@@ -129,6 +129,70 @@
       "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Catedral_de_Santiago_de_Compostela_%28Spain%29.jpg/320px-Catedral_de_Santiago_de_Compostela_%28Spain%29.jpg",
       "content": "The Cathedral of Santiago de Compostela is part of the Roman Catholic Archdiocese of Santiago de Compostela in Galicia, Spain. The cathedral is the reputed burial place of Saint James the Great, one of the apostles of Jesus Christ. It is the destination of the famous Way of St. James pilgrimage route.",
       "imageCredit": "Wikimedia Commons"
+    },
+    {
+      "focusOptions": {
+        "focusRadius": null,
+        "showFocus": false,
+        "showLocationMarker": true
+      },
+      "title": "Exponav Fundacion - museo de la construccion naval",
+      "placeName": "Museo Naval da Armada, Rúa dos Irmandiños, s/n, 15403 Ferrol, A Coruña, Spain",
+      "cameraStyle": "drone-orbit",
+      "id": 9,
+      "imageUrl": "https://static.wixstatic.com/media/18acae_053d1e23629644fc9f0434acc4519b1a~mv2.png/v1/fill/w_626,h_180,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/exponav_mcn_pegatina.png",
+      "preserveCustomImage": true,
+      "content": "Exponav es un museo dedicado a la construcción naval y la historia marítima. Más información en: https://exponav.org/",
+      "dateTime": "Presente",
+      "imageCredit": "Exponav"
+    },
+    {
+      "focusOptions": {
+        "focusRadius": null,
+        "showFocus": false,
+        "showLocationMarker": true
+      },
+      "title": "Excelem Fundacion",
+      "placeName": "Poligono Industrial Oeste, Calle Perú, 5, planta 2 oficina 8, Oficinas Forum 2, 30820 Alcantarilla, Murcia, Spain",
+      "cameraStyle": "drone-orbit",
+      "id": 10,
+      "imageUrl": "https://static.wixstatic.com/media/18acae_6847fdcbde304a31bf26700040246957~mv2.jpg/v1/crop/x_5,y_0,w_189,h_200/fill/w_222,h_236,al_c,lg_1,q_80,enc_avif,quality_auto/fundacion_excelem_logo.jpg",
+      "preserveCustomImage": true,
+      "content": "Fundación Excelem es una organización dedicada a la excelencia y desarrollo. Más información en: https://excelem.org/",
+      "dateTime": "Presente",
+      "imageCredit": "Excelem"
+    },
+    {
+      "focusOptions": {
+        "focusRadius": null,
+        "showFocus": false,
+        "showLocationMarker": true
+      },
+      "title": "Asociacion Mucain (Museo Carrera Indias)",
+      "placeName": "Pl. Catedral, s/n, 11005 Cádiz, Spain",
+      "cameraStyle": "drone-orbit",
+      "id": 11,
+      "imageUrl": "https://static.wixstatic.com/media/18acae_e6724b02c36a4b9290ac8f24ba480053~mv2.png/v1/fill/w_230,h_244,al_c,lg_1,q_85,enc_avif,quality_auto/images.png",
+      "preserveCustomImage": true,
+      "content": "Museo de la Carrera de Indias dedicado a preservar la historia de las relaciones entre España y América. Más información en: https://mucain.com/",
+      "dateTime": "Presente",
+      "imageCredit": "Mucain"
+    },
+    {
+      "focusOptions": {
+        "focusRadius": null,
+        "showFocus": false,
+        "showLocationMarker": true
+      },
+      "title": "Museo historico minero de la universidad politecnica de madrid (UPM)",
+      "placeName": "C. de Ríos Rosas, 23, Chamberí, 28003 Madrid, Spain",
+      "cameraStyle": "drone-orbit",
+      "id": 12,
+      "imageUrl": "https://static.wixstatic.com/media/18acae_37242b188e73455e897144af889e3655~mv2.png/v1/fill/w_230,h_244,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/b5jq1DDA_400x400.png",
+      "preserveCustomImage": true,
+      "content": "Museo histórico minero que preserva el patrimonio geológico y minero de España. Más información en: https://minasyenergia.upm.es/museo/",
+      "dateTime": "Presente",
+      "imageCredit": "UPM"
     }
   ]
 }

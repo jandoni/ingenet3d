@@ -278,9 +278,11 @@ export async function updateChapter(chapterIndex) {
           chapter.content = cameraConfig.placeDetails.editorialSummary;
         }
         
-        // Update image with first Google photo if available
+        // Update image with first Google photo if available (unless preserveCustomImage is true)
         if (cameraConfig.placeDetails.photos && cameraConfig.placeDetails.photos.length > 0) {
-          chapter.imageUrl = cameraConfig.placeDetails.photos[0];
+          if (!chapter.preserveCustomImage) {
+            chapter.imageUrl = cameraConfig.placeDetails.photos[0];
+          }
         }
         
         // Update chapter details in UI

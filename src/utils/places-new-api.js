@@ -52,25 +52,74 @@ export function initGoogleMapsServicesNew() {
  */
 async function searchPlace(query) {
   try {
-    const request = {
+    // First try NEW API without type restriction for addresses
+    let request = {
       textQuery: query,
       fields: ['id', 'displayName', 'location', 'viewport', 'photos', 'editorialSummary', 
                'formattedAddress', 'rating', 'regularOpeningHours', 'internationalPhoneNumber',
                'adrFormatAddress', 'businessStatus', 'priceLevel', 'userRatingCount'],
-      includedType: 'tourist_attraction',
       language: 'es',
       maxResultCount: 1
     };
 
-    const { places } = await google.maps.places.Place.searchByText(request);
+    let { places } = await google.maps.places.Place.searchByText(request);
     
     if (places && places.length > 0) {
       return places[0];
     }
     
-    throw new Error(`No results found for: ${query}`);
+    // If no results, try Legacy Find Place API (better for addresses)
+    console.log(`NEW API failed for ${query}, trying Legacy Find Place API...`);
+    return await searchPlaceLegacy(query);
+    
   } catch (error) {
     console.error(`Error searching for place ${query}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Search for a place using the Legacy Find Place API (better for addresses)
+ * @param {string} query - The place name/address to search for
+ * @returns {Promise<Object>} Place object from Google Places API
+ */
+async function searchPlaceLegacy(query) {
+  try {
+    console.log(`Trying Legacy Find Place API for: ${query}`);
+    
+    const service = new google.maps.places.PlacesService(document.createElement('div'));
+    
+    return new Promise((resolve, reject) => {
+      const request = {
+        query: query,
+        fields: ['place_id', 'name', 'formatted_address', 'geometry', 'photos', 'rating', 'types']
+      };
+      
+      service.findPlaceFromQuery(request, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
+          const place = results[0];
+          console.log(`Legacy Find Place API found: ${place.name} at ${place.formatted_address}`);
+          
+          // Convert legacy format to NEW API format
+          const convertedPlace = {
+            id: place.place_id,
+            displayName: { text: place.name },
+            location: place.geometry.location,
+            viewport: place.geometry.viewport,
+            formattedAddress: place.formatted_address,
+            photos: place.photos || [],
+            rating: place.rating
+          };
+          
+          resolve(convertedPlace);
+        } else {
+          console.error(`Legacy Find Place API failed with status: ${status}`);
+          reject(new Error(`Legacy Find Place API failed: ${status}`));
+        }
+      });
+    });
+  } catch (error) {
+    console.error(`Error in Legacy Find Place API for ${query}:`, error);
     throw error;
   }
 }

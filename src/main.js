@@ -40,10 +40,14 @@ async function enrichChaptersWithPlacesData(chapters) {
           chapter.content = cameraConfig.placeDetails.editorialSummary;
         }
         
-        // Update image with first Google photo if available
+        // Update image with first Google photo if available (unless preserveCustomImage is true)
         if (cameraConfig.placeDetails.photos && cameraConfig.placeDetails.photos.length > 0) {
-          chapter.imageUrl = cameraConfig.placeDetails.photos[0];
-          console.log(`Updated image for ${chapter.title}: ${chapter.imageUrl}`);
+          if (!chapter.preserveCustomImage) {
+            chapter.imageUrl = cameraConfig.placeDetails.photos[0];
+            console.log(`Updated image for ${chapter.title}: ${chapter.imageUrl}`);
+          } else {
+            console.log(`Preserving custom image for ${chapter.title}: ${chapter.imageUrl}`);
+          }
         }
         
         // Store place details for future use
