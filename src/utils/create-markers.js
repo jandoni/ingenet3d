@@ -73,23 +73,59 @@ function encodeSvgToDataUri(svgElement) {
 
 /**
  * Creates a marker SVG for a given location.
- * @param {string} The type of marker.
- * @returns {string} The marker SVG's data URI.
+ * @param {string} markerId - The ID of the marker.
+ * @param {string} title - The title of the place for icon selection.
+ * @returns {string} The marker image URL.
  */
-async function createMarkerSvg(markerType) {
-  const baseSvgElement = await fetchSvgContent("assets/icons/marker.svg");
-
-  // Configurations for the base and icon SVG elements
-  const baseConfig = {
-    height: "60",
-    width: "80",
-    stroke: "white",
-    fill: markerType === "place-marker" ? "red" : "#13B5C7",
-  };
-
-  setSvgAttributes(baseSvgElement, baseConfig);
-
-  return encodeSvgToDataUri(baseSvgElement);
+async function createMarkerSvg(markerId, title = '') {
+  // Determine icon based on place title/type
+  let imageUrl;
+  const titleLower = title.toLowerCase();
+  
+  // Churches: Sagrada Familia, Giralda, Santiago de Compostela
+  if (titleLower.includes('sagrada') || titleLower.includes('giralda') || titleLower.includes('santiago') || 
+      titleLower.includes('cathedral') || titleLower.includes('basilica')) {
+    imageUrl = "assets/images/church.png";
+  }
+  // Museums: Prado, Guggenheim, Exponav, Mucain, Museo historico
+  else if (titleLower.includes('museo') || titleLower.includes('museum') || titleLower.includes('prado') || 
+           titleLower.includes('guggenheim') || titleLower.includes('exponav') || titleLower.includes('mucain')) {
+    imageUrl = "assets/images/museum.png";
+  }
+  // Parks: Park Güell
+  else if (titleLower.includes('park') || titleLower.includes('güell') || titleLower.includes('guell')) {
+    imageUrl = "assets/images/park.png";
+  }
+  // Palaces and others: Alhambra, Royal Palace, etc.
+  else {
+    imageUrl = "assets/images/palace.png";
+  }
+  
+  console.log(`Creating marker for ID ${markerId} (${title}): using ${imageUrl}`);
+  
+  // Test if image exists by trying to load it
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      console.error(`Failed to load icon ${imageUrl}, status: ${response.status}`);
+      throw new Error(`HTTP ${response.status}`);
+    }
+    console.log(`Successfully loaded icon: ${imageUrl}`);
+    return imageUrl;
+  } catch (error) {
+    console.error(`Error loading icon ${imageUrl}:`, error);
+    // Fall back to default marker
+    console.log("Falling back to default SVG marker");
+    const baseSvgElement = await fetchSvgContent("assets/icons/marker.svg");
+    const baseConfig = {
+      height: "60",
+      width: "60",
+      stroke: "white", 
+      fill: "#13B5C7",
+    };
+    setSvgAttributes(baseSvgElement, baseConfig);
+    return encodeSvgToDataUri(baseSvgElement);
+  }
 }
 
 /**
@@ -117,7 +153,20 @@ function getPolylineConfiguration({ start, end }) {
   return {
     polyline: {
       positions: [start, end],
-      material: Cesium.Color.WHITE,
+      material: new Cesium.PolylineGlowMaterialProperty({
+        glowPower: 0.25,
+        color: Cesium.Color.WHITE.withAlpha(0.95)
+      }),
+      width: 8, // Much thicker lines for high altitude visibility
+      followSurface: false,
+      clampToGround: false,
+      granularity: Cesium.Math.RADIANS_PER_DEGREE,
+      depthFailMaterial: new Cesium.PolylineGlowMaterialProperty({
+        glowPower: 0.15,
+        color: Cesium.Color.WHITE.withAlpha(0.7)
+      }),
+      // Ensure visibility at all distances
+      distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, Number.MAX_VALUE),
     },
   };
 }
@@ -126,17 +175,27 @@ function getPolylineConfiguration({ start, end }) {
  * Helper function to create a marker entity configuration.
  * @param {Cesium.Cartesian3} options.position - The position to place the marker.
  * @param {number} options.id - ID for the marker.
- * @param {string} options.markerSvg - Data URI for the marker SVG.
+ * @param {string} options.markerSvg - Data URI for the marker SVG or image URL.
  * @returns {Cesium.Entity.ConstructorOptions} Marker entity configuration.
  */
 function getMarkerEntityConfiguration({ position, id, markerSvg }) {
+  // Check if it's a PNG image (custom icon) or SVG (default marker)
+  const isCustomIcon = markerSvg.includes('assets/images/') && markerSvg.endsWith('.png');
+  
+  console.log(`Configuring marker ${id}: isCustomIcon=${isCustomIcon}, image=${markerSvg}`);
+  
   return {
     position,
     id,
     billboard: {
       image: markerSvg,
-      scale: defaultMarkerScale,
-      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      scale: isCustomIcon ? 1.0 : defaultMarkerScale, // Much larger scale for custom icons
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Bottom of icon touches the line top
+      width: isCustomIcon ? 64 : undefined, // Larger width for good visibility
+      height: isCustomIcon ? 64 : undefined, // Larger height for good visibility
+      pixelOffset: new Cesium.Cartesian2(0, 0), // No offset - icon sits directly on line
+      scaleByDistance: new Cesium.NearFarScalar(1000, 2.0, 50000, 0.5), // Scale with zoom distance
+      translucencyByDistance: new Cesium.NearFarScalar(1000, 1.0, 100000, 0.8), // Fade at far distances
     },
   };
 }
@@ -156,12 +215,14 @@ export function setSelectedMarker(markerId) {
 
   // Scale the previous selected marker back to the default scale
   if (currentMarker) {
-    currentMarker.billboard.scale = defaultMarkerScale;
+    const isCurrentCustom = currentMarker.billboard.image.getValue().includes('assets/images/');
+    currentMarker.billboard.scale = isCurrentCustom ? 0.1 : defaultMarkerScale;
   }
 
-  // Scale the new selected marker to 1
+  // Scale the new selected marker to be larger
   if (newMarker) {
-    newMarker.billboard.scale = 1;
+    const isNewCustom = newMarker.billboard.image.getValue().includes('assets/images/');
+    newMarker.billboard.scale = isNewCustom ? 0.15 : 1; // Slightly larger for custom icons
   }
 
   // Update the selected marker ID
@@ -310,19 +371,37 @@ export async function createMarkers(chapters) {
 
   // iterate the coordinates
   coordsWithAdjustedHeight.forEach(async (coord, index) => {
-    // add vertical offset between marker and terrain to allow for a line to be rendered in between
-    const coordWithHeightOffset = addHeightOffset(coord, 28);
-    const { id } = chapters[index];
-    const markerSvg = await createMarkerSvg(id);
+    // Determine if we're in overview mode (Spain overview)
+    const isOverviewMode = cesiumViewer.camera.positionCartographic.height > 1000000; // Over 1000km altitude
+    
+    // Use much larger height offset for overview mode so lines are visible from space
+    const heightOffset = isOverviewMode ? 200000 : 28; // 200km for overview, 28m for close views
+    const coordWithHeightOffset = addHeightOffset(coord, heightOffset);
+    const { id, title } = chapters[index];
+    console.log(`Processing chapter ${index}: ID=${id}, Title="${title}"`);
+    const markerSvg = await createMarkerSvg(id, title);
 
     const isMarkerVisible = chapters[index].focusOptions?.showLocationMarker;
 
     // Store the resolved coordinates on the chapter for other uses
     chapters[index].coords = chapterLocations[index];
 
-    // add the line and the marker
-    cesiumViewer.entities.add({
+    // add the line and the marker as separate entities for better visibility
+    const lineEntity = cesiumViewer.entities.add({
+      id: `line-${id}`,
       ...getPolylineConfiguration({ start: coord, end: coordWithHeightOffset }),
+      show: isMarkerVisible,
+    });
+    
+    console.log(`Added line entity for marker ${id}:`, {
+      lineId: `line-${id}`,
+      start: coord,
+      end: coordWithHeightOffset,
+      visible: isMarkerVisible,
+      lineEntity: lineEntity
+    });
+    
+    cesiumViewer.entities.add({
       ...getMarkerEntityConfiguration({
         position: coordWithHeightOffset,
         id,

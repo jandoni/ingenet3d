@@ -390,8 +390,8 @@ function startSpainOrbitEffect() {
   stopSpainOrbitEffect(); // Clear any existing orbit
   
   spainOrbitAnimation = cesiumViewer.clock.onTick.addEventListener(() => {
-    // Half the speed of other locations: 0.00125 radians/tick
-    cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.00125); 
+    // Much slower speed for overview: 0.0003 radians/tick (quarter the previous speed)
+    cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.0003); 
   });
 }
 
