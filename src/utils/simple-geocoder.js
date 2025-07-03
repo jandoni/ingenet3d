@@ -1,0 +1,119 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { cesiumViewer } from "./cesium.js";
+
+/**
+ * Simple geocoding fallback when Places API is not available
+ */
+
+/**
+ * Simple geocode using basic coordinates
+ * @param {string} placeName - The place name to geocode
+ * @param {string} cameraStyle - Camera style (ignored, uses simple positioning)
+ * @returns {Promise<Object>} Simple camera configuration
+ */
+export async function simpleGeocodeToCamera(placeName, cameraStyle = 'static') {
+  // Simple fallback coordinates for major Spanish locations (English and Spanish names)
+  const knownPlaces = {
+    'spain': { lat: 40.4637, lng: -3.7492, altitude: 2000000 },
+    'españa': { lat: 40.4637, lng: -3.7492, altitude: 2000000 },
+    'sagrada familia': { lat: 41.4036, lng: 2.1744, altitude: 1000 },
+    'basílica de la sagrada família': { lat: 41.4036, lng: 2.1744, altitude: 1000 },
+    'barcelona': { lat: 41.3851, lng: 2.1734, altitude: 10000 },
+    'prado museum': { lat: 40.4138, lng: -3.6921, altitude: 1000 },
+    'museo nacional del prado': { lat: 40.4138, lng: -3.6921, altitude: 1000 },
+    'madrid': { lat: 40.4168, lng: -3.7038, altitude: 10000 },
+    'park güell': { lat: 41.4145, lng: 2.1527, altitude: 1000 },
+    'parque güell': { lat: 41.4145, lng: 2.1527, altitude: 1000 },
+    'giralda': { lat: 37.3862, lng: -5.9926, altitude: 1000 },
+    'la giralda': { lat: 37.3862, lng: -5.9926, altitude: 1000 },
+    'seville': { lat: 37.3886, lng: -5.9823, altitude: 5000 },
+    'sevilla': { lat: 37.3886, lng: -5.9823, altitude: 5000 },
+    'alhambra': { lat: 37.1761, lng: -3.5881, altitude: 1000 },
+    'granada': { lat: 37.1773, lng: -3.5986, altitude: 5000 },
+    'guggenheim bilbao': { lat: 43.2687, lng: -2.9340, altitude: 1000 },
+    'museo guggenheim bilbao': { lat: 43.2687, lng: -2.9340, altitude: 1000 },
+    'bilbao': { lat: 43.2627, lng: -2.9253, altitude: 5000 },
+    'royal palace madrid': { lat: 40.4180, lng: -3.7143, altitude: 1000 },
+    'palacio real de madrid': { lat: 40.4180, lng: -3.7143, altitude: 1000 },
+    'santiago de compostela': { lat: 42.8805, lng: -8.5456, altitude: 1000 },
+    'catedral de santiago de compostela': { lat: 42.8805, lng: -8.5456, altitude: 1000 }
+  };
+
+  // Find matching place (case insensitive, partial match)
+  const searchKey = placeName.toLowerCase();
+  let coords = null;
+  
+  for (const [key, value] of Object.entries(knownPlaces)) {
+    if (searchKey.includes(key) || key.includes(searchKey)) {
+      coords = value;
+      break;
+    }
+  }
+
+  // Default to Spain if no match found
+  if (!coords) {
+    coords = knownPlaces['spain'];
+  }
+
+  // Create simple camera configuration
+  const position = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat, coords.altitude);
+  
+  return {
+    target: position,
+    position: position,
+    heading: 0,
+    pitch: coords.altitude > 100000 ? -1.2 : -0.5, // More downward for overview
+    roll: 0,
+    cameraStyle,
+    location: {
+      lat: () => coords.lat,
+      lng: () => coords.lng
+    },
+    headingPitchRange: new Cesium.HeadingPitchRange(
+      0, 
+      coords.altitude > 100000 ? -1.2 : -0.5, 
+      coords.altitude * 0.1 // Distance from target
+    )
+  };
+}
+
+/**
+ * Simple fly to place using basic geocoding
+ * @param {string} placeName - Place name to fly to
+ * @param {string} cameraStyle - Camera style
+ * @returns {Promise<Object>} Camera configuration
+ */
+export async function simpleFlyToPlace(placeName, cameraStyle = 'static') {
+  try {
+    const cameraConfig = await simpleGeocodeToCamera(placeName, cameraStyle);
+    
+    // Animate to the new position
+    cesiumViewer.camera.flyTo({
+      destination: cameraConfig.position,
+      orientation: {
+        heading: cameraConfig.heading,
+        pitch: cameraConfig.pitch,
+        roll: cameraConfig.roll
+      },
+      duration: 3.0 // 3 second animation
+    });
+    
+    return cameraConfig;
+  } catch (error) {
+    console.error(`Error flying to place ${placeName}:`, error);
+    throw error;
+  }
+}

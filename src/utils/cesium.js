@@ -14,6 +14,7 @@
 
 import { GOOGLE_MAPS_API_KEY } from "../env.js";
 import { story } from "../main.js";
+import { resolvePlaceToCameraNew, applyCameraConfigNew } from "./places-new-api.js";
 
 /**
  * The radius from the target point to position the camera.
@@ -54,6 +55,32 @@ export const DEFAULT_HIGHLIGHT_RADIUS = 250;
  * @type {Cesium.Viewer} The CesiumJS viewer instance.
  */
 export let cesiumViewer;
+
+/**
+ * Helper function to position camera to view an entire country
+ * @param {number} lat - Center latitude in degrees
+ * @param {number} lng - Center longitude in degrees  
+ * @param {number} altitude - Altitude in meters (default 2,000,000 for country view)
+ * @returns {Object} Camera configuration
+ */
+export function getCountryViewCamera(lat, lng, altitude = 2000000) {
+  // Convert center point to Cartesian3
+  const center = Cesium.Cartesian3.fromDegrees(lng, lat, 0);
+  
+  // Calculate camera position directly above the center at specified altitude
+  const cameraPos = Cesium.Cartesian3.fromDegrees(lng, lat, altitude);
+  
+  return {
+    position: {
+      x: cameraPos.x,
+      y: cameraPos.y,
+      z: cameraPos.z
+    },
+    heading: 0,
+    pitch: -1.57079632679, // -90 degrees (looking straight down)
+    roll: 0
+  };
+}
 
 /**
  * @type {Cesium.Cesium3DTileset} The Google Photorealistic 3D tileset.
@@ -178,6 +205,9 @@ export function getCameraOptions() {
  * tileset and attribution to the viewer.
  */
 export async function initCesiumViewer() {
+  // Enable simultaneous requests for better tile loading performance
+  Cesium.RequestScheduler.requestsByServer["tile.googleapis.com:443"] = 18;
+  
   // Set the default access token to null to prevent the CesiumJS viewer from requesting an access token
   Cesium.Ion.defaultAccessToken = null;
 
@@ -185,15 +215,17 @@ export async function initCesiumViewer() {
   cesiumViewer = new Cesium.Viewer("cesium-container", {
     baseLayerPicker: false,
     imageryProvider: false,
-    homeButton: false,
-    fullscreenButton: false,
-    navigationHelpButton: false,
+    homeButton: true,        // Enable home button
+    fullscreenButton: true,  // Enable fullscreen button
+    navigationHelpButton: true, // Enable navigation help
     sceneModePicker: false,
     geocoder: false,
     infoBox: false,
     selectionIndicator: false,
     timeline: false,
     animation: false,
+    // Enable request render mode for better performance
+    requestRenderMode: true,
   });
 
   // disable the default lighting of the globe
@@ -202,25 +234,55 @@ export async function initCesiumViewer() {
   // this is foremost to improve the resolution of icons and text displayed in the cesium viewer
   cesiumViewer.resolutionScale = 2;
 
-  // Disable free-look, the camera view direction can only be changed through translating or rotating
-  cesiumViewer.scene.screenSpaceCameraController.enableLook = false;
+  // Enable camera controls for user interaction
+  cesiumViewer.scene.screenSpaceCameraController.enableLook = true;
+  cesiumViewer.scene.screenSpaceCameraController.enableTranslate = true;
+  cesiumViewer.scene.screenSpaceCameraController.enableZoom = true;
+  cesiumViewer.scene.screenSpaceCameraController.enableRotate = true;
+  cesiumViewer.scene.screenSpaceCameraController.enableTilt = true;
 
-  const {
-    position: destination,
-    heading,
-    pitch,
-    roll,
-  } = story.properties.cameraOptions;
+  // For Spain overview, use fixed coordinates instead of Places API
+  if (story.properties.placeName === "Spain" && story.properties.cameraStyle === "overview") {
+    setSpainOverviewFromGoogleEarth();
+  } else if (story.properties.placeName) {
+    try {
+      // Check if Google Maps services are available
+      if (typeof google !== 'undefined' && google.maps) {
+        const cameraConfig = await resolvePlaceToCameraNew(
+          story.properties.placeName, 
+          story.properties.cameraStyle || 'overview'
+        );
+        // Use immediate mode for initial overview to avoid any zoom animations
+        applyCameraConfigNew(cameraConfig, true);
+      } else {
+        console.warn('Google Maps not available, using default Spain view');
+        setDefaultSpainView();
+      }
+    } catch (error) {
+      console.error('Error setting initial camera from place:', error);
+      // Fallback to default Spain view
+      setDefaultSpainView();
+    }
+  } else {
+    // Fallback to default Spain view
+    setDefaultSpainView();
+  }
 
-  // Set the starting position and orientation of the camera
-  cesiumViewer.camera.setView({
-    destination,
-    orientation: {
-      heading,
-      pitch,
-      roll,
-    },
-  });
+  function setSpainOverviewFromGoogleEarth() {
+    setSpainOverviewFromGoogleEarthExported();
+  }
+
+  function setDefaultSpainView() {
+    // Default overview of Spain (fallback)
+    cesiumViewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(-3.7492, 40.4637, 2000000), // 2000km altitude
+      orientation: {
+        heading: 0,
+        pitch: -1.2,
+        roll: 0,
+      },
+    });
+  }
 
   await createTileset();
   createAttribution();
@@ -239,6 +301,9 @@ async function createTileset() {
       "https://tile.googleapis.com/v1/3dtiles/root.json?key=" +
         GOOGLE_MAPS_API_KEY
     );
+    
+    // This property is required to properly display attributions
+    tileset.showCreditsOnScreen = true;
 
     // Add tileset to the scene
     cesiumViewer.scene.primitives.add(tileset);
@@ -281,6 +346,65 @@ export function removeCustomRadiusShader() {
   if (tileset.customShader) {
     tileset.customShader = undefined;
   }
+}
+
+/**
+ * Set Spain overview using exact Google Earth coordinates (exported function)
+ */
+export function setSpainOverviewFromGoogleEarthExported() {
+  if (!cesiumViewer) {
+    console.error('Cesium viewer not initialized');
+    return;
+  }
+
+  // Spain overview using exact Google Earth coordinates from screenshot
+  // Lat: 40.0363445°, Lng: -4.7938347°, Alt: 313.7482751m, Range: 2,390,861.5117782m
+  // Heading: 0.2156642°, Tilt: 0.1477297°
+  
+  const latitude = 40.0363445;
+  const longitude = -4.7938347;
+  const altitude = 313.7482751;
+  const range = 2390861.5117782; // 2.39 million meters
+  
+  // Convert Google Earth angles to Cesium (degrees to radians)
+  const heading = Cesium.Math.toRadians(0.2156642);
+  const pitch = Cesium.Math.toRadians(-45); // Higher angle (less steep) for better country view
+  const roll = 0;
+  
+  // Set camera position using lookAt for exact Google Earth reproduction
+  const center = Cesium.Cartesian3.fromDegrees(longitude, latitude, altitude);
+  const headingPitchRange = new Cesium.HeadingPitchRange(heading, pitch, range);
+  
+  cesiumViewer.camera.lookAt(center, headingPitchRange);
+  
+  // Add orbit effect for Spain overview
+  startSpainOrbitEffect();
+}
+
+/**
+ * Spain orbit animation (same speed as other locations)
+ */
+let spainOrbitAnimation = null;
+
+function startSpainOrbitEffect() {
+  stopSpainOrbitEffect(); // Clear any existing orbit
+  
+  spainOrbitAnimation = cesiumViewer.clock.onTick.addEventListener(() => {
+    // Half the speed of other locations: 0.00125 radians/tick
+    cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.00125); 
+  });
+}
+
+export function stopSpainOrbitEffect() {
+  if (spainOrbitAnimation) {
+    spainOrbitAnimation();
+    spainOrbitAnimation = null;
+  }
+}
+
+// Make it available globally for cross-module access
+if (typeof window !== 'undefined') {
+  window.stopSpainOrbitEffect = stopSpainOrbitEffect;
 }
 
 /**

@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  story,
-  createLocationItem,
-  initDragAndDrop,
-  createEditMenus,
-} from "./sidebar.js";
+// Sidebar functionality removed
 import { GOOGLE_MAPS_API_KEY } from "../env.js";
 import { createChapterCard } from "../chapters/chapters.js"
 import {
@@ -53,14 +48,7 @@ const chapterProperties = [
   "cameraOptions",
 ];
 
-const sidebarHTMLString = await fetch("/demo/sidebar.html").then((response) =>
-  response.text()
-);
-const parser = new DOMParser();
-const htmlDocument = parser.parseFromString(sidebarHTMLString, "text/html");
-const sidebarElement = htmlDocument.querySelector("aside");
-
-document.body.prepend(sidebarElement);
+// Sidebar HTML loading removed
 
 /**
  * Asynchronously initializes and loads the Google Maps JavaScript API with specific configurations.

@@ -13,7 +13,7 @@ ARG API_KEY
 
 RUN cp env.example.js env.js
 RUN sed -i -r "s/<API_KEY>/${API_KEY}/g" env.js
-RUN sed -i "s/main.js/demo\/sidebar.js/g" index.html
+# Keep index.html unchanged (sidebar functionality removed)
 
 # The default port of the application
 EXPOSE  8080

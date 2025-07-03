@@ -61,12 +61,6 @@ export function createChapterCard(chapter) {
   chapterImage.src = getPreviewUrl(chapter.imageUrl);
   card.appendChild(chapterImage);
 
-  const chapterDate = document.createElement("p");
-  chapterDate.setAttribute("data-input-name", "dateTime");
-  chapterDate.classList.add("date");
-  chapterDate.textContent = chapter.dateTime;
-  card.appendChild(chapterDate);
-
   const chapterTitleContainer = document.createElement("div");
   card.appendChild(chapterTitleContainer);
 

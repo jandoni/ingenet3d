@@ -17,6 +17,8 @@ import {
   updateChapter,
 } from "../chapters/chapter-navigation.js";
 import { cesiumViewer } from "./cesium.js";
+import { resolvePlaceToCameraNew } from "./places-new-api.js";
+import { simpleGeocodeToCamera } from "./simple-geocoder.js";
 
 // The size of the marker in relation to the original SVG size.
 // We are scaling it down to help preserve clarity when increasing marker size for the selected marker.
@@ -268,10 +270,37 @@ export async function createMarkers(chapters) {
     return;
   }
 
-  const markerCoordinates = chapters.map(({ coords }) => {
-    const { lng, lat } = coords;
-    return Cesium.Cartesian3.fromDegrees(lng, lat);
-  });
+  // Resolve places to coordinates using Places API
+  const markerCoordinates = [];
+  const chapterLocations = [];
+
+  for (const chapter of chapters) {
+    try {
+      let cameraConfig;
+      
+      // Try NEW Places API first, fallback to simple geocoder
+      try {
+        cameraConfig = await resolvePlaceToCameraNew(chapter.placeName, 'static');
+      } catch (placesError) {
+        console.warn(`NEW Places API failed for ${chapter.placeName}, using simple geocoder:`, placesError);
+        cameraConfig = await simpleGeocodeToCamera(chapter.placeName, 'static');
+      }
+      
+      const location = cameraConfig.location;
+      const cartesian = Cesium.Cartesian3.fromDegrees(location.lng(), location.lat());
+      markerCoordinates.push(cartesian);
+      chapterLocations.push({
+        lat: location.lat(),
+        lng: location.lng()
+      });
+    } catch (error) {
+      console.error(`Error resolving place ${chapter.placeName}:`, error);
+      // Final fallback to default coordinates if both methods fail
+      const fallbackCoord = Cesium.Cartesian3.fromDegrees(-3.7492, 40.4637);
+      markerCoordinates.push(fallbackCoord);
+      chapterLocations.push({ lat: 40.4637, lng: -3.7492 });
+    }
+  }
 
   // Modify the position to be on top of terrain (e.g. Rooftops, trees, etc.)
   // this has to be done with the whole coordinates array, because clamping single
@@ -287,6 +316,9 @@ export async function createMarkers(chapters) {
     const markerSvg = await createMarkerSvg(id);
 
     const isMarkerVisible = chapters[index].focusOptions?.showLocationMarker;
+
+    // Store the resolved coordinates on the chapter for other uses
+    chapters[index].coords = chapterLocations[index];
 
     // add the line and the marker
     cesiumViewer.entities.add({

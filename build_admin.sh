@@ -37,11 +37,18 @@ fi
 DEFAULT_PORT=5500
 PORT=${1:-$DEFAULT_PORT}  
 
-# Retrieve API Key (check environment variable first, then arguments)
-API_KEY=${API_KEY:-$2} 
+# Retrieve API Key (check environment variable first, then arguments, then env.js file)
+API_KEY=${API_KEY:-$2}
 
 if [[ -z "$API_KEY" ]]; then
-  echo "Error: API key missing. Please provide it as an environment variable (API_KEY) or argument."
+  # Try to extract API key from env.js file
+  if [[ -f "./src/env.js" ]]; then
+    API_KEY=$(grep -o 'API_KEY = "[^"]*"' ./src/env.js | sed 's/API_KEY = "\(.*\)"/\1/')
+  fi
+fi
+
+if [[ -z "$API_KEY" ]]; then
+  echo "Error: API key missing. Please provide it as an environment variable (API_KEY), argument, or in src/env.js file."
   exit 1
 fi
 
@@ -64,13 +71,12 @@ cd "$WORKDIR" || exit 1 # Move into the WORKDIR
 echo "Changed directory to: $WORKDIR"
 
 # API Key replacement in 'env.js' (assuming it's in the root)
-cp env.example.js env.js
+cp env.js env.js.bak
 sed -i -r "s/<API_KEY>/${API_KEY}/g" env.js
 echo "API key updated in env.js"
 
-# Modify index.html (assuming it's in the top level of WORKDIR)
-sed -i -r "s/main.js/demo\/sidebar.js/g" index.html
-echo "index.html modified"
+# Keep index.html unchanged (sidebar functionality removed)
+echo "index.html unchanged"
 
 # Start the server using npx (no need for pre-installation)
 echo "Starting server on port $PORT..."

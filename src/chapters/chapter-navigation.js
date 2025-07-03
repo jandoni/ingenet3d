@@ -17,7 +17,10 @@ import {
   createCustomRadiusShader,
   performFlyTo,
   removeCustomRadiusShader,
+  setSpainOverviewFromGoogleEarthExported,
 } from "../utils/cesium.js";
+import { flyToPlaceNew } from "../utils/places-new-api.js";
+import { simpleFlyToPlace } from "../utils/simple-geocoder.js";
 import { setSelectedMarker } from "../utils/create-markers.js";
 import { getParams, setParams } from "../utils/params.js";
 import { loadSvg } from "../utils/svg.js";
@@ -204,9 +207,8 @@ const setNextChapter = () => {
 /**
  * Resets the application to the introductory state.
  */
-export function resetToIntro() {
-  const { cameraOptions } = story.properties;
-  const { position, pitch, heading, roll } = cameraOptions;
+export async function resetToIntro() {
+  const { placeName, cameraStyle } = story.properties;
 
   setParams("chapterId", null); // Clear the chapter parameter
   setSelectedMarker(null); // "Deselect" current marker
@@ -214,26 +216,42 @@ export function resetToIntro() {
   updateChapterContent(story.properties); // Update the chapter details content
   activateNavigationElement("intro"); // Activate the introduction navigation
   removeCustomRadiusShader(); // Remove the custom radius shader
-  // Fly back to the starting position
-  performFlyTo({
-    position,
-    orientation: {
-      roll,
-      pitch,
-      heading,
-    },
-    duration: FLY_TO_DURATION,
-  });
+  
+  // For Spain overview, use fixed coordinates instead of animated flight
+  if (placeName === "Spain" && (cameraStyle === "overview" || !cameraStyle)) {
+    setSpainOverviewFromGoogleEarthExported();
+  } else {
+    try {
+      // Try NEW Places API first, fallback to simple geocoder
+      try {
+        await flyToPlaceNew(placeName, cameraStyle || 'overview');
+      } catch (placesError) {
+        console.warn(`NEW Places API failed for intro ${placeName}, using simple geocoder:`, placesError);
+        await simpleFlyToPlace(placeName, cameraStyle || 'overview');
+      }
+    } catch (error) {
+      console.error(`Error returning to intro (${placeName}):`, error);
+      // Final fallback to manual camera positioning
+      performFlyTo({
+        position: Cesium.Cartesian3.fromDegrees(-3.7492, 40.4637, 2000000),
+        orientation: {
+          roll: 0,
+          pitch: -1.2,
+          heading: 0,
+        },
+        duration: FLY_TO_DURATION,
+      });
+    }
+  }
 }
 
 /**
  * Updates the current chapter of the story based on the given chapter index.
  * @param {number} chapterIndex - The index of the chapter to be updated.
  */
-export function updateChapter(chapterIndex) {
+export async function updateChapter(chapterIndex) {
   const chapter = story.chapters.at(chapterIndex);
-  const { cameraOptions, coords, id: chapterId } = chapter;
-  const { position, pitch, heading, roll } = cameraOptions;
+  const { placeName, cameraStyle, id: chapterId } = chapter;
 
   setSelectedMarker(chapterId); // Set the selected marker
   setSelectedChapterCard(chapterId); // Set the selected chapter card
@@ -246,24 +264,50 @@ export function updateChapter(chapterIndex) {
     story.chapters[chapterIndex]?.focusOptions?.showFocus
   );
 
-  if (hasFocus) {
-    const radius = story.chapters[chapterIndex].focusOptions.focusRadius;
-
-    createCustomRadiusShader(coords, radius); // Create the custom radius shader
-  } else {
-    removeCustomRadiusShader(); // Remove the custom radius shader
+  try {
+    let cameraConfig;
+    
+    // Try NEW Places API first, fallback to simple geocoder
+    try {
+      cameraConfig = await flyToPlaceNew(placeName, cameraStyle || 'drone-orbit'); // Default to drone-orbit
+      
+      // Update chapter with Google Place details if available
+      if (cameraConfig.placeDetails) {
+        // Update content with Google's editorial summary if available
+        if (cameraConfig.placeDetails.editorialSummary) {
+          chapter.content = cameraConfig.placeDetails.editorialSummary;
+        }
+        
+        // Update image with first Google photo if available
+        if (cameraConfig.placeDetails.photos && cameraConfig.placeDetails.photos.length > 0) {
+          chapter.imageUrl = cameraConfig.placeDetails.photos[0];
+        }
+        
+        // Update chapter details in UI
+        updateChapterContent(chapter, false);
+      }
+    } catch (placesError) {
+      console.warn(`NEW Places API failed for ${placeName}, using simple geocoder:`, placesError);
+      cameraConfig = await simpleFlyToPlace(placeName, cameraStyle || 'drone-orbit');
+    }
+    
+    // Handle focus options after camera is positioned
+    if (hasFocus) {
+      const radius = story.chapters[chapterIndex].focusOptions.focusRadius;
+      // Convert lat/lng from cameraConfig to coords format for shader
+      const coords = {
+        lat: cameraConfig.location.lat(),
+        lng: cameraConfig.location.lng()
+      };
+      createCustomRadiusShader(coords, radius); // Create the custom radius shader
+    } else {
+      removeCustomRadiusShader(); // Remove the custom radius shader
+    }
+    
+  } catch (error) {
+    console.error(`Error navigating to ${placeName}:`, error);
+    removeCustomRadiusShader(); // Remove any existing shader on error
   }
-
-  // Fly to the new chapter location
-  performFlyTo({
-    position,
-    orientation: {
-      roll,
-      pitch,
-      heading,
-    },
-    duration: FLY_TO_DURATION,
-  });
 }
 
 /**
