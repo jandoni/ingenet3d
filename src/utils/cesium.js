@@ -404,7 +404,14 @@ export function setSpainOverviewFromGoogleEarthExported() {
  */
 let spainOrbitAnimation = null;
 
-function startSpainOrbitEffect() {
+export function stopSpainOrbitEffect() {
+  if (spainOrbitAnimation) {
+    spainOrbitAnimation();
+    spainOrbitAnimation = null;
+  }
+}
+
+export function startSpainOrbitEffect() {
   stopSpainOrbitEffect(); // Clear any existing orbit
   
   // Don't check for mobile here - let the pause button control it
@@ -416,17 +423,13 @@ function startSpainOrbitEffect() {
   console.log('✅ Spain orbit effect started');
 }
 
-export function stopSpainOrbitEffect() {
-  if (spainOrbitAnimation) {
-    spainOrbitAnimation();
-    spainOrbitAnimation = null;
-  }
-}
-
 // Make orbit control functions available globally for cross-module access
 if (typeof window !== 'undefined') {
   window.stopSpainOrbitEffect = stopSpainOrbitEffect;
   window.startSpainOrbitEffect = startSpainOrbitEffect;
+  // Unified naming for consistency
+  window.stopOverviewOrbit = stopSpainOrbitEffect;
+  window.startOverviewOrbit = startSpainOrbitEffect;
 }
 
 /**

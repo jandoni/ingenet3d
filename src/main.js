@@ -86,6 +86,14 @@ async function loadChapterDetails(chapterId) {
 }
 
 /**
+ * Truncate text to specified length with ellipsis
+ */
+function truncateText(text, maxLength) {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - 3) + '...';
+}
+
+/**
  * Create basic markers from chapter data without API calls
  */
 async function createBasicMarkers(chapters) {
@@ -114,19 +122,53 @@ async function createBasicMarkers(chapters) {
     for (const chapter of chapters) {
       const coords = basicCoordinates[chapter.id];
       if (coords) {
-        // Create a simple billboard marker
-        const position = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat, 100);
+        // Create a position slightly above ground for better visibility
+        const position = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat, 200);
         
-        cesiumViewer.entities.add({
+        // Create marker entity with both billboard and label
+        const entity = cesiumViewer.entities.add({
           id: `marker-${chapter.id}`,
           name: chapter.title,
           position: position,
           billboard: {
-            image: 'assets/icons/marker.svg',
-            scale: 0.6,
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            image: 'data:image/svg+xml;base64,' + btoa(`
+              <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="1" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.4)"/>
+                  </filter>
+                </defs>
+                <circle cx="14" cy="14" r="12" fill="white" stroke="rgba(0,0,0,0.2)" stroke-width="1" filter="url(#shadow)"/>
+                <circle cx="14" cy="14" r="6" fill="#f1f5f9" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+                <circle cx="14" cy="14" r="3" fill="#64748b"/>
+              </svg>
+            `),
+            scale: 1.2,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            scaleByDistance: new Cesium.NearFarScalar(1000, 1.2, 15000, 0.9)
+          },
+          label: {
+            text: truncateText(chapter.title, 20), // Truncate long titles
+            font: 'bold 13pt Arial, sans-serif',
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            fillColor: Cesium.Color.WHITE, // White text for better visibility
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 3, // Thicker outline for better contrast
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            pixelOffset: new Cesium.Cartesian2(0, -35), // Position label above marker
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            scaleByDistance: new Cesium.NearFarScalar(1000, 1.0, 12000, 0.6),
+            translucencyByDistance: new Cesium.NearFarScalar(1000, 1.0, 15000, 0.2),
+            // Solid dark background for maximum readability
+            backgroundPadding: new Cesium.Cartesian2(10, 5),
+            backgroundColor: new Cesium.Color(0, 0, 0, 0.8), // Dark semi-transparent background
+            showBackground: true,
+            eyeOffset: new Cesium.Cartesian3(0, 0, -50)
           },
           properties: {
             chapterId: chapter.id,
@@ -143,44 +185,15 @@ async function createBasicMarkers(chapters) {
     // Set up click handler for markers
     setupMarkerClickHandler();
     
+    // Set up hover effects for markers
+    setupMarkerHoverEffects();
+    
   } catch (error) {
     console.error('❌ Failed to create basic markers:', error);
   }
 }
 
-/**
- * Set up click handler for markers
- */
-function setupMarkerClickHandler() {
-  // Remove any existing handler
-  if (window.markerHandler) {
-    window.markerHandler.destroy();
-  }
-  
-  // Create new click handler
-  window.markerHandler = new Cesium.ScreenSpaceEventHandler(cesiumViewer.scene.canvas);
-  
-  window.markerHandler.setInputAction(async function onMouseClick(click) {
-    const pickedObject = cesiumViewer.scene.pick(click.position);
-    
-    if (Cesium.defined(pickedObject) && pickedObject.id && pickedObject.id.properties) {
-      const chapterId = pickedObject.id.properties.chapterId;
-      console.log(`📍 Marker clicked for chapter: ${chapterId}`);
-      
-      // Find the chapter index
-      const chapterIndex = chapters.findIndex(ch => ch.id === chapterId);
-      if (chapterIndex >= 0) {
-        // Load chapter details first
-        await loadChapterDetails(chapterId);
-        
-        // Now navigate to the location
-        updateChapter(chapterIndex);
-        setActivePlace(chapterId);
-        showSheetHint();
-      }
-    }
-  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-}
+// Note: Marker click handlers are now managed by the unified marker system in create-markers.js
 
 /**
  * The main function. This function is called when the page is loaded.
@@ -215,9 +228,9 @@ async function main() {
     console.log('🧭 Initializing chapter navigation...');
     initChapterNavigation();
     
-    // Create basic markers from chapter coordinates (no API calls needed)
-    console.log('📍 Creating basic markers...');
-    await createBasicMarkers(chapters);
+    // Create unified markers using the advanced marker system
+    console.log('📍 Creating unified markers...');
+    await createMarkers(chapters);
     
     console.log('🎉 MAIN INITIALIZATION COMPLETE - NO API CALLS MADE YET');
     
@@ -478,13 +491,20 @@ window.toggleOrbitPause = function() {
       currentChapterWithPausedOrbit = 'unknown';
     }
     
-    // Stop the actual orbit animation
+    // Stop the actual orbit animation - try all possible orbit types
+    let orbitStopped = false;
     if (window.stopOrbitAnimation) {
       window.stopOrbitAnimation();
-      console.log('✅ Orbit animation stopped');
-    } else if (window.stopSpainOrbitEffect) {
+      console.log('✅ Location orbit animation stopped');
+      orbitStopped = true;
+    }
+    if (window.stopSpainOrbitEffect) {
       window.stopSpainOrbitEffect();
-      console.log('✅ Spain orbit effect stopped');
+      console.log('✅ Spain overview orbit stopped');
+      orbitStopped = true;
+    }
+    if (!orbitStopped) {
+      console.warn('⚠️ No orbit animation found to stop');
     }
     
     // Keep camera controls enabled so user can still manually control the camera
@@ -500,24 +520,39 @@ window.toggleOrbitPause = function() {
     // Resume orbit animation based on current location
     try {
       const currentChapterIndex = getCurrentChapterIndex();
+      console.log(`🔄 Current chapter index for orbit restart: ${currentChapterIndex}`);
+      
       if (currentChapterIndex >= 0 && story.chapters[currentChapterIndex]) {
         const chapter = story.chapters[currentChapterIndex];
+        console.log(`📍 Restarting orbit for chapter: ${chapter.title} (style: ${chapter.cameraStyle})`);
         
         // Check if we should restart an orbit animation
         if (chapter.cameraStyle === 'drone-orbit' && window.startOrbitAnimation) {
           const coords = chapter.cameraConfig?.coordinates || { lat: 40.4168, lng: -3.7038 };
           window.startOrbitAnimation(coords);
-          console.log('✅ Orbit animation restarted');
+          console.log('✅ Location orbit animation restarted');
         }
       } else {
-        // We're at the intro/Spain overview
+        // We're at the intro/Spain overview - always try to start overview orbit
+        console.log('🌍 Restarting Spain overview orbit effect');
+        let orbitStarted = false;
         if (window.startSpainOrbitEffect) {
           window.startSpainOrbitEffect();
           console.log('✅ Spain orbit effect restarted');
+          orbitStarted = true;
+        }
+        if (window.startOverviewOrbit && !orbitStarted) {
+          window.startOverviewOrbit();
+          console.log('✅ Overview orbit restarted (unified)');
+          orbitStarted = true;
+        }
+        if (!orbitStarted) {
+          console.error('❌ No overview orbit function available');
         }
       }
     } catch (error) {
       console.warn('⚠️ Could not restart orbit:', error);
+      console.error('Error details:', error);
     }
     
     // Re-enable camera controls

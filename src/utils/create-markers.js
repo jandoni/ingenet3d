@@ -178,15 +178,22 @@ function getPolylineConfiguration({ start, end }) {
  * @param {string} options.markerSvg - Data URI for the marker SVG or image URL.
  * @returns {Cesium.Entity.ConstructorOptions} Marker entity configuration.
  */
-function getMarkerEntityConfiguration({ position, id, markerSvg }) {
+function getMarkerEntityConfiguration({ position, id, markerSvg, title }) {
   // Check if it's a PNG image (custom icon) or SVG (default marker)
   const isCustomIcon = markerSvg.includes('assets/images/') && markerSvg.endsWith('.png');
   
-  console.log(`Configuring marker ${id}: isCustomIcon=${isCustomIcon}, image=${markerSvg}`);
+  console.log(`Configuring marker ${id}: isCustomIcon=${isCustomIcon}, image=${markerSvg}, title=${title}`);
+  
+  // Helper function to truncate text
+  const truncateText = (text, maxLength) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + '...';
+  };
   
   return {
     position,
     id,
+    name: title,
     billboard: {
       image: markerSvg,
       scale: isCustomIcon ? 1.0 : defaultMarkerScale, // Much larger scale for custom icons
@@ -196,6 +203,26 @@ function getMarkerEntityConfiguration({ position, id, markerSvg }) {
       pixelOffset: new Cesium.Cartesian2(0, 0), // No offset - icon sits directly on line
       scaleByDistance: new Cesium.NearFarScalar(1000, 2.0, 50000, 0.5), // Scale with zoom distance
       translucencyByDistance: new Cesium.NearFarScalar(1000, 1.0, 100000, 0.8), // Fade at far distances
+    },
+    label: {
+      text: truncateText(title || 'Unknown', 20), // Truncate long titles
+      font: 'bold 13pt Arial, sans-serif',
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      fillColor: Cesium.Color.WHITE, // White text for better visibility
+      outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 3, // Thick outline for better contrast
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+      pixelOffset: new Cesium.Cartesian2(0, -45), // Position label above marker
+      heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      scaleByDistance: new Cesium.NearFarScalar(1000, 1.0, 12000, 0.6),
+      translucencyByDistance: new Cesium.NearFarScalar(1000, 1.0, 15000, 0.2),
+      // Solid dark background for maximum readability
+      backgroundPadding: new Cesium.Cartesian2(10, 5),
+      backgroundColor: new Cesium.Color(0, 0, 0, 0.8), // Dark semi-transparent background
+      showBackground: true,
+      eyeOffset: new Cesium.Cartesian3(0, 0, -50)
     },
   };
 }
@@ -217,12 +244,20 @@ export function setSelectedMarker(markerId) {
   if (currentMarker) {
     const isCurrentCustom = currentMarker.billboard.image.getValue().includes('assets/images/');
     currentMarker.billboard.scale = isCurrentCustom ? 0.1 : defaultMarkerScale;
+    // Reset label scale if it exists
+    if (currentMarker.label) {
+      currentMarker.label.scale = 1.0;
+    }
   }
 
   // Scale the new selected marker to be larger
   if (newMarker) {
     const isNewCustom = newMarker.billboard.image.getValue().includes('assets/images/');
     newMarker.billboard.scale = isNewCustom ? 0.15 : 1; // Slightly larger for custom icons
+    // Scale up label for selected marker
+    if (newMarker.label) {
+      newMarker.label.scale = 1.1;
+    }
   }
 
   // Update the selected marker ID
@@ -341,32 +376,36 @@ export async function createMarkers(chapters) {
     chaptersToProcess = chapters.slice(0, maxMarkersOnMobile);
   }
 
-  // Resolve places to coordinates using Places API
+  // Use hardcoded coordinates for fast loading (no API calls needed for initial display)
+  const hardcodedCoordinates = {
+    1: { lat: 41.4036, lng: 2.1744 },    // Sagrada Familia, Barcelona
+    2: { lat: 40.4138, lng: -3.6923 },   // Prado Museum, Madrid  
+    3: { lat: 41.4145, lng: 2.1527 },    // Park Güell, Barcelona
+    4: { lat: 37.3826, lng: -5.9930 },   // La Giralda, Seville
+    5: { lat: 37.1770, lng: -3.5880 },   // Alhambra, Granada
+    6: { lat: 43.2630, lng: -2.9350 },   // Guggenheim, Bilbao
+    7: { lat: 40.4180, lng: -3.7144 },   // Royal Palace, Madrid
+    8: { lat: 42.8805, lng: -8.5446 },   // Santiago Cathedral
+    9: { lat: 43.3247, lng: -8.4115 },   // Exponav, Ferrol
+    10: { lat: 37.9838, lng: -1.1300 },  // Excelem, Murcia
+    11: { lat: 36.5298, lng: -6.2927 },  // Mucain, Cádiz
+    12: { lat: 40.4478, lng: -3.7189 }   // UPM Museum, Madrid
+  };
+
   const markerCoordinates = [];
   const chapterLocations = [];
 
   for (const chapter of chaptersToProcess) {
-    try {
-      let cameraConfig;
-      
-      // Try NEW Places API first, fallback to simple geocoder
-      try {
-        cameraConfig = await resolvePlaceToCameraNew(chapter.placeName, 'static');
-      } catch (placesError) {
-        console.warn(`NEW Places API failed for ${chapter.placeName}, using simple geocoder:`, placesError);
-        cameraConfig = await simpleGeocodeToCamera(chapter.placeName, 'static');
-      }
-      
-      const location = cameraConfig.location;
-      const cartesian = Cesium.Cartesian3.fromDegrees(location.lng(), location.lat());
+    const coords = hardcodedCoordinates[chapter.id];
+    if (coords) {
+      // Use hardcoded coordinates for fast initial display
+      const cartesian = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat);
       markerCoordinates.push(cartesian);
-      chapterLocations.push({
-        lat: location.lat(),
-        lng: location.lng()
-      });
-    } catch (error) {
-      console.error(`Error resolving place ${chapter.placeName}:`, error);
-      // Final fallback to default coordinates if both methods fail
+      chapterLocations.push(coords);
+      console.log(`✅ Using hardcoded coordinates for ${chapter.title}: ${coords.lat}, ${coords.lng}`);
+    } else {
+      console.warn(`⚠️ No hardcoded coordinates for chapter ${chapter.id}: ${chapter.title}`);
+      // Fallback to default coordinates if no hardcoded coords available
       const fallbackCoord = Cesium.Cartesian3.fromDegrees(-3.7492, 40.4637);
       markerCoordinates.push(fallbackCoord);
       chapterLocations.push({ lat: 40.4637, lng: -3.7492 });
@@ -416,6 +455,7 @@ export async function createMarkers(chapters) {
         position: coordWithHeightOffset,
         id,
         markerSvg,
+        title,
       }),
       show: isMarkerVisible,
     });

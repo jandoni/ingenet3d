@@ -452,10 +452,13 @@ function stopDroneOrbit() {
   }
 }
 
-// Make orbit control functions available globally
+// Make orbit control functions available globally with unified names
 if (typeof window !== 'undefined') {
   window.stopOrbitAnimation = stopDroneOrbit;
   window.startOrbitAnimation = startDroneOrbit;
+  // Also provide legacy compatibility
+  window.stopDroneOrbit = stopDroneOrbit;
+  window.startDroneOrbit = startDroneOrbit;
 }
 
 /**
