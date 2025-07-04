@@ -211,13 +211,16 @@ export async function initCesiumViewer() {
   // Set the default access token to null to prevent the CesiumJS viewer from requesting an access token
   Cesium.Ion.defaultAccessToken = null;
 
+  // Detect if we're on mobile for performance optimizations
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
   // most options prevent the creation of certain built-in widgets (cesium ui elements)
   cesiumViewer = new Cesium.Viewer("cesium-container", {
     baseLayerPicker: false,
     imageryProvider: false,
-    homeButton: true,        // Enable home button
-    fullscreenButton: true,  // Enable fullscreen button
-    navigationHelpButton: true, // Enable navigation help
+    homeButton: false,        // Disable home button
+    fullscreenButton: false,  // Disable fullscreen button
+    navigationHelpButton: false, // Disable navigation help
     sceneModePicker: false,
     geocoder: false,
     infoBox: false,
@@ -226,12 +229,18 @@ export async function initCesiumViewer() {
     animation: false,
     // Enable request render mode for better performance
     requestRenderMode: true,
+    // Mobile optimizations (but keep resolution high)
+    ...(isMobile && {
+      // Use lower frame rate for mobile (but keep quality high)
+      targetFrameRate: 30,
+    })
   });
 
   // disable the default lighting of the globe
   cesiumViewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
 
   // this is foremost to improve the resolution of icons and text displayed in the cesium viewer
+  // Keep high resolution even on mobile for better quality
   cesiumViewer.resolutionScale = 2;
 
   // Enable camera controls for user interaction
@@ -377,8 +386,17 @@ export function setSpainOverviewFromGoogleEarthExported() {
   
   cesiumViewer.camera.lookAt(center, headingPitchRange);
   
-  // Add orbit effect for Spain overview
-  startSpainOrbitEffect();
+  // Add orbit effect for Spain overview (but pause on mobile by default)
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (!isMobile) {
+    startSpainOrbitEffect();
+  } else {
+    console.log('📱 Mobile detected: orbit paused by default. Use pause button to start.');
+    // Set the global pause state to true on mobile
+    if (typeof window !== 'undefined') {
+      window.isOrbitPausedByDefault = true;
+    }
+  }
 }
 
 /**
@@ -389,10 +407,13 @@ let spainOrbitAnimation = null;
 function startSpainOrbitEffect() {
   stopSpainOrbitEffect(); // Clear any existing orbit
   
+  // Don't check for mobile here - let the pause button control it
   spainOrbitAnimation = cesiumViewer.clock.onTick.addEventListener(() => {
     // Much slower speed for overview: 0.0003 radians/tick (quarter the previous speed)
     cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.0003); 
   });
+  
+  console.log('✅ Spain orbit effect started');
 }
 
 export function stopSpainOrbitEffect() {
@@ -402,9 +423,10 @@ export function stopSpainOrbitEffect() {
   }
 }
 
-// Make it available globally for cross-module access
+// Make orbit control functions available globally for cross-module access
 if (typeof window !== 'undefined') {
   window.stopSpainOrbitEffect = stopSpainOrbitEffect;
+  window.startSpainOrbitEffect = startSpainOrbitEffect;
 }
 
 /**

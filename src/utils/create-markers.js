@@ -331,11 +331,21 @@ export async function createMarkers(chapters) {
     return;
   }
 
+  // Mobile optimization: reduce number of markers loaded simultaneously
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const maxMarkersOnMobile = 8; // Limit to 8 markers on mobile
+  
+  let chaptersToProcess = chapters;
+  if (isMobile && chapters.length > maxMarkersOnMobile) {
+    console.log(`Mobile device: limiting markers to ${maxMarkersOnMobile} for performance`);
+    chaptersToProcess = chapters.slice(0, maxMarkersOnMobile);
+  }
+
   // Resolve places to coordinates using Places API
   const markerCoordinates = [];
   const chapterLocations = [];
 
-  for (const chapter of chapters) {
+  for (const chapter of chaptersToProcess) {
     try {
       let cameraConfig;
       
@@ -377,14 +387,14 @@ export async function createMarkers(chapters) {
     // Use much larger height offset for overview mode so lines are visible from space
     const heightOffset = isOverviewMode ? 200000 : 28; // 200km for overview, 28m for close views
     const coordWithHeightOffset = addHeightOffset(coord, heightOffset);
-    const { id, title } = chapters[index];
+    const { id, title } = chaptersToProcess[index];
     console.log(`Processing chapter ${index}: ID=${id}, Title="${title}"`);
     const markerSvg = await createMarkerSvg(id, title);
 
-    const isMarkerVisible = chapters[index].focusOptions?.showLocationMarker;
+    const isMarkerVisible = chaptersToProcess[index].focusOptions?.showLocationMarker;
 
     // Store the resolved coordinates on the chapter for other uses
-    chapters[index].coords = chapterLocations[index];
+    chaptersToProcess[index].coords = chapterLocations[index];
 
     // add the line and the marker as separate entities for better visibility
     const lineEntity = cesiumViewer.entities.add({

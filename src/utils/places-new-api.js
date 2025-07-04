@@ -22,6 +22,49 @@ import { cesiumViewer } from "./cesium.js";
 let elevationService;
 let geocoder;
 
+// API caching and rate limiting
+const apiCache = new Map();
+const requestQueue = [];
+let lastRequestTime = 0;
+const MIN_REQUEST_INTERVAL = 100; // Minimum 100ms between API requests
+
+/**
+ * Rate-limited API request wrapper with caching
+ */
+async function rateLimitedApiCall(cacheKey, apiFunction) {
+  // Check cache first
+  if (apiCache.has(cacheKey)) {
+    console.log(`Using cached result for: ${cacheKey}`);
+    return apiCache.get(cacheKey);
+  }
+  
+  // Rate limiting
+  const now = Date.now();
+  const timeSinceLastRequest = now - lastRequestTime;
+  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+    await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest));
+  }
+  
+  try {
+    lastRequestTime = Date.now();
+    const result = await apiFunction();
+    
+    // Cache the result
+    apiCache.set(cacheKey, result);
+    
+    // Limit cache size to prevent memory issues
+    if (apiCache.size > 50) {
+      const firstKey = apiCache.keys().next().value;
+      apiCache.delete(firstKey);
+    }
+    
+    return result;
+  } catch (error) {
+    console.error(`API call failed for ${cacheKey}:`, error);
+    throw error;
+  }
+}
+
 /**
  * Initialize Google Maps services (NEW API)
  */
@@ -176,9 +219,13 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
     throw new Error('Google Maps services not initialized. Call initGoogleMapsServicesNew() first.');
   }
   
-  try {
-    // Search for the place using NEW API
-    const place = await searchPlace(placeName);
+  // Use caching for place resolution
+  const cacheKey = `place_${placeName}_${cameraStyle}`;
+  
+  return await rateLimitedApiCall(cacheKey, async () => {
+    try {
+      // Search for the place using NEW API
+      const place = await searchPlace(placeName);
     
     if (!place) {
       throw new Error(`Could not find place: ${placeName}`);
@@ -217,10 +264,11 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
       }
     };
     
-  } catch (error) {
-    console.error(`Error resolving place ${placeName}:`, error);
-    throw error;
-  }
+    } catch (error) {
+      console.error(`Error resolving place ${placeName}:`, error);
+      throw error;
+    }
+  });
 }
 
 /**
@@ -357,7 +405,15 @@ export function applyCameraConfigNew(cameraConfig, immediate = false) {
 
   // Add drone orbit effect if specified (but not for overview)
   if (cameraConfig.cameraStyle === 'drone-orbit') {
-    startDroneOrbit();
+    // Check if mobile and if orbit should be paused by default
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (!isMobile || (window.isOrbitPaused === false)) {
+      // Only start orbit on desktop or if explicitly unpaused on mobile
+      startDroneOrbit();
+    } else {
+      console.log('📱 Mobile: orbit paused by default for this location');
+      stopDroneOrbit();
+    }
   } else {
     stopDroneOrbit();
   }
@@ -372,10 +428,13 @@ function startDroneOrbit() {
   stopDroneOrbit(); // Clear any existing orbit
   stopSpainOrbitIfExists(); // Stop Spain orbit if active
   
+  // Don't check for mobile here - let the pause button control it
   orbitAnimation = cesiumViewer.clock.onTick.addEventListener(() => {
     // Further reduced speed from 0.005 to 0.0025 (quarter original speed)
     cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.0025); 
   });
+  
+  console.log('✅ Drone orbit animation started');
 }
 
 // Function to stop Spain orbit (we'll import this or check if it exists)
@@ -391,6 +450,12 @@ function stopDroneOrbit() {
     orbitAnimation();
     orbitAnimation = null;
   }
+}
+
+// Make orbit control functions available globally
+if (typeof window !== 'undefined') {
+  window.stopOrbitAnimation = stopDroneOrbit;
+  window.startOrbitAnimation = startDroneOrbit;
 }
 
 /**

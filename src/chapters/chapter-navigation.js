@@ -405,6 +405,16 @@ export function updateChapterContent(chapter, isIntro = true) {
 
   // Update chapter index and forward button state
   updateChapterIndexAndNavigation();
+  
+  // Update active place in top nav
+  if (typeof window.setActivePlace === 'function') {
+    window.setActivePlace(chapter.id);
+  }
+  
+  // Update orbit pause state for new chapter
+  if (typeof window.updateOrbitPauseState === 'function') {
+    window.updateOrbitPauseState();
+  }
 }
 
 /**
@@ -455,26 +465,9 @@ function setMediaContent(url) {
  * @returns {void}
  */
 function setSelectedChapterCard(chapterId, isIntro = false) {
-  const cardsContainer = document.querySelector("#chapters-bar .cards");
-
-  // Remove selected style from previous card if there is one
-  const currentlySelectedCard = cardsContainer.querySelector(".selected");
-  if (currentlySelectedCard) {
-    currentlySelectedCard.classList.remove("selected");
+  // Updated to work with new top navigation instead of old chapters bar
+  // This functionality is now handled by setActivePlace() in main.js
+  if (typeof window.setActivePlace === 'function' && chapterId && !isIntro) {
+    window.setActivePlace(chapterId);
   }
-
-  let card;
-  // Get card to be deleted
-  if (isIntro) {
-    card = cardsContainer.querySelector(".card.story-intro");
-  } else {
-    card = cardsContainer.querySelector(`.card[id="${chapterId}"]`);
-  }
-
-  if (!card) {
-    return;
-  }
-
-  // add selected style
-  card.classList.add("selected");
 }

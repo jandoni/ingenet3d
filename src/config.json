@@ -20,7 +20,8 @@
       "placeName": "Sagrada Familia, Barcelona, Spain",
       "cameraStyle": "drone-orbit",
       "id": 1,
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Sagrada_Familia_nave_roof_detail.jpg/320px-Sagrada_Familia_nave_roof_detail.jpg",
+      "imageUrl": "https://images.adsttc.com/media/images/5254/4190/e8e4/4eff/0200/06cf/large_jpg/sfpassio.jpg?1381253501",
+      "preserveCustomImage": true,
       "content": "The Basílica de la Sagrada Família is an iconic Roman Catholic basilica in Barcelona designed by Antoni Gaudí. Construction began in 1882 and continues today, making it one of the most famous unfinished buildings in the world. Its unique architectural style combines Gothic and Art Nouveau forms.",
       "dateTime": "1882-present"
     },
@@ -37,7 +38,8 @@
       "imageCredit": "Wikimedia Commons",
       "content": "The Prado Museum is the main Spanish national art museum, located in central Madrid. It houses one of the world's finest collections of European art, dating from the 12th century to the early 20th century, including works by Velázquez, Goya, and El Greco.",
       "address": "Paseo del Prado, Madrid",
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Museo_del_Prado_-_Facade.jpg/320px-Museo_del_Prado_-_Facade.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Museo_del_Prado_2016_%2825185969599%29.jpg/330px-Museo_del_Prado_2016_%2825185969599%29.jpg",
+      "preserveCustomImage": true,
       "dateTime": "1819"
     },
     {
@@ -51,7 +53,8 @@
       "cameraStyle": "drone-orbit",
       "id": 3,
       "content": "Park Güell is a public park system composed of gardens and architectural elements located on Carmel Hill in Barcelona. Designed by Antoni Gaudí and built between 1900 and 1914, it is part of the UNESCO World Heritage Site 'Works of Antoni Gaudí'.",
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Park_Guell_01.jpg/320px-Park_Guell_01.jpg",
+      "imageUrl": "https://hotelarclarambla.com/agenda/wp-content/uploads/2023/05/hotel-arc-rambla-barcelona-blog-modernism-park-guell.webp",
+      "preserveCustomImage": true,
       "dateTime": "1900-1914"
     },
     {
@@ -66,7 +69,8 @@
       "imageCredit": "Wikimedia Commons",
       "id": 4,
       "content": "La Giralda is the bell tower of Seville Cathedral in Seville, Spain. Originally built as the minaret for the Great Mosque of Seville in al-Andalus, it was converted into a bell tower for the cathedral after the Reconquista. The tower is 104.1 meters tall and was the tallest tower in the world from 1198 to 1221.",
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/La_Giralda_August_2012_Seville_Spain.jpg/240px-La_Giralda_August_2012_Seville_Spain.jpg",
+      "imageUrl": "https://www.spain-sothebysrealty.com/cdn-cgi/image/format=auto,width=768,height=463,fit=cover,quality=95/https://spain-sir-assets.s3.eu-west-1.amazonaws.com/b2362938-3548-4069-b076-c7daaf3d3040.jpg",
+      "preserveCustomImage": true,
       "dateTime": "1184-1198",
       "address": "Seville Cathedral"
     },
@@ -81,7 +85,8 @@
       "cameraStyle": "drone-orbit",
       "id": 5,
       "imageCredit": "Wikimedia Commons",
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/La_Alhambra%2C_Granada%2C_Andaluc%C3%ADa%2C_Espa%C3%B1a%2C_2015-12-23%2C_DD_20.JPG/320px-La_Alhambra%2C_Granada%2C_Andaluc%C3%ADa%2C_Espa%C3%B1a%2C_2015-12-23%2C_DD_20.JPG",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/de/Dawn_Charles_V_Palace_Alhambra_Granada_Andalusia_Spain.jpg",
+      "preserveCustomImage": true,
       "dateTime": "1238-1358",
       "content": "The Alhambra is a palace and fortress complex located in Granada, Andalusia, Spain. Originally constructed as a small fortress in AD 889, it was rebuilt in the mid-11th century and later converted into a royal palace in 1333 by Yusuf I, Sultan of Granada."
     },
@@ -96,7 +101,8 @@
       "cameraStyle": "drone-orbit",
       "id": 6,
       "dateTime": "1997",
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/GuggenheimBilbao.jpg/320px-GuggenheimBilbao.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Museo_Guggenheim%2C_Bilbao_%2831273245344%29.jpg",
+      "preserveCustomImage": true,
       "content": "The Guggenheim Museum Bilbao is a museum of modern and contemporary art designed by Canadian-American architect Frank Gehry. Built alongside the Nervión River in Bilbao, Spain, it opened in 1997 and is regarded as one of the most important architectural works of its time.",
       "imageCredit": "Wikimedia Commons"
     },
@@ -111,7 +117,8 @@
       "cameraStyle": "drone-orbit",
       "id": 7,
       "imageCredit": "Wikimedia Commons",
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Palacio_Real_de_Madrid_-_12.jpg/320px-Palacio_Real_de_Madrid_-_12.jpg",
+      "imageUrl": "https://cdn-imgix.headout.com/media/images/68d9aa77c4d16a910bb2a6cd0d7d6fb7-Royal%20Palace%20Of%20Madrid%202.jpg?auto=format&w=1222.3999999999999&h=687.6&q=90&fit=crop&ar=16%3A9&crop=faces",
+      "preserveCustomImage": true,
       "dateTime": "1738-1755",
       "content": "The Royal Palace of Madrid is the official residence of the Spanish royal family at the city of Madrid, although now used only for state ceremonies. The palace has 3,418 rooms and is the largest functioning royal palace and the largest by floor area in Europe."
     },
@@ -126,7 +133,8 @@
       "cameraStyle": "drone-orbit",
       "id": 8,
       "dateTime": "1075-1211",
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Catedral_de_Santiago_de_Compostela_%28Spain%29.jpg/320px-Catedral_de_Santiago_de_Compostela_%28Spain%29.jpg",
+      "imageUrl": "https://catholicshrinebasilica.com/wp-content/uploads/Cathedral-of-Santiago-de-Compostela-Galicia-Spain-927x500.webp",
+      "preserveCustomImage": true,
       "content": "The Cathedral of Santiago de Compostela is part of the Roman Catholic Archdiocese of Santiago de Compostela in Galicia, Spain. The cathedral is the reputed burial place of Saint James the Great, one of the apostles of Jesus Christ. It is the destination of the famous Way of St. James pilgrimage route.",
       "imageCredit": "Wikimedia Commons"
     },

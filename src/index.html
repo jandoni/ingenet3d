@@ -1,8 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      // Suppress browser extension errors as early as possible
+      (function() {
+        const originalError = window.Error;
+        const originalEval = window.eval;
+        
+        // Override Error constructor to catch extension errors
+        window.addEventListener('error', function(e) {
+          if (e.filename && (e.filename.includes('inject-script') || e.filename.includes('extension://') || e.filename.includes('VM'))) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+        }, true); // Use capture phase
+        
+        // Suppress console errors from extensions
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+          const errorString = args.join(' ');
+          if (errorString.includes('foregroundEntryPoint') || 
+              errorString.includes('inject-script') ||
+              errorString.includes('extension://')) {
+            return;
+          }
+          originalConsoleError.apply(console, args);
+        };
+      })();
+    </script>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#000000" />
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://ajax.googleapis.com" />
+    <link rel="preconnect" href="https://tile.googleapis.com" />
+    
     <link rel="stylesheet" type="text/css" href="./main.css" />
     <link rel="stylesheet" type="text/css" href="./styles/chapters.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Cesium.js"></script>
@@ -10,15 +47,64 @@
       href="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Widgets/widgets.css"
       rel="stylesheet"
     />
-    <title>3D Storytelling Demo - Google Maps Platform</title>
+    <title>Explorar España - 3D Interactive Story</title>
   </head>
   <body>
-    <!-- Organization Logo -->
-    <div class="organization-logo">
-      <img src="assets/IIE-logo.png" alt="IIE Logo" />
+    <!-- Loading screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-content">
+        <img src="assets/IIE-logo.png" alt="IIE Logo" class="loading-logo">
+        <div class="loading-text">Explorar España</div>
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+    <!-- Top navigation container with logo and places -->
+    <div id="top-navigation-container">
+      <div class="organization-logo">
+        <img src="assets/IIE-logo.png" alt="IIE Logo" />
+      </div>
+      
+      <div id="top-navigation-bar">
+      <button class="nav-scroll-btn prev" onclick="scrollPlaces('prev')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div id="places-scroll-container">
+        <div id="places-list"></div>
+      </div>
+      <button class="nav-scroll-btn next" onclick="scrollPlaces('next')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      </div>
     </div>
     
-    <section class="chapter">
+    <!-- Mobile overlay -->
+    <div id="mobile-overlay" class="mobile-overlay" onclick="toggleMobilePlaces()"></div>
+    
+    <!-- Mobile places toggle button -->
+    <button id="mobile-places-toggle" class="mobile-places-toggle" onclick="toggleMobilePlaces()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    
+    <!-- Orbit pause button -->
+    <button id="orbit-pause-btn" class="orbit-pause-btn" onclick="toggleOrbitPause()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path id="pause-icon" d="M6 4H8V20H6V4ZM16 4H18V20H16V4Z" fill="currentColor"/>
+        <path id="play-icon" d="M8 5V19L19 12L8 5Z" fill="currentColor" style="display: none;"/>
+      </svg>
+    </button>
+    
+    <!-- Bottom sheet for chapter details -->
+    <div id="bottom-sheet" class="bottom-sheet">
+      <div class="bottom-sheet-handle" onclick="toggleBottomSheet()">
+        <div class="handle-bar"></div>
+        <div class="sheet-hint">Tap to view details</div>
+      </div>
       <div class="chapter-detail">
         <div class="story-title"></div>
         <div class="hero-media-container">
@@ -35,22 +121,8 @@
         <div class="story-intro-author"></div>
         <div class="story-intro-date"></div>
       </div>
-      <nav class="intro-navigation active">
-        <button id="start-story">
-          Begin interactive map story
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9.5 16.5L16.5 12L9.5 7.5V16.5ZM12 22C10.6167 22 9.31667 21.7375 8.1 21.2125C6.88333 20.6875 5.825 19.975 4.925 19.075C4.025 18.175 3.3125 17.1167 2.7875 15.9C2.2625 14.6833 2 13.3833 2 12C2 10.6167 2.2625 9.31667 2.7875 8.1C3.3125 6.88333 4.025 5.825 4.925 4.925C5.825 4.025 6.88333 3.3125 8.1 2.7875C9.31667 2.2625 10.6167 2 12 2C13.3833 2 14.6833 2.2625 15.9 2.7875C17.1167 3.3125 18.175 4.025 19.075 4.925C19.975 5.825 20.6875 6.88333 21.2125 8.1C21.7375 9.31667 22 10.6167 22 12C22 13.3833 21.7375 14.6833 21.2125 15.9C20.6875 17.1167 19.975 18.175 19.075 19.075C18.175 19.975 17.1167 20.6875 15.9 21.2125C14.6833 21.7375 13.3833 22 12 22Z"
-              fill="white"
-            />
-          </svg>
-        </button>
+      <nav class="intro-navigation">
+        <button id="start-story">Start Story</button>
       </nav>
       <nav class="detail-navigation">
         <span class="controls-container">
@@ -100,21 +172,12 @@
           </svg>
         </button>
       </nav>
-    </section>
+    </div>
+    
     <div class="map-container">
       <div id="cesium-container"></div>
-      <div id="chapters-bar">
-        <button
-          class="navigation-button previous hidden"
-          aria-label="Show previous cards"
-        ></button>
-        <div class="cards"></div>
-        <button
-          class="navigation-button next hidden"
-          aria-label="Show next cards"
-        ></button>
-      </div>
     </div>
     <script type="module" src="./main.js"></script>
+    
   </body>
 </html>

@@ -2,22 +2,117 @@
  * CHAPTER DETAIL
  */
 
+/* Hide old chapter panel - using bottom sheet now */
 .chapter {
-  --chapter-color: rgba(255, 255, 255, 0.8);
-  --media-container-height: 160px;
-  position: absolute;
-  display: flex;
-  width: 350px;
-  height: calc(100vh - 190px);
-  flex-direction: column;
-  align-items: flex-start;
-  border-radius: var(--spacing-medium);
-  background: rgba(0, 0, 0, 0.8);
-  z-index: 1;
-  top: var(--spacing-medium-large);
-  right: var(--spacing-medium-large);
-  font-weight: 400;
-  overflow: hidden;
+  display: none !important;
+}
+
+/* Mobile responsiveness for chapter panel */
+@media (max-width: 768px) {
+  .chapter {
+    width: calc(100vw - 32px);
+    height: 50vh;
+    max-height: 400px;
+    top: auto;
+    bottom: var(--spacing-medium);
+    right: var(--spacing-medium);
+    left: var(--spacing-medium);
+    border-radius: var(--spacing-small);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .chapter.collapsed {
+    transform: translateX(100%);
+  }
+  
+  .chapter h2 {
+    font-size: 1.5rem;
+    margin: var(--spacing-extra-small) 0;
+  }
+  
+  .chapter .description {
+    font-size: var(--font-size-small);
+    line-height: 1.2rem;
+    margin-bottom: var(--spacing-small);
+  }
+}
+
+/* Mobile collapse button */
+@media (max-width: 768px) {
+  .mobile-collapse-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 0;
+  }
+  
+  .mobile-collapse-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+  }
+  
+  .mobile-collapse-btn svg {
+    transition: transform 0.3s;
+  }
+  
+  .chapter.collapsed .mobile-collapse-btn svg {
+    transform: rotate(180deg);
+  }
+  
+  /* Show/hide button when collapsed */
+  .mobile-expand-btn {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background: rgba(26, 115, 232, 0.9);
+    border: none;
+    border-radius: 28px;
+    width: 56px;
+    height: 56px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: 0;
+  }
+  
+  .mobile-expand-btn.show {
+    display: flex;
+  }
+  
+  .mobile-expand-btn:hover {
+    background: rgba(26, 115, 232, 1);
+    transform: scale(1.05);
+  }
+  
+  .mobile-expand-btn svg {
+    stroke: white;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Desktop - hide mobile buttons */
+@media (min-width: 769px) {
+  .mobile-collapse-btn,
+  .mobile-expand-btn {
+    display: none !important;
+  }
 }
 
 .chapter .chapter-detail {
@@ -203,17 +298,28 @@
   opacity: 0.5;
 }
 
+/* Hide old chapters bar - using top navigation now */
 #chapters-bar {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-areas: "navigation-previous cards navigation-next";
-  gap: 0.75rem;
-  align-items: center;
-  margin: 2.5rem var(--spacing-medium-large);
+  display: none !important;
+}
+
+/* Mobile responsiveness for chapters bar */
+@media (max-width: 768px) {
+  #chapters-bar {
+    margin: 1rem var(--spacing-medium);
+    gap: 0.5rem;
+  }
+  
+  .card {
+    width: 7rem;
+    height: 5.5rem;
+    font-size: 0.6rem;
+  }
+  
+  .card.selected {
+    width: 7.5rem;
+    height: 6rem;
+  }
 }
 
 .cards {
