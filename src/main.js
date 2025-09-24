@@ -326,15 +326,16 @@ function initializeNewUI() {
     
     // Add click handler with on-demand loading
     placeCard.onclick = async () => {
-      console.log(`🖱️ User clicked on: ${chapter.title}`);
+      console.log(`🖱️ User clicked on: ${chapter.title} (index: ${index})`);
       setActivePlace(chapter.id);
-      
+
       // Load chapter details on-demand
       await loadChapterDetails(chapter.id);
-      
+
+      console.log(`📍 Calling updateChapter(${index}) for ${chapter.title}`);
       // Now update the chapter view
       updateChapter(index);
-      
+
       // Don't auto-open the sheet, just show a subtle hint animation
       showSheetHint();
     };
@@ -741,6 +742,358 @@ function updateScrollButtons() {
     nextBtn.disabled = isAtEnd;
   }
 }
+
+/* ============================================
+ * GALLERY AND TAB FUNCTIONALITY
+ * ============================================ */
+
+// Gallery state
+let currentGalleryIndex = 0;
+let currentGalleryImages = [];
+
+/**
+ * Initialize the photo gallery for a chapter
+ */
+function initializeGallery(chapter) {
+  const galleryTrack = document.getElementById('gallery-track');
+  const galleryDots = document.getElementById('gallery-dots');
+
+  if (!galleryTrack || !galleryDots || !chapter) return;
+
+  // Prepare images array (for now, we'll use the main image multiple times with related images)
+  currentGalleryImages = [];
+
+  // Add the main chapter image
+  if (chapter.imageUrl) {
+    currentGalleryImages.push({
+      url: chapter.imageUrl,
+      credit: chapter.imageCredit || 'Sin crédito disponible'
+    });
+  }
+
+  // For now, add some placeholder related images (in a real implementation,
+  // these would come from an expanded data structure)
+  if (chapter.imageUrl) {
+    // Add the same image as placeholder for gallery demonstration
+    currentGalleryImages.push({
+      url: chapter.imageUrl,
+      credit: chapter.imageCredit || 'Sin crédito disponible'
+    });
+  }
+
+  // Clear previous content
+  galleryTrack.innerHTML = '';
+  galleryDots.innerHTML = '';
+  currentGalleryIndex = 0;
+
+  // Create gallery slides
+  currentGalleryImages.forEach((image, index) => {
+    // Create slide
+    const slide = document.createElement('div');
+    slide.className = 'gallery-slide';
+    slide.innerHTML = `<img src="${image.url}" alt="${chapter.title}" />`;
+    galleryTrack.appendChild(slide);
+
+    // Create dot
+    const dot = document.createElement('div');
+    dot.className = `gallery-dot ${index === 0 ? 'active' : ''}`;
+    dot.onclick = () => goToGallerySlide(index);
+    galleryDots.appendChild(dot);
+  });
+
+  // Update gallery transform
+  updateGalleryPosition();
+  updateImageCredit();
+
+  // Update navigation button visibility
+  updateGalleryNavigation();
+}
+
+/**
+ * Navigate gallery by direction
+ */
+window.navigateGallery = function(direction) {
+  if (currentGalleryImages.length <= 1) return;
+
+  currentGalleryIndex += direction;
+
+  // Handle wraparound
+  if (currentGalleryIndex >= currentGalleryImages.length) {
+    currentGalleryIndex = 0;
+  } else if (currentGalleryIndex < 0) {
+    currentGalleryIndex = currentGalleryImages.length - 1;
+  }
+
+  updateGalleryPosition();
+  updateImageCredit();
+  updateGalleryDots();
+};
+
+/**
+ * Go to specific gallery slide
+ */
+function goToGallerySlide(index) {
+  if (index >= 0 && index < currentGalleryImages.length) {
+    currentGalleryIndex = index;
+    updateGalleryPosition();
+    updateImageCredit();
+    updateGalleryDots();
+  }
+}
+
+/**
+ * Update gallery transform position
+ */
+function updateGalleryPosition() {
+  const galleryTrack = document.getElementById('gallery-track');
+  if (galleryTrack) {
+    const translateX = -currentGalleryIndex * 100;
+    galleryTrack.style.transform = `translateX(${translateX}%)`;
+  }
+}
+
+/**
+ * Update gallery dots active state
+ */
+function updateGalleryDots() {
+  const dots = document.querySelectorAll('.gallery-dot');
+  dots.forEach((dot, index) => {
+    dot.classList.toggle('active', index === currentGalleryIndex);
+  });
+}
+
+/**
+ * Update image credit display
+ */
+function updateImageCredit() {
+  const creditElement = document.getElementById('image-credit');
+  if (creditElement && currentGalleryImages[currentGalleryIndex]) {
+    creditElement.textContent = currentGalleryImages[currentGalleryIndex].credit;
+  }
+}
+
+/**
+ * Update gallery navigation button visibility
+ */
+function updateGalleryNavigation() {
+  const prevBtn = document.querySelector('.gallery-prev');
+  const nextBtn = document.querySelector('.gallery-next');
+
+  if (prevBtn && nextBtn) {
+    const showNavigation = currentGalleryImages.length > 1;
+    prevBtn.style.display = showNavigation ? 'flex' : 'none';
+    nextBtn.style.display = showNavigation ? 'flex' : 'none';
+  }
+}
+
+/**
+ * Switch between tabs
+ */
+window.switchTab = function(tabId) {
+  // Remove active class from all tabs and panels
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+
+  tabButtons.forEach(btn => btn.classList.remove('active'));
+  tabPanels.forEach(panel => panel.classList.remove('active'));
+
+  // Add active class to clicked tab and corresponding panel
+  const activeTabButton = document.querySelector(`[data-tab="${tabId}"]`);
+  const activeTabPanel = document.getElementById(`${tabId}-panel`);
+
+  if (activeTabButton) activeTabButton.classList.add('active');
+  if (activeTabPanel) activeTabPanel.classList.add('active');
+};
+
+/**
+ * Extract URLs from content text
+ */
+function extractUrls(content) {
+  if (!content) return [];
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const matches = content.match(urlRegex);
+  return matches || [];
+}
+
+/**
+ * Populate the information tab
+ */
+function populateInfoTab(chapter, isIntro = false) {
+  // Title
+  const titleElement = document.querySelector('.place-title');
+  if (titleElement) {
+    titleElement.textContent = isIntro ? chapter.title : chapter.title;
+  }
+
+  // Address/Location
+  const addressElement = document.querySelector('.place-address');
+  if (addressElement) {
+    const address = chapter.address || chapter.placeName || 'Ubicación no disponible';
+    addressElement.textContent = address;
+  }
+
+  // Date/Period
+  const dateElement = document.querySelector('.place-date');
+  if (dateElement) {
+    const date = isIntro ? chapter.date : (chapter.dateTime || 'Fecha no disponible');
+    dateElement.textContent = date;
+  }
+
+  // Description
+  const descriptionElement = document.querySelector('.place-description');
+  if (descriptionElement) {
+    const description = isIntro ? chapter.description : (chapter.content || 'Descripción no disponible');
+    descriptionElement.textContent = description;
+  }
+}
+
+/**
+ * Populate the links tab
+ */
+function populateLinksTab(chapter) {
+  const officialLinksContainer = document.getElementById('official-links');
+  if (!officialLinksContainer) return;
+
+  // Clear existing content
+  officialLinksContainer.innerHTML = '';
+
+  // Extract URLs from chapter content
+  const urls = extractUrls(chapter.content);
+
+  if (urls.length > 0) {
+    urls.forEach(url => {
+      const domain = new URL(url).hostname.replace('www.', '');
+
+      const linkElement = document.createElement('a');
+      linkElement.href = url;
+      linkElement.target = '_blank';
+      linkElement.className = 'link-item';
+      linkElement.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M18 13V6A2 2 0 0 0 16 4H4A2 2 0 0 0 2 6V18C2 19.1 2.9 20 4 20H20A2 2 0 0 0 22 18V8H18" stroke="currentColor" stroke-width="2"/>
+          <path d="M15 3H21V9M10 14L21 3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <div>
+          <span class="link-title">${domain}</span>
+          <span class="link-desc">Sitio web oficial</span>
+        </div>
+      `;
+      officialLinksContainer.appendChild(linkElement);
+    });
+  } else {
+    // No official links found
+    officialLinksContainer.innerHTML = `
+      <div style="text-align: center; color: #94a3b8; padding: 20px;">
+        <p>No hay enlaces oficiales disponibles</p>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Update all tab content for a chapter
+ */
+function updateTabContent(chapter, isIntro = false) {
+  populateInfoTab(chapter, isIntro);
+  populateLinksTab(chapter);
+
+  // Initialize gallery
+  initializeGallery(chapter);
+
+  // Reset to info tab
+  switchTab('info');
+}
+
+// Make updateTabContent available globally
+window.updateTabContent = updateTabContent;
+
+/* ============================================
+ * FULLSCREEN FUNCTIONALITY
+ * ============================================ */
+
+let isFullscreen = false;
+let originalStyles = {};
+
+/**
+ * Toggle fullscreen mode for the bottom sheet
+ */
+window.toggleFullscreen = function() {
+  const bottomSheet = document.getElementById('bottom-sheet');
+  const expandIcon = document.querySelector('.fullscreen-expand');
+  const collapseIcon = document.querySelector('.fullscreen-collapse');
+
+  if (!bottomSheet) return;
+
+  if (!isFullscreen) {
+    // Store original styles
+    const rect = bottomSheet.getBoundingClientRect();
+    const computedStyle = getComputedStyle(bottomSheet);
+
+    originalStyles = {
+      position: computedStyle.position,
+      top: computedStyle.top,
+      left: computedStyle.left,
+      right: computedStyle.right,
+      bottom: computedStyle.bottom,
+      width: computedStyle.width,
+      height: computedStyle.height,
+      zIndex: computedStyle.zIndex
+    };
+
+    // Set CSS custom properties for animation
+    bottomSheet.style.setProperty('--original-top', rect.top + 'px');
+    bottomSheet.style.setProperty('--original-left', rect.left + 'px');
+    bottomSheet.style.setProperty('--original-right', (window.innerWidth - rect.right) + 'px');
+    bottomSheet.style.setProperty('--original-bottom', (window.innerHeight - rect.bottom) + 'px');
+    bottomSheet.style.setProperty('--original-width', rect.width + 'px');
+    bottomSheet.style.setProperty('--original-height', rect.height + 'px');
+
+    // Remove minimized class if present
+    bottomSheet.classList.remove('minimized');
+
+    // Add fullscreen class
+    bottomSheet.classList.add('fullscreen');
+    isFullscreen = true;
+
+    // Update button icons
+    if (expandIcon) expandIcon.style.display = 'none';
+    if (collapseIcon) collapseIcon.style.display = 'block';
+
+  } else {
+    // Exit fullscreen
+    bottomSheet.classList.remove('fullscreen');
+    bottomSheet.classList.add('fullscreen-exit');
+
+    // Update button icons
+    if (expandIcon) expandIcon.style.display = 'block';
+    if (collapseIcon) collapseIcon.style.display = 'none';
+
+    // Wait for animation to complete, then restore original styles
+    setTimeout(() => {
+      bottomSheet.classList.remove('fullscreen-exit');
+
+      // Clear custom properties
+      bottomSheet.style.removeProperty('--original-top');
+      bottomSheet.style.removeProperty('--original-left');
+      bottomSheet.style.removeProperty('--original-right');
+      bottomSheet.style.removeProperty('--original-bottom');
+      bottomSheet.style.removeProperty('--original-width');
+      bottomSheet.style.removeProperty('--original-height');
+
+      isFullscreen = false;
+    }, 400); // Match animation duration
+  }
+};
+
+/**
+ * Handle escape key to exit fullscreen
+ */
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && isFullscreen) {
+    toggleFullscreen();
+  }
+});
 
 // Call main (UI initialization happens inside main())
 await main();

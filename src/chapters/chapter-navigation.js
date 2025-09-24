@@ -23,6 +23,7 @@ import { flyToPlaceNew } from "../utils/places-new-api.js";
 import { simpleFlyToPlace } from "../utils/simple-geocoder.js";
 import { setSelectedMarker } from "../utils/create-markers.js";
 import { getParams, setParams } from "../utils/params.js";
+import { cesiumViewer } from "../utils/cesium.js";
 import { loadSvg } from "../utils/svg.js";
 import { setTextContent } from "../utils/ui.js";
 import {
@@ -51,7 +52,7 @@ const PAUSE_ICON = await loadSvg("round-pause-button");
  */
 const PLAY_ICON = await loadSvg("round-play-button");
 
-// Html elements
+// Html elements - Updated for new structure
 /** The nav element shown on the intro details overlay
  * @type {HTMLNavElement}
  */
@@ -63,19 +64,19 @@ const detailNavigation = document.querySelector(".detail-navigation");
 /** The button to start the story / leave the intro overlay with
  * @type {HTMLButtonElement}
  */
-const startButton = introNavigation.querySelector("#start-story");
+const startButton = introNavigation ? introNavigation.querySelector("#start-story") : null;
 /** The button to play the story chapter by chapter
  * @type {HTMLButtonElement}
  */
-const autoplayButton = detailNavigation.querySelector("#autoplay-story");
+const autoplayButton = detailNavigation ? detailNavigation.querySelector("#autoplay-story") : null;
 /** The button to progress the story backward with
  * @type {HTMLButtonElement}
  */
-const backButton = detailNavigation.querySelector("#chapter-backward");
+const backButton = detailNavigation ? detailNavigation.querySelector("#chapter-backward") : null;
 /** The button to progress the story forward with
  * @type {HTMLButtonElement}
  */
-const forwardButton = detailNavigation.querySelector("#chapter-forward");
+const forwardButton = detailNavigation ? detailNavigation.querySelector("#chapter-forward") : null;
 
 /**
  * The id used to identify the timeout instance for the story progression
@@ -97,23 +98,31 @@ let autoplayStep = 0;
  * It determines the current chapter based on URL parameters and updates the UI accordingly.
  */
 export function initChapterNavigation() {
-  // Set up event listeners
-  startButton.addEventListener("click", () => {
-    activateNavigationElement("details");
-    updateChapter(0);
-  });
+  // Set up event listeners only if elements exist
+  if (startButton) {
+    startButton.addEventListener("click", () => {
+      activateNavigationElement("details");
+      updateChapter(0);
+    });
+  }
 
-  forwardButton.addEventListener("click", () => {
-    setNextChapter();
-    stopAutoplay();
-  });
+  if (forwardButton) {
+    forwardButton.addEventListener("click", () => {
+      setNextChapter();
+      stopAutoplay();
+    });
+  }
 
-  backButton.addEventListener("click", () => {
-    setPreviousChapter();
-    stopAutoplay();
-  });
+  if (backButton) {
+    backButton.addEventListener("click", () => {
+      setPreviousChapter();
+      stopAutoplay();
+    });
+  }
 
-  autoplayButton.addEventListener("click", autoplayClickHandler);
+  if (autoplayButton) {
+    autoplayButton.addEventListener("click", autoplayClickHandler);
+  }
 
   // Get the current chapter based on URL parameters
   const chapterIndex = getCurrentChapterIndex();
@@ -130,7 +139,9 @@ export function initChapterNavigation() {
  * Stops the autoplay chapter progression of the story.
  */
 function stopAutoplay() {
-  autoplayButton.innerHTML = PLAY_ICON;
+  if (autoplayButton) {
+    autoplayButton.innerHTML = PLAY_ICON;
+  }
   clearTimeout(timeoutId);
   timeoutId = null;
 }
@@ -172,7 +183,9 @@ function autoplayClickHandler() {
   } else {
     // If the autoplay is not active, start it
     setNextAutoplayStep();
-    autoplayButton.innerHTML = PAUSE_ICON;
+    if (autoplayButton) {
+      autoplayButton.innerHTML = PAUSE_ICON;
+    }
   }
 }
 
@@ -250,8 +263,12 @@ export async function resetToIntro() {
  * @param {number} chapterIndex - The index of the chapter to be updated.
  */
 export async function updateChapter(chapterIndex) {
+  console.log(`📍 updateChapter called with index: ${chapterIndex}`);
+
   const chapter = story.chapters.at(chapterIndex);
   const { placeName, cameraStyle, id: chapterId } = chapter;
+
+  console.log(`🎯 Chapter details: ${chapter.title}, Place: ${placeName}, Style: ${cameraStyle}`);
 
   setSelectedMarker(chapterId); // Set the selected marker
   setSelectedChapterCard(chapterId); // Set the selected chapter card
@@ -265,32 +282,57 @@ export async function updateChapter(chapterIndex) {
   );
 
   try {
+    console.log(`🚀 Attempting to fly to: ${placeName} with style: ${cameraStyle || 'drone-orbit'}`);
+
+    // Check if cesiumViewer is available
+    if (!cesiumViewer) {
+      console.error(`❌ CesiumViewer not available for navigation to ${placeName}`);
+      return;
+    }
+
     let cameraConfig;
-    
+    let flySuccessful = false;
+
     // Try NEW Places API first, fallback to simple geocoder
     try {
-      cameraConfig = await flyToPlaceNew(placeName, cameraStyle || 'drone-orbit'); // Default to drone-orbit
-      
+      cameraConfig = await flyToPlaceNew(placeName, cameraStyle || 'drone-orbit');
+      flySuccessful = true;
+      console.log(`✅ Successfully flew to ${placeName} using NEW Places API`);
+
       // Update chapter with Google Place details if available
-      if (cameraConfig.placeDetails) {
+      if (cameraConfig && cameraConfig.placeDetails) {
+        console.log(`📄 Found place details for ${placeName}`);
         // Update content with Google's editorial summary if available
         if (cameraConfig.placeDetails.editorialSummary) {
           chapter.content = cameraConfig.placeDetails.editorialSummary;
         }
-        
+
         // Update image with first Google photo if available (unless preserveCustomImage is true)
         if (cameraConfig.placeDetails.photos && cameraConfig.placeDetails.photos.length > 0) {
           if (!chapter.preserveCustomImage) {
             chapter.imageUrl = cameraConfig.placeDetails.photos[0];
           }
         }
-        
+
         // Update chapter details in UI
         updateChapterContent(chapter, false);
       }
     } catch (placesError) {
-      console.warn(`NEW Places API failed for ${placeName}, using simple geocoder:`, placesError);
-      cameraConfig = await simpleFlyToPlace(placeName, cameraStyle || 'drone-orbit');
+      console.warn(`⚠️ NEW Places API failed for ${placeName}:`, placesError);
+
+      // Fallback to simple geocoder
+      try {
+        cameraConfig = await simpleFlyToPlace(placeName, cameraStyle || 'drone-orbit');
+        flySuccessful = true;
+        console.log(`✅ Simple geocoder succeeded for ${placeName}`);
+      } catch (geocoderError) {
+        console.error(`❌ Both APIs failed for ${placeName}:`, geocoderError);
+        flySuccessful = false;
+      }
+    }
+
+    if (!flySuccessful) {
+      console.error(`❌ Camera navigation failed for ${placeName}`);
     }
     
     // Handle focus options after camera is positioned
@@ -317,8 +359,9 @@ export async function updateChapter(chapterIndex) {
  * @param {'intro' | 'details'} chapterParam - The navigation element to be toggled.
  */
 export function activateNavigationElement(navName) {
-  introNavigation.classList.toggle("active", navName === "intro");
-  detailNavigation.classList.toggle("active", navName === "details");
+  // Since we removed the old navigation elements, this function is now a no-op
+  // but we keep it for compatibility with existing code
+  console.log(`Navigation element activation: ${navName} (legacy function - no action needed)`);
 }
 
 /**
@@ -350,19 +393,25 @@ export function getChapterIndexFromId(chapterId) {
 export function updateDetailsNavigation() {
   // Update chapter index
   const chapterIndex = getCurrentChapterIndex() + 1;
-  // Displays the current chapter index
-  detailNavigation.querySelector(
-    "#chapter-index"
-  ).textContent = `${chapterIndex} / ${story.chapters.length}`;
+
+  // Displays the current chapter index if element exists
+  if (detailNavigation) {
+    const chapterIndexElement = detailNavigation.querySelector("#chapter-index");
+    if (chapterIndexElement) {
+      chapterIndexElement.textContent = `${chapterIndex} / ${story.chapters.length}`;
+    }
+  }
 
   // If the last chapter is reached, disable the forward button
   // Check if the current chapter is the last chapter
-  if (chapterIndex === story.chapters.length) {
-    // Disable the forward button
-    forwardButton.disabled = true;
-  } else {
-    // Enable the forward button
-    forwardButton.disabled = false;
+  if (forwardButton) {
+    if (chapterIndex === story.chapters.length) {
+      // Disable the forward button
+      forwardButton.disabled = true;
+    } else {
+      // Enable the forward button
+      forwardButton.disabled = false;
+    }
   }
 }
 
@@ -372,8 +421,30 @@ export function updateDetailsNavigation() {
  * @param {boolean} [isIntro=true] - Flag indicating if the current view is the introduction.
  */
 export function updateChapterContent(chapter, isIntro = true) {
-  updateDetailsNavigation();
+  // Use the new tab-based content system
+  if (typeof window.updateTabContent === 'function') {
+    window.updateTabContent(chapter, isIntro);
+  } else {
+    console.warn('updateTabContent function not available, using fallback');
+    // Fallback for legacy content update
+    updateLegacyContent(chapter, isIntro);
+  }
 
+  // Update active place in top nav
+  if (typeof window.setActivePlace === 'function') {
+    window.setActivePlace(chapter.id);
+  }
+
+  // Update orbit pause state for new chapter
+  if (typeof window.updateOrbitPauseState === 'function') {
+    window.updateOrbitPauseState();
+  }
+}
+
+/**
+ * Legacy content update for backward compatibility
+ */
+function updateLegacyContent(chapter, isIntro) {
   setTextContent(".story-title", isIntro ? "" : chapter.title);
   setTextContent(".chapter-detail h2", chapter.title);
   setTextContent(
@@ -402,19 +473,6 @@ export function updateChapterContent(chapter, isIntro = true) {
   );
 
   setTextContent(".story-intro-date", isIntro ? chapter.date : "");
-
-  // Update chapter index and forward button state
-  updateChapterIndexAndNavigation();
-  
-  // Update active place in top nav
-  if (typeof window.setActivePlace === 'function') {
-    window.setActivePlace(chapter.id);
-  }
-  
-  // Update orbit pause state for new chapter
-  if (typeof window.updateOrbitPauseState === 'function') {
-    window.updateOrbitPauseState();
-  }
 }
 
 /**
@@ -425,8 +483,10 @@ function updateChapterIndexAndNavigation() {
   const chapterIndexDisplay = `${chapterIndex + 1} / ${story.chapters.length}`;
   setTextContent("#chapter-index", chapterIndexDisplay);
 
-  // Update forward button state
-  forwardButton.disabled = chapterIndex + 1 === story.chapters.length;
+  // Update forward button state if it exists
+  if (forwardButton) {
+    forwardButton.disabled = chapterIndex + 1 === story.chapters.length;
+  }
 }
 
 /**
