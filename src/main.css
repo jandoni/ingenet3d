@@ -2,6 +2,7 @@
 @import "./styles/chapters.css";
 @import "./styles/camera-controls.css";
 @import "./styles/bottom-sheet.css";
+@import "./styles/chatbot.css";
 
 @font-face {
   font-display: swap;

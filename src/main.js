@@ -6,6 +6,7 @@ import { initGoogleMaps } from "./utils/places.js";
 import { initChapterNavigation, updateChapter, resetToIntro, getCurrentChapterIndex } from "./chapters/chapter-navigation.js";
 import { initGoogleMapsServicesNew, resolvePlaceToCameraNew } from "./utils/places-new-api.js";
 import { simpleGeocodeToCamera } from "./utils/simple-geocoder.js";
+import { initChatbot } from "./utils/chatbot.js";
 
 /**
  * The story configuration object
@@ -231,7 +232,11 @@ async function main() {
     // Create unified markers using the advanced marker system
     console.log('📍 Creating unified markers...');
     await createMarkers(chapters);
-    
+
+    // Initialize the chatbot with story data
+    console.log('🤖 Initializing chatbot...');
+    initChatbot(story);
+
     console.log('🎉 MAIN INITIALIZATION COMPLETE - NO API CALLS MADE YET');
     
   } catch (error) {
