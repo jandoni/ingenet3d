@@ -81,6 +81,18 @@ function renderChatHistory() {
           `).join('')}
         </div>
       `;
+    } else if (message.confirmation) {
+      messageDiv.innerHTML = `
+        <div class="message-text">${message.text}</div>
+        <div class="confirmation-buttons">
+          <button class="confirm-btn yes" onclick="window.confirmNavigation(${message.confirmation.place.index})">
+            Sí, llévame allí
+          </button>
+          <button class="confirm-btn no" onclick="window.cancelNavigation()">
+            No, buscar otra cosa
+          </button>
+        </div>
+      `;
     } else {
       messageDiv.innerHTML = `<div class="message-text">${message.text}</div>`;
     }
@@ -119,23 +131,28 @@ export function sendMessage() {
     const place = matches[0];
     const botMessage = {
       type: 'bot',
-      text: `¡Perfecto! Te llevo a ${place.title}...`,
+      text: `Encontré: ${place.title}. ¿Quieres que te lleve allí?`,
+      confirmation: {
+        place: place,
+        userInput: userInput
+      },
       timestamp: new Date()
     };
     chatHistory.push(botMessage);
-
-    setTimeout(() => {
-      navigateToPlace(place.index);
-
-      setTimeout(() => {
-        toggleChat();
-      }, 500);
-    }, 1000);
   } else {
+    const topMatches = matches.slice(0, 4);
+    let responseText = `Encontré ${matches.length} lugar${matches.length > 1 ? 'es' : ''} relacionado${matches.length > 1 ? 's' : ''} con "${userInput}".`;
+
+    if (matches.length > 4) {
+      responseText += ` Te muestro los ${topMatches.length} más relevantes:`;
+    } else {
+      responseText += ' ¿Cuál te gustaría visitar?';
+    }
+
     const botMessage = {
       type: 'bot',
-      text: `Encontré ${matches.length} lugares con "${userInput}". ¿Cuál te gustaría visitar?`,
-      suggestions: matches.slice(0, 4),
+      text: responseText,
+      suggestions: topMatches,
       timestamp: new Date()
     };
     chatHistory.push(botMessage);
@@ -145,93 +162,287 @@ export function sendMessage() {
 }
 
 function findMatchingPlaces(input) {
-  const searchTerm = normalizeText(input.toLowerCase().trim());
-  const matches = [];
+  // Extract keywords from the input query
+  const keywords = extractKeywords(input);
+  console.log(`🔍 Search query: "${input}" → Keywords: [${keywords.join(', ')}]`);
 
-  // Spanish to English translations for common terms
-  const translations = {
-    'palacio real': 'royal palace',
-    'catedral': 'cathedral',
-    'museo': 'museum',
-    'parque': 'park',
-    'basilica': 'basilica',
-    'plaza': 'square',
-    'fundacion': 'foundation'
-  };
-
-  // Apply translations
-  let enhancedSearchTerm = searchTerm;
-  for (const [spanish, english] of Object.entries(translations)) {
-    if (searchTerm.includes(spanish)) {
-      enhancedSearchTerm = searchTerm.replace(spanish, english);
-      break;
-    }
+  if (keywords.length === 0) {
+    console.log('❌ No valid keywords found after filtering');
+    return [];
   }
 
-  storyData.chapters.forEach((chapter, index) => {
-    const titleMatch = normalizeText(chapter.title.toLowerCase());
-    const placeNameMatch = normalizeText(chapter.placeName.toLowerCase());
+  const matches = [];
 
-    let score = 0;
+  // Enhanced translations and synonyms dictionary
+  const translations = {
+    // Location variations and synonyms
+    'espana': 'españa',
+    'andaluza': 'andalucía',
+    'andaluz': 'andalucía',
+    'sur': 'andalucía',
+    'cataluna': 'catalunya',
+    'catalan': 'catalunya',
+    'vasco': 'país vasco',
+    'euskadi': 'país vasco',
+    'norte': 'galicia',
+    'gallego': 'galicia',
+    'gallega': 'galicia',
 
-    // Exact match gets highest score
-    if (titleMatch === searchTerm || titleMatch === enhancedSearchTerm) {
-      score = 1;
-    }
-    // Check if search term is contained in title
-    else if (titleMatch.includes(searchTerm) || titleMatch.includes(enhancedSearchTerm)) {
-      score = 0.9;
-    }
-    // Check if search term is in placeName
-    else if (placeNameMatch.includes(searchTerm) || placeNameMatch.includes(enhancedSearchTerm)) {
-      score = 0.8;
-    }
-    // Check individual words
-    else {
-      const words = searchTerm.split(' ').filter(w => w.length > 2);
-      const enhancedWords = enhancedSearchTerm.split(' ').filter(w => w.length > 2);
-      let wordMatchCount = 0;
-      let totalWords = words.length;
+    // Type variations and plurals
+    'museos': 'museo',
+    'museo': 'museo',
+    'museistico': 'museo',
+    'galeria': 'museo',
+    'galerias': 'museo',
+    'centro cultural': 'museo',
+    'centros culturales': 'museo',
+    'palacios': 'palacio',
+    'palacio': 'palacio',
+    'catedrales': 'catedral',
+    'catedral': 'catedral',
+    'basilicas': 'basilica',
+    'basilica': 'basilica',
+    'iglesias': 'catedral',
+    'iglesia': 'catedral',
+    'templos': 'catedral',
+    'templo': 'catedral',
+    'parques': 'parque',
+    'parque': 'parque',
+    'jardines': 'parque',
+    'jardin': 'parque',
+    'fundaciones': 'fundación',
+    'fundacion': 'fundación',
+    'universidades': 'universidad',
+    'universidad': 'universidad',
+    'centros': 'centro',
+    'centro': 'centro',
 
-      words.forEach(word => {
-        if (titleMatch.includes(word) || placeNameMatch.includes(word)) {
-          wordMatchCount++;
-        }
-      });
+    // Sector synonyms and variations
+    'robotica': 'robótica',
+    'roboticos': 'robótica',
+    'automatizacion': 'automatización',
+    'automatico': 'automatización',
+    'automatica': 'automatización',
+    'maritimo': 'marítimo',
+    'maritima': 'marítimo',
+    'naval': 'naval',
+    'navales': 'naval',
+    'marino': 'marítimo',
+    'marina': 'marítimo',
+    'barcos': 'naval',
+    'barco': 'naval',
+    'mineria': 'minería',
+    'minero': 'minería',
+    'minera': 'minería',
+    'minas': 'minería',
+    'mina': 'minería',
+    'arte': 'arte',
+    'artistico': 'arte',
+    'artistica': 'arte',
+    'artistas': 'arte',
+    'artista': 'arte',
+    'historia': 'historia',
+    'historico': 'historia',
+    'historica': 'historia',
+    'historicos': 'historia',
+    'historicas': 'historia',
+    'arquitectura': 'arquitectura',
+    'arquitectonico': 'arquitectura',
+    'arquitectonica': 'arquitectura',
+    'construccion': 'arquitectura',
+    'edificios': 'arquitectura',
+    'edificio': 'arquitectura',
+    'religion': 'religión',
+    'religioso': 'religión',
+    'religiosa': 'religión',
+    'religioosos': 'religión',
+    'religiosas': 'religión',
+    'sagrado': 'religión',
+    'sagrada': 'religión',
+    'santo': 'religión',
+    'santa': 'religión',
+    'cultura': 'cultura',
+    'cultural': 'cultura',
+    'culturales': 'cultura',
+    'turismo': 'turismo',
+    'turistico': 'turismo',
+    'turistica': 'turismo',
+    'tecnologia': 'tecnología',
+    'tecnologico': 'tecnología',
+    'tecnologica': 'tecnología',
 
-      enhancedWords.forEach(word => {
-        if (titleMatch.includes(word) || placeNameMatch.includes(word)) {
-          wordMatchCount++;
-        }
-      });
+    // Professional variations
+    'ingenieria': 'ingeniería',
+    'ingeniero': 'ingeniería',
+    'ingeniera': 'ingeniería',
+    'ingenieros': 'ingeniería',
+    'ingenieras': 'ingeniería',
+    'tecnico': 'ingeniería',
+    'tecnica': 'ingeniería',
+    'tecnicos': 'ingeniería',
+    'tecnicas': 'ingeniería',
+    'arquitecto': 'arquitectura',
+    'arquitecta': 'arquitectura',
+    'arquitectos': 'arquitectura',
+    'arquitectas': 'arquitectura',
+    'historiador': 'historia',
+    'historiadora': 'historia',
+    'historiadores': 'historia',
+    'historiadoras': 'historia',
 
-      if (wordMatchCount > 0 && totalWords > 0) {
-        score = wordMatchCount / totalWords * 0.7;
+    // Common search terms and patterns
+    'lugares': 'lugar',
+    'lugar': 'lugar',
+    'sitios': 'lugar',
+    'sitio': 'lugar',
+    'visitas': 'visitar',
+    'visita': 'visitar',
+    'visitar': 'visitar',
+    'conocer': 'visitar',
+    'ver': 'visitar',
+    'turístico': 'turismo',
+    'turística': 'turismo',
+    'turísticos': 'turismo',
+    'turísticas': 'turismo'
+  };
+
+  // Apply translations to each keyword
+  const enhancedKeywords = keywords.map(keyword => {
+    for (const [spanish, normalized] of Object.entries(translations)) {
+      if (keyword === spanish || keyword.includes(spanish)) {
+        console.log(`🔄 Translating "${keyword}" → "${normalized}"`);
+        return normalized;
       }
     }
+    return keyword;
+  });
 
-    if (score > 0.2) {
-      matches.push({
-        ...chapter,
-        index,
-        score
-      });
+  storyData.chapters.forEach((chapter, index) => {
+    const titleMatch = normalizeText(chapter.title);
+    const placeNameMatch = normalizeText(chapter.placeName);
+
+    let score = 0;
+    let matchedKeywords = 0;
+    let categoryMatches = new Set(); // Track which tag categories matched
+    let matchDetails = []; // For debugging
+
+    // Check each keyword against this chapter
+    [...keywords, ...enhancedKeywords].forEach(keyword => {
+      let keywordFound = false;
+      let keywordScore = 0;
+
+      // Check title (highest priority)
+      if (titleMatch.includes(keyword)) {
+        keywordScore = Math.max(keywordScore, 0.9);
+        matchDetails.push(`title:"${keyword}"`);
+        keywordFound = true;
+      }
+
+      // Check placeName
+      if (placeNameMatch.includes(keyword)) {
+        keywordScore = Math.max(keywordScore, 0.8);
+        matchDetails.push(`place:"${keyword}"`);
+        keywordFound = true;
+      }
+
+      // Check tags
+      if (chapter.etiquetas) {
+        Object.entries(chapter.etiquetas).forEach(([category, tagArray]) => {
+          if (Array.isArray(tagArray)) {
+            tagArray.forEach(tag => {
+              const normalizedTag = normalizeText(tag);
+              if (normalizedTag.includes(keyword) || keyword.includes(normalizedTag)) {
+                // Exact matches get higher scores
+                const exactMatch = normalizedTag === keyword;
+                const tagScore = exactMatch ? 0.75 : 0.6;
+                keywordScore = Math.max(keywordScore, tagScore);
+                categoryMatches.add(category);
+                matchDetails.push(`${category}:"${tag}"→"${keyword}"`);
+                keywordFound = true;
+              }
+            });
+          }
+        });
+      }
+
+      if (keywordFound) {
+        matchedKeywords++;
+        score += keywordScore;
+      }
+    });
+
+    // Bonus for matching keywords across different tag categories
+    const categoryBonus = Math.min(categoryMatches.size * 0.1, 0.3);
+
+    // Calculate final score
+    if (matchedKeywords > 0) {
+      const baseScore = score / Math.max(keywords.length, 1); // Average score per keyword
+      const completenessBonus = (matchedKeywords / keywords.length) * 0.2; // Bonus for matching more keywords
+      const finalScore = Math.min(baseScore + categoryBonus + completenessBonus, 1);
+
+      console.log(`📊 ${chapter.title}: ${matchedKeywords}/${keywords.length} keywords, score: ${finalScore.toFixed(3)}, matches: [${matchDetails.join(', ')}]`);
+
+      if (finalScore > 0.3) { // Lower threshold for multi-keyword searches
+        matches.push({
+          ...chapter,
+          index,
+          score: finalScore,
+          matchedKeywords,
+          totalKeywords: keywords.length,
+          matchDetails: matchDetails.join(', ')
+        });
+      }
     }
   });
 
-  matches.sort((a, b) => b.score - a.score);
+  // Sort by score (highest first), then by number of keywords matched
+  matches.sort((a, b) => {
+    if (Math.abs(a.score - b.score) < 0.1) {
+      // If scores are very close, prioritize more keyword matches
+      return b.matchedKeywords - a.matchedKeywords;
+    }
+    return b.score - a.score;
+  });
+
+  console.log(`🎯 Found ${matches.length} matches for query: "${input}"`);
+  matches.forEach((match, i) => {
+    console.log(`  ${i + 1}. ${match.title} (score: ${match.score.toFixed(3)}, matched: ${match.matchedKeywords}/${match.totalKeywords})`);
+  });
 
   return matches;
 }
+
+// Spanish stopwords to filter out from search queries
+const spanishStopwords = new Set([
+  'algun', 'alguna', 'algunos', 'algunas', 'en', 'de', 'del', 'la', 'el', 'los', 'las',
+  'que', 'donde', 'como', 'para', 'por', 'con', 'sin', 'hay', 'tiene', 'tengo',
+  'quiero', 'busco', 'ver', 'visitar', 'ir', 'llevame', 'y', 'o', 'un', 'una',
+  'unos', 'unas', 'me', 'te', 'se', 'nos', 'le', 'les', 'lo', 'al', 'esta', 'este',
+  'estan', 'son', 'es', 'ser', 'esta', 'estar', 'pero', 'si', 'no', 'mas', 'muy',
+  'tambien', 'solo', 'cuando', 'quien', 'cual', 'cuales', 'porque', 'hasta', 'desde'
+]);
 
 // Function to normalize text by removing accents and special characters
 function normalizeText(text) {
   return text
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents but keep ñ
+    .replace(/[^\w\sñÑ]/g, ' ') // Keep letters, numbers, spaces, and ñ
     .replace(/\s+/g, ' ')
-    .trim();
+    .trim()
+    .toLowerCase();
+}
+
+// Function to extract keywords by removing stopwords
+function extractKeywords(text) {
+  const normalized = normalizeText(text);
+  const words = normalized.split(' ')
+    .filter(word => word.length > 2) // Remove very short words
+    .filter(word => !spanishStopwords.has(word)) // Remove stopwords
+    .filter(word => word.trim() !== ''); // Remove empty strings
+
+  // Remove duplicates
+  return [...new Set(words)];
 }
 
 function navigateToPlace(index) {
@@ -251,6 +462,35 @@ function navigateToPlace(index) {
   };
   chatHistory.push(successMessage);
 }
+
+// Confirmation functions
+window.confirmNavigation = function(index) {
+  const confirmationMessage = {
+    type: 'bot',
+    text: '¡Perfecto! Te llevo allí...',
+    timestamp: new Date()
+  };
+  chatHistory.push(confirmationMessage);
+  renderChatHistory();
+
+  setTimeout(() => {
+    navigateToPlace(index);
+
+    setTimeout(() => {
+      toggleChat();
+    }, 500);
+  }, 1000);
+};
+
+window.cancelNavigation = function() {
+  const cancelMessage = {
+    type: 'bot',
+    text: 'De acuerdo. Prueba con otro nombre o ubicación. Puedo buscar por nombre, ciudad, tipo de lugar o sector.',
+    timestamp: new Date()
+  };
+  chatHistory.push(cancelMessage);
+  renderChatHistory();
+};
 
 window.selectPlace = function(index) {
   navigateToPlace(index);

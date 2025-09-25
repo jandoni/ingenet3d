@@ -25,7 +25,13 @@
       "content": "El Museo de la Construcción Naval de Ferrol es el mayor museo de Europa dedicado a la actividad de construcción naval. Ubicado en el edificio de las Herrerías del siglo XVIII, alberga una importante colección sobre la construcción naval desde el siglo XVIII hasta la actualidad. Ofrece un recorrido educativo por los hitos históricos más relevantes relacionados con la construcción naval española, incluyendo modelos históricos del astillero de Ferrol y exhibiciones sobre faros y señales marítimas. Información completa: https://exponav.org/",
       "dateTime": "1750-Presente",
       "imageCredit": "Fundación Exponav",
-      "address": "Edificio Herrerías, Cantón de Molins s/n, 15490 Ferrol (A Coruña)"
+      "address": "Edificio Herrerías, Cantón de Molins s/n, 15490 Ferrol (A Coruña)",
+      "etiquetas": {
+        "ubicacion": ["Ferrol", "Galicia", "España", "A Coruña"],
+        "sector": ["Naval", "Marítimo", "Militar", "Ingeniería", "Historia"],
+        "profesion": ["Ingeniería Naval", "Ingeniería Marina", "Ingeniería Industrial"],
+        "tipo": ["Fundación", "Museo"]
+      }
     },
     {
       "focusOptions": {
@@ -42,7 +48,13 @@
       "content": "Fundación Excelem conforma un ecosistema transversal de Robótica y Automatización que coordina acciones entre los ámbitos educativo, institucional y empresarial. Su misión es mejorar la formación tecnológica, fomentar la innovación, crear empresas punteras del sector y generar empleos de calidad en la Región de Murcia. Iniciativa conjunta de FREMM y Centro Tecnológico del Metal, la fundación promueve las materias STEAM desde edades tempranas y organiza concursos de robótica educativa. Información completa: https://excelem.org/",
       "dateTime": "2023-Presente",
       "imageCredit": "Fundación Excelem",
-      "address": "Polígono Industrial Oeste, Calle Perú, 5, 30820 Alcantarilla, Murcia"
+      "address": "Polígono Industrial Oeste, Calle Perú, 5, 30820 Alcantarilla, Murcia",
+      "etiquetas": {
+        "ubicacion": ["Murcia", "España", "Alcantarilla"],
+        "sector": ["Robótica", "Automatización", "Tecnología", "Manufactura", "Educación", "STEAM"],
+        "profesion": ["Ingeniería", "Ingeniería Industrial", "Tecnología", "Robótica"],
+        "tipo": ["Fundación", "Centro de Investigación"]
+      }
     },
     {
       "focusOptions": {
@@ -59,7 +71,13 @@
       "content": "MUCAIN es un innovador museo virtual inaugurado en 2021 que preserva la historia de la Carrera de Indias, la ruta comercial que conectó España con América desde 1503 hasta 1828. Describida como 'la operación naval más duradera, efectiva, decisiva y exitosa de la historia de la humanidad', esta ruta convirtió a Cádiz en uno de los centros comerciales más poderosos de Europa tras el traslado de la Casa de Contratación desde Sevilla en 1717. El museo virtual combina contenido audiovisual educativo de alta calidad con tecnología de vanguardia. Sitio web: https://mucain.com/",
       "dateTime": "1503-1828 (Museo: 2021)",
       "imageCredit": "Asociación MUCAIN",
-      "address": "Plaza de la Catedral, 11005 Cádiz"
+      "address": "Plaza de la Catedral, 11005 Cádiz",
+      "etiquetas": {
+        "ubicacion": ["Cádiz", "Andalucía", "España"],
+        "sector": ["Marítimo", "Historia", "Naval", "Comercio", "Cultura"],
+        "profesion": ["Historia", "Estudios Marítimos", "Estudios Navales"],
+        "tipo": ["Museo", "Centro Cultural", "Museo Virtual"]
+      }
     },
     {
       "focusOptions": {
@@ -76,7 +94,13 @@
       "content": "El Museo Histórico-Minero de la Universidad Politécnica de Madrid preserva una excepcional colección de más de 10,000 minerales, fósiles, lámparas mineras e instrumentos científicos, con orígenes que se remontan a la década de 1830. Ubicado en la ETS de Ingenieros de Minas y Energía, incluye especímenes de minas históricas europeas y americanas (Potosí, Guanajuato, Zacatecas), una reproducción a escala natural de una mina con maquinaria original, y una destacada colección de lámparas mineras que muestra su evolución desde lámparas romanas hasta eléctricas españolas. Información y visitas: https://minasyenergia.upm.es/museo/",
       "dateTime": "1830-Presente",
       "imageCredit": "Universidad Politécnica de Madrid",
-      "address": "C. de Ríos Rosas, 21, 28003 Madrid"
+      "address": "C. de Ríos Rosas, 21, 28003 Madrid",
+      "etiquetas": {
+        "ubicacion": ["Madrid", "España"],
+        "sector": ["Minería", "Geología", "Historia", "Ciencia", "Educación"],
+        "profesion": ["Ingeniería de Minas", "Geología", "Ingeniería"],
+        "tipo": ["Universidad", "Museo"]
+      }
     },
     {
       "focusOptions": {
@@ -90,8 +114,14 @@
       "id": 5,
       "imageUrl": "https://images.adsttc.com/media/images/5254/4190/e8e4/4eff/0200/06cf/large_jpg/sfpassio.jpg?1381253501",
       "preserveCustomImage": true,
-      "content": "The Basílica de la Sagrada Família is an iconic Roman Catholic basilica in Barcelona designed by Antoni Gaudí. Construction began in 1882 and continues today, making it one of the most famous unfinished buildings in the world. Its unique architectural style combines Gothic and Art Nouveau forms.",
-      "dateTime": "1882-present"
+      "content": "La Basílica de la Sagrada Família es una emblemática basílica católica romana en Barcelona diseñada por Antoni Gaudí. La construcción comenzó en 1882 y continúa hoy día, convirtiéndola en uno de los edificios inacabados más famosos del mundo. Su estilo arquitectónico único combina formas góticas y modernistas.",
+      "dateTime": "1882-presente",
+      "etiquetas": {
+        "ubicacion": ["Barcelona", "Catalunya", "España"],
+        "sector": ["Arquitectura", "Religión", "Turismo", "Arte", "Cultura"],
+        "profesion": ["Arquitectura", "Arte", "Ingeniería"],
+        "tipo": ["Basílica", "Sitio Religioso", "Monumento"]
+      }
     },
     {
       "focusOptions": {
@@ -104,11 +134,17 @@
       "cameraStyle": "drone-orbit",
       "id": 6,
       "imageCredit": "Wikimedia Commons",
-      "content": "The Prado Museum is the main Spanish national art museum, located in central Madrid. It houses one of the world's finest collections of European art, dating from the 12th century to the early 20th century, including works by Velázquez, Goya, and El Greco.",
+      "content": "El Museo del Prado es el principal museo nacional de arte español, ubicado en el centro de Madrid. Alberga una de las mejores colecciones de arte europeo del mundo, que data del siglo XII hasta principios del siglo XX, incluyendo obras de Velázquez, Goya y El Greco.",
       "address": "Paseo del Prado, Madrid",
       "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Museo_del_Prado_2016_%2825185969599%29.jpg/330px-Museo_del_Prado_2016_%2825185969599%29.jpg",
       "preserveCustomImage": true,
-      "dateTime": "1819"
+      "dateTime": "1819",
+      "etiquetas": {
+        "ubicacion": ["Madrid", "España"],
+        "sector": ["Arte", "Cultura", "Historia", "Turismo"],
+        "profesion": ["Arte", "Historia", "Conservación", "Museología"],
+        "tipo": ["Museo"]
+      }
     },
     {
       "focusOptions": {
@@ -120,10 +156,16 @@
       "placeName": "Park Güell, Barcelona, Spain",
       "cameraStyle": "drone-orbit",
       "id": 7,
-      "content": "Park Güell is a public park system composed of gardens and architectural elements located on Carmel Hill in Barcelona. Designed by Antoni Gaudí and built between 1900 and 1914, it is part of the UNESCO World Heritage Site 'Works of Antoni Gaudí'.",
+      "content": "Park Güell es un sistema de parque público compuesto por jardines y elementos arquitectónicos ubicado en la colina del Carmel en Barcelona. Diseñado por Antoni Gaudí y construido entre 1900 y 1914, forma parte del Patrimonio Mundial de la UNESCO 'Obras de Antoni Gaudí'.",
       "imageUrl": "https://hotelarclarambla.com/agenda/wp-content/uploads/2023/05/hotel-arc-rambla-barcelona-blog-modernism-park-guell.webp",
       "preserveCustomImage": true,
-      "dateTime": "1900-1914"
+      "dateTime": "1900-1914",
+      "etiquetas": {
+        "ubicacion": ["Barcelona", "Catalunya", "España"],
+        "sector": ["Arquitectura", "Turismo", "Arte", "Naturaleza"],
+        "profesion": ["Arquitectura", "Arte", "Urbanismo"],
+        "tipo": ["Parque", "Sitio Cultural", "Patrimonio UNESCO"]
+      }
     },
     {
       "focusOptions": {
@@ -135,10 +177,16 @@
       "placeName": "Alhambra, Granada, Spain",
       "cameraStyle": "drone-orbit",
       "id": 8,
-      "content": "The Alhambra is a palace and fortress complex located in Granada, Andalusia, Spain. Originally constructed as a small fortress in 889 CE, it was rebuilt in the 13th and 14th centuries by Moorish rulers. The Alhambra is now one of Spain's major tourist attractions.",
+      "content": "La Alhambra es un complejo palaciego y fortaleza ubicado en Granada, Andalucía, España. Originalmente construida como una pequeña fortaleza en 889 d.C., fue reconstruida en los siglos XIII y XIV por los gobernantes moros. La Alhambra es ahora una de las principales atracciones turísticas de España.",
       "imageUrl": "https://www.spain-sothebysrealty.com/cdn-cgi/image/format=auto,width=768,height=463,fit=cover,quality=95/https://spain-sir-assets.s3.eu-west-1.amazonaws.com/b2362938-3548-4069-b076-c7daaf3d3040.jpg",
       "preserveCustomImage": true,
-      "dateTime": "889-present"
+      "dateTime": "889-presente",
+      "etiquetas": {
+        "ubicacion": ["Granada", "Andalucía", "España"],
+        "sector": ["Historia", "Arquitectura", "Turismo", "Cultura", "Arte Islámico"],
+        "profesion": ["Arquitectura", "Historia", "Arte"],
+        "tipo": ["Palacio", "Sitio Cultural", "Monumento Histórico", "Patrimonio UNESCO"]
+      }
     },
     {
       "focusOptions": {
@@ -150,10 +198,16 @@
       "placeName": "Alhambra, Granada, Spain",
       "cameraStyle": "drone-orbit",
       "id": 9,
-      "content": "The Alhambra Palace is the crown jewel of the Alhambra complex in Granada. This exquisite example of Islamic architecture features intricate geometric patterns, beautiful courtyards, and stunning views of the Sierra Nevada mountains.",
+      "content": "El Palacio de la Alhambra es la joya de la corona del complejo de la Alhambra en Granada. Este exquisito ejemplo de arquitectura islámica presenta patrones geométricos intrincados, hermosos patios y vistas impresionantes de las montañas de Sierra Nevada.",
       "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/de/Dawn_Charles_V_Palace_Alhambra_Granada_Andalusia_Spain.jpg",
       "preserveCustomImage": true,
-      "dateTime": "13th-14th century"
+      "dateTime": "Siglo XIII-XIV",
+      "etiquetas": {
+        "ubicacion": ["Granada", "Andalucía", "España"],
+        "sector": ["Historia", "Arquitectura", "Turismo", "Cultura", "Arte Islámico"],
+        "profesion": ["Arquitectura", "Historia", "Arte"],
+        "tipo": ["Palacio", "Sitio Cultural", "Monumento Histórico", "Patrimonio UNESCO"]
+      }
     },
     {
       "focusOptions": {
@@ -165,10 +219,16 @@
       "placeName": "Guggenheim Museum Bilbao, Spain",
       "cameraStyle": "drone-orbit",
       "id": 10,
-      "content": "The Guggenheim Museum Bilbao is a modern art museum designed by Frank Gehry and opened in 1997. The building itself is considered a masterpiece of contemporary architecture and has become an iconic symbol of Bilbao's urban renewal.",
+      "content": "El Museo Guggenheim Bilbao es un museo de arte moderno diseñado por Frank Gehry e inaugurado en 1997. El edificio en sí mismo se considera una obra maestra de la arquitectura contemporánea y se ha convertido en un símbolo icónico de la renovación urbana de Bilbao.",
       "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Museo_Guggenheim%2C_Bilbao_%2831273245344%29.jpg",
       "preserveCustomImage": true,
-      "dateTime": "1997"
+      "dateTime": "1997",
+      "etiquetas": {
+        "ubicacion": ["Bilbao", "País Vasco", "España"],
+        "sector": ["Arte", "Cultura", "Arquitectura", "Turismo"],
+        "profesion": ["Arte", "Arquitectura", "Conservación", "Diseño"],
+        "tipo": ["Museo"]
+      }
     },
     {
       "focusOptions": {
@@ -180,10 +240,16 @@
       "placeName": "Royal Palace, Madrid, Spain",
       "cameraStyle": "drone-orbit",
       "id": 11,
-      "content": "The Royal Palace of Madrid is the official residence of the Spanish Royal Family at the city of Madrid, although now used only for state ceremonies. The palace has 3,418 rooms and is one of the largest palaces in Europe.",
+      "content": "El Palacio Real de Madrid es la residencia oficial de la Familia Real Española en la ciudad de Madrid, aunque ahora se usa sólo para ceremonias de estado. El palacio tiene 3,418 habitaciones y es uno de los palacios más grandes de Europa.",
       "imageUrl": "https://cdn-imgix.headout.com/media/images/68d9aa77c4d16a910bb2a6cd0d7d6fb7-Royal%20Palace%20Of%20Madrid%202.jpg?auto=format&w=1222.3999999999999&h=687.6&q=90&fit=crop&ar=16%3A9&crop=faces",
       "preserveCustomImage": true,
-      "dateTime": "1738-1755"
+      "dateTime": "1738-1755",
+      "etiquetas": {
+        "ubicacion": ["Madrid", "España"],
+        "sector": ["Historia", "Turismo", "Cultura", "Arquitectura", "Realeza"],
+        "profesion": ["Arquitectura", "Historia", "Arte"],
+        "tipo": ["Palacio", "Residencia Real", "Monumento"]
+      }
     },
     {
       "focusOptions": {
@@ -195,10 +261,16 @@
       "placeName": "Cathedral of Santiago de Compostela, Galicia, Spain",
       "cameraStyle": "drone-orbit",
       "id": 12,
-      "content": "The Cathedral of Santiago de Compostela is part of the Roman Catholic Archdiocese of Santiago de Compostela in Galicia, Spain. The cathedral is the reputed burial place of Saint James the Greater, one of the apostles of Jesus Christ.",
+      "content": "La Catedral de Santiago de Compostela forma parte del Arzobispado Católico Romano de Santiago de Compostela en Galicia, España. La catedral es el supuesto lugar de entierro de Santiago el Mayor, uno de los apóstoles de Jesucristo.",
       "imageUrl": "https://catholicshrinebasilica.com/wp-content/uploads/Cathedral-of-Santiago-de-Compostela-Galicia-Spain-927x500.webp",
       "preserveCustomImage": true,
-      "dateTime": "1075-1211"
+      "dateTime": "1075-1211",
+      "etiquetas": {
+        "ubicacion": ["Santiago", "Galicia", "España"],
+        "sector": ["Religión", "Historia", "Turismo", "Arquitectura", "Peregrinación"],
+        "profesion": ["Arquitectura", "Historia", "Estudios Religiosos"],
+        "tipo": ["Catedral", "Sitio Religioso", "Patrimonio UNESCO"]
+      }
     }
   ]
 }

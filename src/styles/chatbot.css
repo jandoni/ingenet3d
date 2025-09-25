@@ -335,6 +335,51 @@
   }
 }
 
+/* Confirmation buttons styles */
+.confirmation-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.confirm-btn {
+  padding: 8px 16px;
+  border: 2px solid;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 120px;
+}
+
+.confirm-btn.yes {
+  background: #10B981;
+  color: white;
+  border-color: #10B981;
+}
+
+.confirm-btn.yes:hover {
+  background: #059669;
+  border-color: #059669;
+  transform: translateY(-1px);
+}
+
+.confirm-btn.no {
+  background: transparent;
+  color: #6B7280;
+  border-color: #D1D5DB;
+}
+
+.confirm-btn.no:hover {
+  background: #F3F4F6;
+  color: #374151;
+  border-color: #9CA3AF;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 480px) {
   #chat-container {
     width: calc(100vw - 20px);

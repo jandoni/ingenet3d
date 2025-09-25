@@ -1162,11 +1162,53 @@ function populateLinksTab(chapter) {
 }
 
 /**
+ * Populate tags tab with chapter tags
+ */
+function populateTagsTab(chapter) {
+  // Clear existing tags
+  const tagContainers = {
+    'location-tags': 'ubicacion',
+    'sector-tags': 'sector',
+    'profession-tags': 'profesion',
+    'type-tags': 'tipo'
+  };
+
+  Object.entries(tagContainers).forEach(([containerId, tagType]) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Get tags for this category
+    const tags = chapter.etiquetas && chapter.etiquetas[tagType] ? chapter.etiquetas[tagType] : [];
+
+    if (tags.length > 0) {
+      tags.forEach(tag => {
+        const tagElement = document.createElement('span');
+        tagElement.className = `tag ${tagType}`;
+        tagElement.textContent = tag;
+        container.appendChild(tagElement);
+      });
+    } else {
+      // Show placeholder if no tags
+      const placeholder = document.createElement('span');
+      placeholder.className = 'tag-placeholder';
+      placeholder.textContent = 'No disponible';
+      placeholder.style.color = '#94a3b8';
+      placeholder.style.fontStyle = 'italic';
+      placeholder.style.fontSize = '12px';
+      container.appendChild(placeholder);
+    }
+  });
+}
+
+/**
  * Update all tab content for a chapter
  */
 function updateTabContent(chapter, isIntro = false) {
   populateInfoTab(chapter, isIntro);
   populateLinksTab(chapter);
+  populateTagsTab(chapter);
 
   // Initialize gallery
   initializeGallery(chapter);
