@@ -72,60 +72,84 @@ function encodeSvgToDataUri(svgElement) {
 }
 
 /**
- * Creates a marker SVG for a given location.
+ * Creates a bubble-style marker canvas for a given location.
  * @param {string} markerId - The ID of the marker.
- * @param {string} title - The title of the place for icon selection.
- * @returns {string} The marker image URL.
+ * @param {string} title - The title of the place to display in the bubble.
+ * @returns {Promise<string>} The marker image data URL.
  */
-async function createMarkerSvg(markerId, title = '') {
-  // Determine icon based on place title/type
-  let imageUrl;
-  const titleLower = title.toLowerCase();
-  
-  // Churches: Sagrada Familia, Giralda, Santiago de Compostela
-  if (titleLower.includes('sagrada') || titleLower.includes('giralda') || titleLower.includes('santiago') || 
-      titleLower.includes('cathedral') || titleLower.includes('basilica')) {
-    imageUrl = "assets/images/church.png";
-  }
-  // Museums: Prado, Guggenheim, Exponav, Mucain, Museo historico
-  else if (titleLower.includes('museo') || titleLower.includes('museum') || titleLower.includes('prado') || 
-           titleLower.includes('guggenheim') || titleLower.includes('exponav') || titleLower.includes('mucain')) {
-    imageUrl = "assets/images/museum.png";
-  }
-  // Parks: Park Güell
-  else if (titleLower.includes('park') || titleLower.includes('güell') || titleLower.includes('guell')) {
-    imageUrl = "assets/images/park.png";
-  }
-  // Palaces and others: Alhambra, Royal Palace, etc.
-  else {
-    imageUrl = "assets/images/palace.png";
-  }
-  
-  console.log(`Creating marker for ID ${markerId} (${title}): using ${imageUrl}`);
-  
-  // Test if image exists by trying to load it
-  try {
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      console.error(`Failed to load icon ${imageUrl}, status: ${response.status}`);
-      throw new Error(`HTTP ${response.status}`);
-    }
-    console.log(`Successfully loaded icon: ${imageUrl}`);
-    return imageUrl;
-  } catch (error) {
-    console.error(`Error loading icon ${imageUrl}:`, error);
-    // Fall back to default marker
-    console.log("Falling back to default SVG marker");
-    const baseSvgElement = await fetchSvgContent("assets/icons/marker.svg");
-    const baseConfig = {
-      height: "60",
-      width: "60",
-      stroke: "white", 
-      fill: "#13B5C7",
-    };
-    setSvgAttributes(baseSvgElement, baseConfig);
-    return encodeSvgToDataUri(baseSvgElement);
-  }
+async function createMarkerBubble(markerId, title = '') {
+  console.log(`Creating bubble marker for ID ${markerId}: ${title}`);
+
+  // Create a canvas element
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Truncate title if too long
+  const displayTitle = title.length > 20 ? title.substring(0, 17) + '...' : title;
+
+  // Set font for text measurement
+  ctx.font = 'bold 14px Arial, sans-serif';
+  const textMetrics = ctx.measureText(displayTitle);
+
+  // Calculate bubble dimensions
+  const padding = 16;
+  const bubbleWidth = Math.max(textMetrics.width + padding * 2, 80);
+  const bubbleHeight = 36;
+  const arrowSize = 8;
+
+  // Set canvas size
+  canvas.width = bubbleWidth + 4; // Extra space for border
+  canvas.height = bubbleHeight + arrowSize + 4; // Extra space for border and arrow
+
+  // Draw bubble background with border
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.lineWidth = 2;
+
+  // Draw rounded rectangle (bubble)
+  const radius = 16;
+  const x = 2;
+  const y = 2;
+
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + bubbleWidth - radius, y);
+  ctx.quadraticCurveTo(x + bubbleWidth, y, x + bubbleWidth, y + radius);
+  ctx.lineTo(x + bubbleWidth, y + bubbleHeight - radius);
+  ctx.quadraticCurveTo(x + bubbleWidth, y + bubbleHeight, x + bubbleWidth - radius, y + bubbleHeight);
+  ctx.lineTo(x + radius, y + bubbleHeight);
+  ctx.quadraticCurveTo(x, y + bubbleHeight, x, y + bubbleHeight - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+
+  // Fill and stroke the bubble
+  ctx.fill();
+  ctx.stroke();
+
+  // Draw arrow pointing down
+  const arrowX = bubbleWidth / 2 + 2;
+  const arrowY = bubbleHeight + 2;
+
+  ctx.beginPath();
+  ctx.moveTo(arrowX - arrowSize, arrowY);
+  ctx.lineTo(arrowX + arrowSize, arrowY);
+  ctx.lineTo(arrowX, arrowY + arrowSize);
+  ctx.closePath();
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.stroke();
+
+  // Draw text
+  ctx.fillStyle = '#374151';
+  ctx.font = 'bold 14px Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(displayTitle, bubbleWidth / 2 + 2, bubbleHeight / 2 + 2);
+
+  // Return canvas as data URL
+  return canvas.toDataURL();
 }
 
 /**
@@ -175,54 +199,24 @@ function getPolylineConfiguration({ start, end }) {
  * Helper function to create a marker entity configuration.
  * @param {Cesium.Cartesian3} options.position - The position to place the marker.
  * @param {number} options.id - ID for the marker.
- * @param {string} options.markerSvg - Data URI for the marker SVG or image URL.
+ * @param {string} options.markerBubble - Data URI for the marker bubble.
  * @returns {Cesium.Entity.ConstructorOptions} Marker entity configuration.
  */
-function getMarkerEntityConfiguration({ position, id, markerSvg, title }) {
-  // Check if it's a PNG image (custom icon) or SVG (default marker)
-  const isCustomIcon = markerSvg.includes('assets/images/') && markerSvg.endsWith('.png');
-  
-  console.log(`Configuring marker ${id}: isCustomIcon=${isCustomIcon}, image=${markerSvg}, title=${title}`);
-  
-  // Helper function to truncate text
-  const truncateText = (text, maxLength) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength - 3) + '...';
-  };
-  
+function getMarkerEntityConfiguration({ position, id, markerBubble, title }) {
+  console.log(`Configuring bubble marker ${id}: ${title}`);
+
   return {
     position,
     id,
     name: title,
     billboard: {
-      image: markerSvg,
-      scale: isCustomIcon ? 1.0 : defaultMarkerScale, // Much larger scale for custom icons
-      verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Bottom of icon touches the line top
-      width: isCustomIcon ? 64 : undefined, // Larger width for good visibility
-      height: isCustomIcon ? 64 : undefined, // Larger height for good visibility
-      pixelOffset: new Cesium.Cartesian2(0, 0), // No offset - icon sits directly on line
-      scaleByDistance: new Cesium.NearFarScalar(1000, 2.0, 50000, 0.5), // Scale with zoom distance
-      translucencyByDistance: new Cesium.NearFarScalar(1000, 1.0, 100000, 0.8), // Fade at far distances
-    },
-    label: {
-      text: truncateText(title || 'Unknown', 20), // Truncate long titles
-      font: 'bold 13pt Arial, sans-serif',
-      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-      fillColor: Cesium.Color.WHITE, // White text for better visibility
-      outlineColor: Cesium.Color.BLACK,
-      outlineWidth: 3, // Thick outline for better contrast
-      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-      horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-      pixelOffset: new Cesium.Cartesian2(0, -45), // Position label above marker
-      heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      scaleByDistance: new Cesium.NearFarScalar(1000, 1.0, 12000, 0.6),
-      translucencyByDistance: new Cesium.NearFarScalar(1000, 1.0, 15000, 0.2),
-      // Solid dark background for maximum readability
-      backgroundPadding: new Cesium.Cartesian2(10, 5),
-      backgroundColor: new Cesium.Color(0, 0, 0, 0.8), // Dark semi-transparent background
-      showBackground: true,
-      eyeOffset: new Cesium.Cartesian3(0, 0, -50)
+      image: markerBubble,
+      scale: 1.0,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Bottom arrow touches the line top
+      pixelOffset: new Cesium.Cartesian2(0, 0), // No offset - bubble sits directly on line
+      scaleByDistance: new Cesium.NearFarScalar(1000, 1.2, 50000, 0.6), // Scale with zoom distance
+      translucencyByDistance: new Cesium.NearFarScalar(1000, 1.0, 100000, 0.7), // Fade at far distances
+      disableDepthTestDistance: Number.POSITIVE_INFINITY, // Always visible
     },
   };
 }
@@ -242,22 +236,12 @@ export function setSelectedMarker(markerId) {
 
   // Scale the previous selected marker back to the default scale
   if (currentMarker) {
-    const isCurrentCustom = currentMarker.billboard.image.getValue().includes('assets/images/');
-    currentMarker.billboard.scale = isCurrentCustom ? 0.1 : defaultMarkerScale;
-    // Reset label scale if it exists
-    if (currentMarker.label) {
-      currentMarker.label.scale = 1.0;
-    }
+    currentMarker.billboard.scale = 1.0; // Reset to normal size
   }
 
   // Scale the new selected marker to be larger
   if (newMarker) {
-    const isNewCustom = newMarker.billboard.image.getValue().includes('assets/images/');
-    newMarker.billboard.scale = isNewCustom ? 0.15 : 1; // Slightly larger for custom icons
-    // Scale up label for selected marker
-    if (newMarker.label) {
-      newMarker.label.scale = 1.1;
-    }
+    newMarker.billboard.scale = 1.3; // Scale up selected bubble marker
   }
 
   // Update the selected marker ID
@@ -331,7 +315,16 @@ async function handleClickOnMarker(click) {
     return;
   }
 
-  updateChapter(getChapterIndexFromId(markerId));
+  console.log(`🎯 Marker clicked: ${markerId}`);
+
+  // Use the same navigation method as the horizontal bar
+  if (typeof window.navigateToChapter === 'function') {
+    await window.navigateToChapter(markerId);
+  } else {
+    // Fallback to the old method if navigateToChapter is not available
+    console.warn('navigateToChapter not available, using fallback');
+    updateChapter(getChapterIndexFromId(markerId));
+  }
 }
 
 /**
@@ -378,18 +371,18 @@ export async function createMarkers(chapters) {
 
   // Use hardcoded coordinates for fast loading (no API calls needed for initial display)
   const hardcodedCoordinates = {
-    1: { lat: 41.4036, lng: 2.1744 },    // Sagrada Familia, Barcelona
-    2: { lat: 40.4138, lng: -3.6923 },   // Prado Museum, Madrid  
-    3: { lat: 41.4145, lng: 2.1527 },    // Park Güell, Barcelona
-    4: { lat: 37.3826, lng: -5.9930 },   // La Giralda, Seville
-    5: { lat: 37.1770, lng: -3.5880 },   // Alhambra, Granada
-    6: { lat: 43.2630, lng: -2.9350 },   // Guggenheim, Bilbao
-    7: { lat: 40.4180, lng: -3.7144 },   // Royal Palace, Madrid
-    8: { lat: 42.8805, lng: -8.5446 },   // Santiago Cathedral
-    9: { lat: 43.3247, lng: -8.4115 },   // Exponav, Ferrol
-    10: { lat: 37.9838, lng: -1.1300 },  // Excelem, Murcia
-    11: { lat: 36.5298, lng: -6.2927 },  // Mucain, Cádiz
-    12: { lat: 40.4478, lng: -3.7189 }   // UPM Museum, Madrid
+    1: { lat: 43.3247, lng: -8.4115 },   // Fundación Exponav - Ferrol
+    2: { lat: 37.9838, lng: -1.1300 },   // Fundación Excelem - Murcia
+    3: { lat: 36.5298, lng: -6.2927 },   // MUCAIN - Cádiz
+    4: { lat: 40.4478, lng: -3.7189 },   // UPM Museum - Madrid
+    5: { lat: 41.4036, lng: 2.1744 },    // Sagrada Familia - Barcelona
+    6: { lat: 40.4138, lng: -3.6923 },   // Museo del Prado - Madrid
+    7: { lat: 41.4145, lng: 2.1527 },    // Park Güell - Barcelona
+    8: { lat: 37.1770, lng: -3.5880 },   // Alhambra - Granada
+    9: { lat: 37.1770, lng: -3.5880 },   // Alhambra Palace - Granada (same location)
+    10: { lat: 43.2630, lng: -2.9350 },  // Guggenheim - Bilbao
+    11: { lat: 40.4180, lng: -3.7144 },  // Royal Palace - Madrid
+    12: { lat: 42.8805, lng: -8.5446 }   // Santiago Cathedral - Santiago
   };
 
   const markerCoordinates = [];
@@ -428,7 +421,7 @@ export async function createMarkers(chapters) {
     const coordWithHeightOffset = addHeightOffset(coord, heightOffset);
     const { id, title } = chaptersToProcess[index];
     console.log(`Processing chapter ${index}: ID=${id}, Title="${title}"`);
-    const markerSvg = await createMarkerSvg(id, title);
+    const markerBubble = await createMarkerBubble(id, title);
 
     const isMarkerVisible = chaptersToProcess[index].focusOptions?.showLocationMarker;
 
@@ -454,7 +447,7 @@ export async function createMarkers(chapters) {
       ...getMarkerEntityConfiguration({
         position: coordWithHeightOffset,
         id,
-        markerSvg,
+        markerBubble,
         title,
       }),
       show: isMarkerVisible,

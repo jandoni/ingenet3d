@@ -1,6 +1,6 @@
 correr comando para copiar del repositorio a local: AWS_PROFILE=ingenet3d aws s3 sync s3://ingenet3d-webapp-1751575263 ./src --delete
 
-Y para subir de local a repositorio: AWS_PROFILE=ingenet3d aws s3 sync ./src s3://ingenet3d-webapp-1751575263 --delete
+Y para subir de local a repositorio para eso correrlo en el directorio / de ingenet3d: AWS_PROFILE=ingenet3d aws s3 sync ./src s3://ingenet3d-webapp-1751575263 --delete
 
 Luego en cd src correc: python3 -m http.server 8080
 

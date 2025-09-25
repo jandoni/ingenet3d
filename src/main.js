@@ -102,18 +102,18 @@ async function createBasicMarkers(chapters) {
   
   // Simple hardcoded coordinates for Spanish landmarks to avoid API calls
   const basicCoordinates = {
-    1: { lat: 41.4036, lng: 2.1744 },    // Sagrada Familia, Barcelona
-    2: { lat: 40.4138, lng: -3.6923 },   // Prado Museum, Madrid  
-    3: { lat: 41.4145, lng: 2.1527 },    // Park Güell, Barcelona
-    4: { lat: 37.3826, lng: -5.9930 },   // La Giralda, Seville
-    5: { lat: 37.1770, lng: -3.5880 },   // Alhambra, Granada
-    6: { lat: 43.2630, lng: -2.9350 },   // Guggenheim, Bilbao
-    7: { lat: 40.4180, lng: -3.7144 },   // Royal Palace, Madrid
-    8: { lat: 42.8805, lng: -8.5446 },   // Santiago Cathedral
-    9: { lat: 43.3247, lng: -8.4115 },   // Exponav, Ferrol
-    10: { lat: 37.9838, lng: -1.1300 },  // Excelem, Murcia
-    11: { lat: 36.5298, lng: -6.2927 },  // Mucain, Cádiz
-    12: { lat: 40.4478, lng: -3.7189 }   // UPM Museum, Madrid
+    1: { lat: 43.3247, lng: -8.4115 },   // Fundación Exponav - Ferrol
+    2: { lat: 37.9838, lng: -1.1300 },   // Fundación Excelem - Murcia
+    3: { lat: 36.5298, lng: -6.2927 },   // MUCAIN - Cádiz
+    4: { lat: 40.4478, lng: -3.7189 },   // UPM Museum - Madrid
+    5: { lat: 41.4036, lng: 2.1744 },    // Sagrada Familia - Barcelona
+    6: { lat: 40.4138, lng: -3.6923 },   // Museo del Prado - Madrid
+    7: { lat: 41.4145, lng: 2.1527 },    // Park Güell - Barcelona
+    8: { lat: 37.1770, lng: -3.5880 },   // Alhambra - Granada
+    9: { lat: 37.1770, lng: -3.5880 },   // Alhambra Palace - Granada (same location)
+    10: { lat: 43.2630, lng: -2.9350 },  // Guggenheim - Bilbao
+    11: { lat: 40.4180, lng: -3.7144 },  // Royal Palace - Madrid
+    12: { lat: 42.8805, lng: -8.5446 }   // Santiago Cathedral - Santiago
   };
   
   try {
@@ -328,14 +328,7 @@ function initializeNewUI() {
     // Add click handler with on-demand loading
     placeCard.onclick = async () => {
       console.log(`🖱️ User clicked on: ${chapter.title} (index: ${index})`);
-      setActivePlace(chapter.id);
-
-      // Load chapter details on-demand
-      await loadChapterDetails(chapter.id);
-
-      console.log(`📍 Calling updateChapter(${index}) for ${chapter.title}`);
-      // Now update the chapter view
-      updateChapter(index);
+      await navigateToChapter(chapter.id, index);
 
       // Don't auto-open the sheet, just show a subtle hint animation
       showSheetHint();
@@ -446,6 +439,37 @@ window.setActivePlace = function(chapterId) {
       activeCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
   }
+};
+
+/**
+ * Navigate to a chapter by ID - reusable function for both horizontal bar and markers
+ * @param {number} chapterId - The chapter ID to navigate to
+ * @param {number} chapterIndex - The chapter index (optional, will be calculated if not provided)
+ */
+window.navigateToChapter = async function(chapterId, chapterIndex = null) {
+  console.log(`🖱️ Navigating to chapter: ${chapterId}`);
+
+  // Calculate index if not provided
+  if (chapterIndex === null) {
+    chapterIndex = story.chapters.findIndex(ch => ch.id == chapterId);
+  }
+
+  if (chapterIndex === -1) {
+    console.error(`🚨 Chapter not found for ID: ${chapterId}`);
+    return;
+  }
+
+  const chapter = story.chapters[chapterIndex];
+  console.log(`📍 Navigating to: ${chapter.title} (index: ${chapterIndex})`);
+
+  // Update active place in horizontal navigation
+  setActivePlace(chapterId);
+
+  // Load chapter details on-demand
+  await loadChapterDetails(chapterId);
+
+  // Navigate to the chapter
+  updateChapter(chapterIndex);
 };
 
 /**
