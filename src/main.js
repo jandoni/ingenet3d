@@ -314,7 +314,8 @@ function initializeNewUI() {
   introTitle.className = 'place-card-title';
   introTitle.textContent = 'Explorar España';
   introCard.appendChild(introTitle);
-  
+
+
   placesList.appendChild(introCard);
   
   chapters.forEach((chapter, index) => {
@@ -394,7 +395,8 @@ function initializeNewUI() {
     title.className = 'place-card-title';
     title.textContent = chapter.title;
     placeCard.appendChild(title);
-    
+
+
     placesList.appendChild(placeCard);
   });
   
@@ -767,7 +769,7 @@ function initializeGallery(chapter) {
   if (chapter.imageUrl) {
     currentGalleryImages.push({
       url: chapter.imageUrl,
-      credit: chapter.imageCredit || 'Sin crédito disponible'
+      credit: chapter.imageCredit || ''
     });
   }
 
@@ -777,7 +779,7 @@ function initializeGallery(chapter) {
     // Add the same image as placeholder for gallery demonstration
     currentGalleryImages.push({
       url: chapter.imageUrl,
-      credit: chapter.imageCredit || 'Sin crédito disponible'
+      credit: chapter.imageCredit || ''
     });
   }
 
@@ -917,6 +919,101 @@ function extractUrls(content) {
 }
 
 /**
+ * Enhanced location data with real information
+ */
+const enhancedLocationData = {
+  1: { // Fundación Exponav
+    openingHours: "Consultar horarios en el sitio web oficial. Visitas concertadas disponibles",
+    ticketInfo: "Entrada gratuita. Visitas guiadas disponibles previa cita. Centro educativo especializado",
+    address: "Edificio Herrerías, Cantón de Molins s/n, 15490 Ferrol (A Coruña)",
+    officialLinks: [
+      { url: "https://exponav.org/", title: "Fundación Exponav", description: "Museo de Construcción Naval - Sitio oficial" }
+    ]
+  },
+  2: { // Fundación Excelem
+    openingHours: "Lunes a viernes horario comercial. Consultar para actividades específicas",
+    ticketInfo: "Centro de formación y robótica. Participación en concursos y actividades STEAM",
+    address: "Polígono Industrial Oeste, Calle Perú, 5, 30820 Alcantarilla, Murcia",
+    officialLinks: [
+      { url: "https://excelem.org/", title: "Fundación Excelem", description: "Ecosistema de Robótica y Automatización" }
+    ]
+  },
+  3: { // MUCAIN
+    openingHours: "Museo virtual disponible 24/7 online. Consultar eventos presenciales",
+    ticketInfo: "Acceso gratuito al museo virtual. Contenido audiovisual educativo de alta calidad",
+    address: "Plaza de la Catedral, 11005 Cádiz",
+    officialLinks: [
+      { url: "https://mucain.com/", title: "MUCAIN", description: "Museo Virtual de la Carrera de Indias" }
+    ]
+  },
+  4: { // Museo Histórico Minero UPM
+    openingHours: "Visitas concertadas. Consultar en la ETS de Ingenieros de Minas y Energía",
+    ticketInfo: "Entrada gratuita con visita guiada. Más de 10,000 minerales, fósiles e instrumentos históricos",
+    address: "C. de Ríos Rosas, 21, 28003 Madrid",
+    officialLinks: [
+      { url: "https://minasyenergia.upm.es/museo/", title: "Museo Histórico-Minero UPM", description: "Universidad Politécnica de Madrid" }
+    ]
+  },
+  5: { // Sagrada Familia
+    openingHours: "Nov-Feb: Lun-Sáb 9:00-18:00, Dom 10:30-18:00. Mar-Oct: Lun-Vie 9:00-19:00, Sáb 9:00-18:00, Dom 10:30-19:00. Abr-Sep: Lun-Vie 9:00-20:00, Sáb 9:00-18:00, Dom 10:30-20:00",
+    ticketInfo: "Niños menores de 10 años: gratis. Audioguía incluida en app oficial (19 idiomas). Cancelaciones hasta 48h antes.",
+    address: "C/ Mallorca, 401, 08013 Barcelona",
+    officialLinks: [
+      { url: "https://sagradafamilia.org/", title: "Sagrada Família - Sitio Oficial", description: "Web oficial para compra de entradas sin comisiones" }
+    ]
+  },
+  6: { // Prado Museum
+    openingHours: "Lun-Sáb: 10:00-20:00. Dom y festivos: 10:00-19:00. Entrada gratuita: Lun-Sáb 18:00-20:00, Dom 17:00-19:00",
+    ticketInfo: "Entrada general: 18-20€. Con audioguía: 22-26€. Pase Triángulo del Arte (Prado + Reina Sofía + Thyssen): 40-60€",
+    address: "C/ Ruiz de Alarcón, 23, 28014 Madrid",
+    officialLinks: [
+      { url: "https://www.museodelprado.es/", title: "Museo Nacional del Prado", description: "Sitio web oficial del museo" }
+    ]
+  },
+  7: { // Park Güell
+    openingHours: "9:30-19:30 (Jul-Ago: 9:00-19:30). BON DIA BARCELONA: 7:00-9:30 solo residentes",
+    ticketInfo: "Adultos: 10-18€. Niños 7-12 años: 7-13.50€. Menores de 7 años: gratis. Compra anticipada obligatoria",
+    address: "08024 Barcelona",
+    officialLinks: [
+      { url: "https://parkguell.barcelona/", title: "Park Güell - Sitio Oficial", description: "Web oficial del parque diseñado por Gaudí" }
+    ]
+  },
+  8: { // Alhambra
+    openingHours: "Temporada alta (Abr-Oct): 8:30-20:00. Temporada baja: 8:30-18:00. Cerrado 25 Dic y 1 Ene",
+    ticketInfo: "Entrada general diurna, jardines y visitas nocturnas. Reserva hasta 1 año antes. Entrada 1h antes del cierre",
+    address: "C/ Real de la Alhambra, s/n, 18009 Granada",
+    officialLinks: [
+      { url: "https://www.alhambra.org/", title: "Alhambra y Generalife", description: "Portal oficial de la Alhambra de Granada" }
+    ]
+  },
+  10: { // Guggenheim
+    openingHours: "Consultar horarios especiales y días cerrados en el sitio oficial. Cerrado 25 Dic y 1 Ene",
+    ticketInfo: "Descuentos especiales último día de cada exposición (50% desde las 16:00). Precios variables según visitante",
+    address: "Abandoibarra Etorb., 2, 48009 Bilbao, Bizkaia",
+    officialLinks: [
+      { url: "https://www.guggenheim-bilbao.eus/", title: "Museo Guggenheim Bilbao", description: "Sitio web oficial del museo" }
+    ]
+  },
+  11: { // Royal Palace
+    openingHours: "Consultar horarios en el sitio oficial. Cerrado días especiales. Entrada gratuita UE: últimas 2 horas",
+    ticketInfo: "Entrada gratuita ciudadanos UE: Lun-Jue últimas 2 horas. Skip-the-line disponible. Llegada recomendada 8:00",
+    address: "C. de Bailén, s/n, 28071 Madrid",
+    officialLinks: [
+      { url: "https://tickets.patrimonionacional.es/", title: "Patrimonio Nacional", description: "Venta oficial de entradas al Palacio Real" }
+    ]
+  },
+  12: { // Santiago Cathedral
+    openingHours: "Basílica: 7:00-21:00. Museo: 10:00-20:00. Oficina del Peregrino: 9:00-19:00",
+    ticketInfo: "Entrada libre a la basílica. Museo con entrada. Botafumeiro bajo petición. Compostela para peregrinos",
+    address: "Praza do Obradoiro, s/n, 15705 Santiago de Compostela, A Coruña",
+    officialLinks: [
+      { url: "https://catedraldesantiago.es/", title: "Catedral de Santiago", description: "Sitio web oficial de la Catedral" },
+      { url: "https://oficinadelperegrino.com/", title: "Oficina del Peregrino", description: "Información oficial para peregrinos" }
+    ]
+  }
+};
+
+/**
  * Populate the information tab
  */
 function populateInfoTab(chapter, isIntro = false) {
@@ -929,7 +1026,14 @@ function populateInfoTab(chapter, isIntro = false) {
   // Address/Location
   const addressElement = document.querySelector('.place-address');
   if (addressElement) {
-    const address = chapter.address || chapter.placeName || 'Ubicación no disponible';
+    let address = chapter.address || chapter.placeName || 'Ubicación no disponible';
+
+    // Use enhanced data if available
+    const enhanced = enhancedLocationData[chapter.id];
+    if (enhanced && enhanced.address) {
+      address = enhanced.address;
+    }
+
     addressElement.textContent = address;
   }
 
@@ -940,11 +1044,19 @@ function populateInfoTab(chapter, isIntro = false) {
     dateElement.textContent = date;
   }
 
-  // Description
+  // Description - Enhanced with real information
   const descriptionElement = document.querySelector('.place-description');
   if (descriptionElement) {
-    const description = isIntro ? chapter.description : (chapter.content || 'Descripción no disponible');
-    descriptionElement.textContent = description;
+    let description = isIntro ? chapter.description : (chapter.content || 'Descripción no disponible');
+
+    // Add enhanced information for specific locations
+    const enhanced = enhancedLocationData[chapter.id];
+    if (enhanced) {
+      description += `\n\nDIRECCIÓN:\n${enhanced.address}\n\nHORARIOS DE APERTURA:\n${enhanced.openingHours}\n\nINFORMACIÓN DE ENTRADAS:\n${enhanced.ticketInfo}`;
+    }
+
+    // Format the text properly with line breaks
+    descriptionElement.innerHTML = description.replace(/\n/g, '<br>');
   }
 }
 
@@ -958,15 +1070,16 @@ function populateLinksTab(chapter) {
   // Clear existing content
   officialLinksContainer.innerHTML = '';
 
-  // Extract URLs from chapter content
-  const urls = extractUrls(chapter.content);
+  // Get enhanced links data
+  const enhanced = enhancedLocationData[chapter.id];
+  let hasLinks = false;
 
-  if (urls.length > 0) {
-    urls.forEach(url => {
-      const domain = new URL(url).hostname.replace('www.', '');
-
+  // Add enhanced official links
+  if (enhanced && enhanced.officialLinks) {
+    enhanced.officialLinks.forEach(link => {
+      hasLinks = true;
       const linkElement = document.createElement('a');
-      linkElement.href = url;
+      linkElement.href = link.url;
       linkElement.target = '_blank';
       linkElement.className = 'link-item';
       linkElement.innerHTML = `
@@ -975,14 +1088,47 @@ function populateLinksTab(chapter) {
           <path d="M15 3H21V9M10 14L21 3" stroke="currentColor" stroke-width="2"/>
         </svg>
         <div>
-          <span class="link-title">${domain}</span>
-          <span class="link-desc">Sitio web oficial</span>
+          <span class="link-title">${link.title}</span>
+          <span class="link-desc">${link.description}</span>
         </div>
       `;
       officialLinksContainer.appendChild(linkElement);
     });
-  } else {
-    // No official links found
+  }
+
+  // Also extract URLs from chapter content as fallback
+  const urls = extractUrls(chapter.content);
+  if (urls.length > 0) {
+    urls.forEach(url => {
+      // Skip if we already added this URL from enhanced data
+      const alreadyAdded = enhanced && enhanced.officialLinks &&
+        enhanced.officialLinks.some(link => link.url === url);
+
+      if (!alreadyAdded) {
+        hasLinks = true;
+        const domain = new URL(url).hostname.replace('www.', '');
+
+        const linkElement = document.createElement('a');
+        linkElement.href = url;
+        linkElement.target = '_blank';
+        linkElement.className = 'link-item';
+        linkElement.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M18 13V6A2 2 0 0 0 16 4H4A2 2 0 0 0 2 6V18C2 19.1 2.9 20 4 20H20A2 2 0 0 0 22 18V8H18" stroke="currentColor" stroke-width="2"/>
+            <path d="M15 3H21V9M10 14L21 3" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <div>
+            <span class="link-title">${domain}</span>
+            <span class="link-desc">Información adicional</span>
+          </div>
+        `;
+        officialLinksContainer.appendChild(linkElement);
+      }
+    });
+  }
+
+  // If no links were found, show default message
+  if (!hasLinks) {
     officialLinksContainer.innerHTML = `
       <div style="text-align: center; color: #94a3b8; padding: 20px;">
         <p>No hay enlaces oficiales disponibles</p>

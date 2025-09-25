@@ -84,6 +84,7 @@ html,
 body {
   height: 100dvh;
   width: 100vw;
+  overflow: hidden;
 }
 
 body {
@@ -92,7 +93,7 @@ body {
   line-height: 1.25rem;
   letter-spacing: 0.0015em;
   color: var(--text-color-primary);
-  background-color: var(--background-color);
+  background-color: #000000;
 }
 
 h1 {
