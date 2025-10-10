@@ -396,7 +396,7 @@ export function setSpainOverviewFromGoogleEarthExported() {
   const latitude = 38.5; // Adjusted to include Canary Islands
   const longitude = -5.0; // Adjusted to center better
   const altitude = 0;
-  const range = 4800000; // 4.8 million meters to show Spain + Canary Islands with extra space (zoomed out further)
+  const range = 6000000; // 6 million meters to show Spain + Canary Islands with extra space (zoomed out further)
 
   // Fully vertical view (top-down)
   const heading = 0; // North up

@@ -784,6 +784,18 @@ function createMarkerClickHandler() {
   markerClickHandler.setInputAction((click) => {
     handleClickOnMarker(click);
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK); // This defines that we want to listen for a click event
+
+  // Add hover handler to change cursor when over a marker
+  markerClickHandler.setInputAction((movement) => {
+    const pickedObject = cesiumViewer.scene.pick(movement.endPosition);
+
+    // Check if we picked a billboard (marker)
+    if (pickedObject && pickedObject.primitive instanceof Cesium.Billboard) {
+      cesiumViewer.canvas.style.cursor = 'pointer';
+    } else {
+      cesiumViewer.canvas.style.cursor = 'default';
+    }
+  }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 }
 
 /**
