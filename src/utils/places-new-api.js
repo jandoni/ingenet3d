@@ -34,7 +34,6 @@ const MIN_REQUEST_INTERVAL = 100; // Minimum 100ms between API requests
 async function rateLimitedApiCall(cacheKey, apiFunction) {
   // Check cache first
   if (apiCache.has(cacheKey)) {
-    console.log(`Using cached result for: ${cacheKey}`);
     return apiCache.get(cacheKey);
   }
   
@@ -80,7 +79,6 @@ export function initGoogleMapsServicesNew() {
     // PlacesService is deprecated, we use Place class directly
     elevationService = new google.maps.ElevationService();
     geocoder = new google.maps.Geocoder();
-    console.log('Google Maps services (NEW API) initialized successfully');
     return true;
   } catch (error) {
     console.error('Error initializing Google Maps services:', error);
@@ -433,8 +431,6 @@ function startDroneOrbit() {
     // Reduced rotation speed for subtle animation (0.0010 - very gentle)
     cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.0010);
   });
-
-  console.log('✅ Drone orbit animation started with gentle rotation');
 }
 
 // Function to stop Spain orbit (we'll import this or check if it exists)

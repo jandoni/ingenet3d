@@ -239,31 +239,26 @@ export async function resetToIntro() {
   // Stop location-specific orbit animation (drone orbit from places)
   if (window.stopOrbitAnimation) {
     window.stopOrbitAnimation();
-    console.log('🛑 Stopped location orbit animation');
   }
 
   // Stop Spain overview orbit effect
   if (window.stopSpainOrbitEffect) {
     window.stopSpainOrbitEffect();
-    console.log('🛑 Stopped Spain orbit effect');
   }
 
   // Also try stopping drone orbit directly (extra safety)
   if (window.stopDroneOrbit) {
     window.stopDroneOrbit();
-    console.log('🛑 Stopped drone orbit animation');
   }
 
   // Ensure no orbit animation is running by removing any clock listeners
   // This is a safety measure to prevent any lingering animations
   try {
     if (cesiumViewer && cesiumViewer.clock && cesiumViewer.clock.onTick) {
-      // The clock listeners are already managed by the stop functions above,
-      // but we log this for debugging purposes
-      console.log('✅ All orbit animations stopped - root page is static');
+      // The clock listeners are already managed by the stop functions above
     }
   } catch (error) {
-    console.warn('⚠️ Error checking clock listeners:', error);
+    console.error('Error checking clock listeners:', error);
   }
 
   // For Spain overview, use fixed coordinates instead of animated flight
@@ -299,12 +294,8 @@ export async function resetToIntro() {
  * @param {number} chapterIndex - The index of the chapter to be updated.
  */
 export async function updateChapter(chapterIndex) {
-  console.log(`📍 updateChapter called with index: ${chapterIndex}`);
-
   const chapter = story.chapters.at(chapterIndex);
   const { placeName, cameraStyle, id: chapterId } = chapter;
-
-  console.log(`🎯 Chapter details: ${chapter.title}, Place: ${placeName}, Style: ${cameraStyle}`);
 
   setSelectedMarker(chapterId); // Set the selected marker
   setSelectedChapterCard(chapterId); // Set the selected chapter card
@@ -319,8 +310,6 @@ export async function updateChapter(chapterIndex) {
   );
 
   try {
-    console.log(`🚀 Attempting to fly to: ${placeName} with style: ${cameraStyle || 'drone-orbit'}`);
-
     // Check if cesiumViewer is available
     if (!cesiumViewer) {
       console.error(`❌ CesiumViewer not available for navigation to ${placeName}`);
@@ -334,7 +323,6 @@ export async function updateChapter(chapterIndex) {
     try {
       cameraConfig = await flyToPlaceNew(placeName, cameraStyle || 'drone-orbit');
       flySuccessful = true;
-      console.log(`✅ Successfully flew to ${placeName} using NEW Places API`);
 
       // Show location pin at the actual location with company logo
       if (cameraConfig && cameraConfig.location) {
@@ -349,7 +337,6 @@ export async function updateChapter(chapterIndex) {
 
       // Update chapter with Google Place details if available
       if (cameraConfig && cameraConfig.placeDetails) {
-        console.log(`📄 Found place details for ${placeName}`);
         // Update content with Google's editorial summary if available
         if (cameraConfig.placeDetails.editorialSummary) {
           chapter.content = cameraConfig.placeDetails.editorialSummary;
@@ -366,13 +353,10 @@ export async function updateChapter(chapterIndex) {
         updateChapterContent(chapter, false);
       }
     } catch (placesError) {
-      console.warn(`⚠️ NEW Places API failed for ${placeName}:`, placesError);
-
       // Fallback to simple geocoder
       try {
         cameraConfig = await simpleFlyToPlace(placeName, cameraStyle || 'drone-orbit');
         flySuccessful = true;
-        console.log(`✅ Simple geocoder succeeded for ${placeName}`);
 
         // Show location pin at the actual location with company logo
         if (cameraConfig && cameraConfig.location) {
@@ -420,7 +404,6 @@ export async function updateChapter(chapterIndex) {
 export function activateNavigationElement(navName) {
   // Since we removed the old navigation elements, this function is now a no-op
   // but we keep it for compatibility with existing code
-  console.log(`Navigation element activation: ${navName} (legacy function - no action needed)`);
 }
 
 /**

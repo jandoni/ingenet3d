@@ -77,8 +77,6 @@ function encodeSvgToDataUri(svgElement) {
  * @returns {Promise<string>} The marker image data URL.
  */
 async function createLocationDot(markerId) {
-  console.log(`Creating location dot for ID ${markerId}`);
-
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
@@ -136,7 +134,6 @@ function loadImage(url, websiteUrl = null) {
         }
 
         img.onload = () => {
-          console.log(`✅ Successfully loaded image: ${imageUrl}`);
           res(img);
         };
 
@@ -169,7 +166,6 @@ function loadImage(url, websiteUrl = null) {
         try {
           const domain = new URL(websiteUrl).hostname;
           const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
-          console.log(`Trying Google Favicon API for ${domain}`);
           const img = await tryLoadImage(faviconUrl, false); // Google doesn't support CORS
           resolve(img);
         } catch (faviconError) {
@@ -192,8 +188,6 @@ function loadImage(url, websiteUrl = null) {
  * @returns {Promise<string>} The marker image with logo in circle or initials.
  */
 async function createMarkerLabel(markerId, title = '', logoUrl = null, websiteUrl = null) {
-  console.log(`Creating marker label for ID ${markerId}: ${title}`);
-
   const size = 84;
   const centerX = size / 2;
   const centerY = size / 2;
@@ -202,8 +196,6 @@ async function createMarkerLabel(markerId, title = '', logoUrl = null, websiteUr
   let svgContent;
 
   if (logoUrl) {
-    console.log(`🖼️ Attempting to load logo for ${title}: ${logoUrl}`);
-
     // Try to load the image and convert to data URI to avoid CORS issues
     let logoDataUri = null;
     try {
@@ -217,10 +209,8 @@ async function createMarkerLabel(markerId, title = '', logoUrl = null, websiteUr
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
         logoDataUri = canvas.toDataURL('image/png');
-        console.log(`✅ Successfully converted logo to data URI for ${title}`);
       } catch (canvasError) {
         // If canvas conversion fails due to CORS, use the URL directly
-        console.log(`⚠️ Canvas tainted, using direct URL for ${title}`);
         logoDataUri = img.src;
       }
     } catch (error) {
@@ -280,8 +270,6 @@ async function createMarkerLabel(markerId, title = '', logoUrl = null, websiteUr
       .substring(0, 2)
       .toUpperCase();
 
-    console.log(`📝 Using initials for ${title}: ${initials}`);
-
     svgContent = `
       <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -318,8 +306,6 @@ async function createMarkerLabel(markerId, title = '', logoUrl = null, websiteUr
 
   // Convert SVG to proper data URI for Cesium
   const encodedSvg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
-
-  console.log(`✅ Created SVG marker label for ${title}`);
   return encodedSvg;
 }
 
@@ -374,8 +360,6 @@ function getPolylineConfiguration({ locationPoint, labelPoint }) {
  * @returns {Cesium.Entity.ConstructorOptions} Dot marker entity configuration.
  */
 function getDotMarkerConfiguration({ position, id, dotImage, title }) {
-  console.log(`Configuring location dot ${id}: ${title}`);
-
   return {
     position,
     id: `dot-${id}`,
@@ -400,8 +384,6 @@ function getDotMarkerConfiguration({ position, id, dotImage, title }) {
  * @returns {Cesium.Entity.ConstructorOptions} Label entity configuration.
  */
 function getLabelMarkerConfiguration({ position, id, labelImage, title }) {
-  console.log(`Configuring label marker ${id}: ${title}`);
-
   return {
     position,
     id,
@@ -490,8 +472,6 @@ export function hideAllMarkers() {
     return;
   }
 
-  console.log('🙈 Hiding all markers');
-
   // Iterate through all entities and hide markers, dots, and lines
   for (let i = 0; i < cesiumViewer.entities.values.length; i++) {
     const entity = cesiumViewer.entities.values[i];
@@ -514,8 +494,6 @@ export function showAllMarkers() {
   if (!cesiumViewer) {
     return;
   }
-
-  console.log('👁️ Showing all markers');
 
   // Iterate through all entities and show markers, dots, and lines
   for (let i = 0; i < cesiumViewer.entities.values.length; i++) {
@@ -552,8 +530,6 @@ export async function showLocationPin(chapterId, location, title, logoUrl, websi
   // Hide any existing location pin first
   hideLocationPin();
 
-  console.log(`📍 Creating location pin for ${title} at location:`, location);
-
   // Create the pin image with logo
   const pinImage = await createLocationPinImage(title, logoUrl, websiteUrl);
 
@@ -566,8 +542,6 @@ export async function showLocationPin(chapterId, location, title, logoUrl, websi
     lng = location.lng;
     lat = location.lat;
   }
-
-  console.log(`📍 Pin coordinates: lat=${lat}, lng=${lng}`);
 
   // Get the location coordinates
   const position = Cesium.Cartesian3.fromDegrees(lng, lat, 0);
@@ -590,8 +564,6 @@ export async function showLocationPin(chapterId, location, title, logoUrl, websi
     },
     show: true,
   });
-
-  console.log(`✅ Location pin created for ${title} with entity ID:`, pinEntity.id);
 }
 
 /**
@@ -610,8 +582,6 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
   let svgContent;
 
   if (logoUrl) {
-    console.log(`📍 Attempting to load logo for pin: ${logoUrl}`);
-
     // Try to load the image and convert to data URI to avoid CORS issues
     let logoDataUri = null;
     try {
@@ -625,10 +595,8 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
         logoDataUri = canvas.toDataURL('image/png');
-        console.log(`✅ Successfully converted logo to data URI for pin`);
       } catch (canvasError) {
         // If canvas conversion fails due to CORS, use the URL directly
-        console.log(`⚠️ Canvas tainted, using direct URL for pin`);
         logoDataUri = img.src;
       }
     } catch (error) {
@@ -691,8 +659,6 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
       .substring(0, 2)
       .toUpperCase();
 
-    console.log(`📍 Using initials for pin: ${initials}`);
-
     svgContent = `
       <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -732,8 +698,6 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
 
   // Convert SVG to proper data URI for Cesium
   const encodedSvg = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
-
-  console.log(`✅ Created SVG location pin`);
   return encodedSvg;
 }
 
@@ -757,10 +721,6 @@ export function hideLocationPin() {
   entitiesToRemove.forEach(entity => {
     cesiumViewer.entities.remove(entity);
   });
-
-  if (entitiesToRemove.length > 0) {
-    console.log('📍 Location pin removed');
-  }
 }
 
 /**
@@ -794,11 +754,8 @@ async function handleClickOnMarker(click) {
     markerId = parseInt(markerId.replace('dot-', ''));
   }
 
-  console.log(`🎯 Marker clicked: ${markerId}`);
-
   // Use the same navigation method as the horizontal bar
   if (typeof window.navigateToChapter === 'function') {
-    console.log(`📍 Navigating to chapter ${markerId}...`);
     await window.navigateToChapter(markerId);
   } else {
     // Fallback to the old method if navigateToChapter is not available
@@ -905,12 +862,7 @@ function resolveCollisions(markers) {
     }
 
     if (!hasCollisions) {
-      console.log(`✅ Collision resolution converged after ${iteration + 1} iterations (no overlaps)`);
       break;
-    }
-
-    if (iteration === maxIterations - 1) {
-      console.warn(`⚠️ Collision resolution reached max iterations (${collisionCount} overlaps remaining)`);
     }
   }
 
@@ -930,10 +882,9 @@ export async function createMarkers(chapters) {
   // Mobile optimization: reduce number of markers loaded simultaneously
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   const maxMarkersOnMobile = 8; // Limit to 8 markers on mobile
-  
+
   let chaptersToProcess = chapters;
   if (isMobile && chapters.length > maxMarkersOnMobile) {
-    console.log(`Mobile device: limiting markers to ${maxMarkersOnMobile} for performance`);
     chaptersToProcess = chapters.slice(0, maxMarkersOnMobile);
   }
 
@@ -989,7 +940,6 @@ export async function createMarkers(chapters) {
       const cartesian = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat);
       markerCoordinates.push(cartesian);
       chapterLocations.push(coords);
-      console.log(`✅ Using hardcoded coordinates for ${chapter.title}: ${coords.lat}, ${coords.lng}`);
     } else {
       console.warn(`⚠️ No hardcoded coordinates for chapter ${chapter.id}: ${chapter.title}`);
       // Fallback to default coordinates if no hardcoded coords available
@@ -1037,16 +987,13 @@ export async function createMarkers(chapters) {
   });
 
   // Apply collision resolution to spread overlapping markers
-  console.log('🔄 Starting collision resolution for markers...');
   const resolvedPositions = resolveCollisions(markerData);
-  console.log('✅ Collision resolution complete');
 
   // Create markers with resolved positions
   for (let index = 0; index < coordsWithAdjustedHeight.length; index++) {
     const coord = coordsWithAdjustedHeight[index];
     const labelPosition = resolvedPositions[index];
     const { id, title, logoUrl, website } = chaptersToProcess[index];
-    console.log(`Processing chapter ${index}: ID=${id}, Title="${title}"`);
 
     const isMarkerVisible = chaptersToProcess[index].focusOptions?.showLocationMarker;
 
@@ -1067,14 +1014,6 @@ export async function createMarkers(chapters) {
         labelPoint: labelPosition
       }),
       show: isMarkerVisible,
-    });
-
-    console.log(`Added line entity for marker ${id}:`, {
-      lineId: `line-${id}`,
-      from: coord,
-      to: labelPosition,
-      visible: isMarkerVisible,
-      lineEntity: lineEntity
     });
 
     // Add the location dot at the actual location

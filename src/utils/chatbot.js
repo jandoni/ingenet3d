@@ -5,7 +5,6 @@ let isOpen = false;
 let storyData = null;
 
 export function initChatbot(story) {
-  console.log('🤖 Initializing chatbot...');
   storyData = story;
 
   const welcomeMessage = {
@@ -164,10 +163,8 @@ export function sendMessage() {
 function findMatchingPlaces(input) {
   // Extract keywords from the input query
   const keywords = extractKeywords(input);
-  console.log(`🔍 Search query: "${input}" → Keywords: [${keywords.join(', ')}]`);
 
   if (keywords.length === 0) {
-    console.log('❌ No valid keywords found after filtering');
     return [];
   }
 
@@ -310,7 +307,6 @@ function findMatchingPlaces(input) {
   const enhancedKeywords = keywords.map(keyword => {
     for (const [spanish, normalized] of Object.entries(translations)) {
       if (keyword === spanish || keyword.includes(spanish)) {
-        console.log(`🔄 Translating "${keyword}" → "${normalized}"`);
         return normalized;
       }
     }
@@ -380,8 +376,6 @@ function findMatchingPlaces(input) {
       const completenessBonus = (matchedKeywords / keywords.length) * 0.2; // Bonus for matching more keywords
       const finalScore = Math.min(baseScore + categoryBonus + completenessBonus, 1);
 
-      console.log(`📊 ${chapter.title}: ${matchedKeywords}/${keywords.length} keywords, score: ${finalScore.toFixed(3)}, matches: [${matchDetails.join(', ')}]`);
-
       if (finalScore > 0.3) { // Lower threshold for multi-keyword searches
         matches.push({
           ...chapter,
@@ -402,11 +396,6 @@ function findMatchingPlaces(input) {
       return b.matchedKeywords - a.matchedKeywords;
     }
     return b.score - a.score;
-  });
-
-  console.log(`🎯 Found ${matches.length} matches for query: "${input}"`);
-  matches.forEach((match, i) => {
-    console.log(`  ${i + 1}. ${match.title} (score: ${match.score.toFixed(3)}, matched: ${match.matchedKeywords}/${match.totalKeywords})`);
   });
 
   return matches;
@@ -446,8 +435,6 @@ function extractKeywords(text) {
 }
 
 function navigateToPlace(index) {
-  console.log(`🗺️ Navigating to chapter index: ${index}`);
-
   const placeCard = document.querySelector(`.place-card[data-chapter-id="${storyData.chapters[index].id}"]`);
   if (placeCard) {
     placeCard.click();

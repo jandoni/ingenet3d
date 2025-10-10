@@ -408,9 +408,6 @@ export function setSpainOverviewFromGoogleEarthExported() {
   const headingPitchRange = new Cesium.HeadingPitchRange(heading, pitch, range);
 
   cesiumViewer.camera.lookAt(center, headingPitchRange);
-
-  // Rotation effect disabled - map stays centered on Spain
-  console.log('🗺️ Spain overview set - no rotation effect');
 }
 
 /**
@@ -433,8 +430,6 @@ export function startSpainOrbitEffect() {
     // Very subtle rotation for overview: 0.00005 radians/tick (minimal movement)
     cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.00005);
   });
-
-  console.log('✅ Spain orbit effect started with subtle rotation');
 }
 
 // Make orbit control functions available globally for cross-module access
@@ -499,7 +494,6 @@ export function zoomIn() {
   };
 
   animate();
-  console.log('🔍 Zoomed in');
 }
 
 /**
@@ -555,7 +549,6 @@ export function zoomOut() {
   };
 
   animate();
-  console.log('🔎 Zoomed out');
 }
 
 // Make zoom functions available globally

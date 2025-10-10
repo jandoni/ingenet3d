@@ -27,56 +27,42 @@ async function loadChapterDetails(chapterId) {
   }
   
   if (chapter.detailsLoaded) {
-    console.log(`✅ Details already loaded for ${chapter.title}`);
     return chapter;
   }
-  
+
   try {
-    console.log(`🔄 LOADING DETAILS FOR: ${chapter.title} (ID: ${chapterId})`);
-    console.log(`💰 API CALL STARTING - This will cost money!`);
-    
     // Initialize Google APIs if not already done
     if (!window.googleMapsLoaded) {
-      console.log(`🔑 Initializing Google Maps APIs...`);
       await initGoogleMaps();
       initGoogleMapsServicesNew();
       window.googleMapsLoaded = true;
-      console.log(`✅ Google Maps APIs initialized`);
     }
-    
+
     let cameraConfig;
-    
+
     // Try NEW Places API first, fallback to simple geocoder
     try {
-      console.log(`🆕 Trying NEW Places API for: ${chapter.placeName}`);
       cameraConfig = await resolvePlaceToCameraNew(chapter.placeName, 'static');
-      console.log(`✅ NEW Places API successful for: ${chapter.title}`);
     } catch (placesError) {
       console.warn(`⚠️ NEW Places API failed for ${chapter.title}, trying simple geocoder...`);
-      console.log(`🗺️ Trying simple geocoder for: ${chapter.placeName}`);
       cameraConfig = await simpleGeocodeToCamera(chapter.placeName, 'static');
-      console.log(`✅ Simple geocoder successful for: ${chapter.title}`);
     }
-    
+
     // Store camera configuration and place details
     if (cameraConfig) {
       chapter.cameraConfig = cameraConfig;
-      console.log(`📍 Camera config stored for: ${chapter.title}`);
-      
+
       if (cameraConfig.placeDetails) {
         chapter.placeDetails = cameraConfig.placeDetails;
-        console.log(`📋 Place details stored for: ${chapter.title}`);
-        
+
         // Optionally update content with Google's editorial summary
         if (cameraConfig.placeDetails.editorialSummary && !chapter.content) {
           chapter.content = cameraConfig.placeDetails.editorialSummary;
-          console.log(`📝 Content updated with editorial summary for: ${chapter.title}`);
         }
       }
     }
-    
+
     chapter.detailsLoaded = true;
-    console.log(`✅ DETAILS LOADED SUCCESSFULLY FOR: ${chapter.title}`);
     
   } catch (error) {
     console.error(`💥 FAILED to load details for ${chapter.title}:`, error);
@@ -98,8 +84,6 @@ function truncateText(text, maxLength) {
  * Create basic markers from chapter data without API calls
  */
 async function createBasicMarkers(chapters) {
-  console.log('📍 Creating basic markers for initial display...');
-  
   // Simple hardcoded coordinates for Spanish landmarks to avoid API calls
   const basicCoordinates = {
     1: { lat: 43.3247, lng: -8.4115 },   // Fundación Exponav - Ferrol
@@ -180,9 +164,7 @@ async function createBasicMarkers(chapters) {
         markerCount++;
       }
     }
-    
-    console.log(`✅ Created ${markerCount} basic markers without API calls`);
-    
+
     // Set up click handler for markers
     setupMarkerClickHandler();
     
@@ -210,34 +192,25 @@ async function main() {
   }
   
   mainFunctionCalled = true;
-  console.log('🏁 STARTING MAIN INITIALIZATION...');
-  
+
   try {
     // Show initial UI immediately with curated images
-    console.log('📱 Initializing UI...');
     initializeNewUI();
-    
+
     // Initialize Cesium first for fast map display
-    console.log('🌍 Initializing Cesium viewer...');
     await initCesiumViewer();
-    
+
     // Hide loading screen after Cesium is ready
-    console.log('✨ Hiding loading screen...');
     hideLoadingScreen();
-    
+
     // Initialize chapter navigation with basic data
-    console.log('🧭 Initializing chapter navigation...');
     initChapterNavigation();
-    
+
     // Create unified markers using the advanced marker system
-    console.log('📍 Creating unified markers...');
     await createMarkers(chapters);
 
     // Initialize the chatbot with story data
-    console.log('🤖 Initializing chatbot...');
     initChatbot(story);
-
-    console.log('🎉 MAIN INITIALIZATION COMPLETE - NO API CALLS MADE YET');
     
   } catch (error) {
     console.error('💥 Critical error during initialization:', error);
@@ -275,17 +248,15 @@ function initializeNewUI() {
   }
   
   isUIInitialized = true;
-  console.log('🚀 STARTING UI INITIALIZATION...');
-  
+
   // Clear any existing content to prevent duplicates
   const placesList = document.getElementById('places-list');
   if (placesList.children.length > 0) {
     console.warn('⚠️ PLACES LIST ALREADY HAS CONTENT, CLEARING...');
     placesList.innerHTML = '';
   }
-  
+
   const chapters = story.chapters;
-  console.log(`📍 Loading ${chapters.length} places...`);
   
   // Add intro card for "Explorar España"
   const introCard = document.createElement('div');
@@ -319,15 +290,12 @@ function initializeNewUI() {
   placesList.appendChild(introCard);
   
   chapters.forEach((chapter, index) => {
-    console.log(`📱 Creating place card for: ${chapter.title} (ID: ${chapter.id})`);
-    
     const placeCard = document.createElement('div');
     placeCard.className = 'place-card';
     placeCard.dataset.chapterId = chapter.id;
-    
+
     // Add click handler with on-demand loading
     placeCard.onclick = async () => {
-      console.log(`🖱️ User clicked on: ${chapter.title} (index: ${index})`);
       await navigateToChapter(chapter.id, index);
 
       // Don't auto-open the sheet, just show a subtle hint animation
@@ -343,16 +311,14 @@ function initializeNewUI() {
     // Load image with proper error handling
     if (chapter.imageUrl && !imageAttempted) {
       imageAttempted = true;
-      console.log(`🖼️ Loading image for ${chapter.title}: ${chapter.imageUrl}`);
-      
+
       // Add a small delay for each image to prevent rate limiting
       setTimeout(() => {
         // Check if image element still exists (hasn't been removed)
         if (!img.parentNode) {
-          console.log(`⚠️ Image element removed before loading for ${chapter.title}`);
           return;
         }
-        
+
         img.src = chapter.imageUrl;
       }, index * 50); // 50ms delay between each image
       
@@ -369,13 +335,11 @@ function initializeNewUI() {
       };
       
       img.onload = () => {
-        console.log(`✅ Successfully loaded image for ${chapter.title}`);
         // Remove handlers to prevent memory leaks
         img.onload = null;
         img.onerror = null;
       };
     } else {
-      console.log(`📝 No image URL for ${chapter.title}, using placeholder`);
       // No image URL, use placeholder
       const placeholderColor = '#3b82f6';
       img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="${placeholderColor}"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">${encodeURIComponent(chapter.title.substring(0, 20))}</text></svg>`;
@@ -392,26 +356,23 @@ function initializeNewUI() {
 
     placesList.appendChild(placeCard);
   });
-  
-  console.log(`✅ UI INITIALIZATION COMPLETE - Created ${chapters.length} place cards`);
-  
+
   // Initialize bottom sheet to minimized state
   const bottomSheet = document.getElementById('bottom-sheet');
   if (bottomSheet) {
     bottomSheet.classList.add('minimized');
   }
-  
+
   // Initialize orbit pause button state on mobile
   if (isMobile && isOrbitPaused) {
     const pauseBtn = document.getElementById('orbit-pause-btn');
     const pauseIcon = document.getElementById('pause-icon');
     const playIcon = document.getElementById('play-icon');
-    
+
     if (pauseBtn) {
       pauseBtn.classList.add('paused');
       pauseIcon.style.display = 'none';
       playIcon.style.display = 'block';
-      console.log('📱 Mobile: orbit pause button initialized to paused state');
     }
   }
   
@@ -446,7 +407,6 @@ window.setActivePlace = function(chapterId) {
  * Called by home button and IEE logo click
  */
 window.goToHome = function() {
-  console.log('🏠 Going to home page');
   resetToIntro();
 };
 
@@ -456,8 +416,6 @@ window.goToHome = function() {
  * @param {number} chapterIndex - The chapter index (optional, will be calculated if not provided)
  */
 window.navigateToChapter = async function(chapterId, chapterIndex = null) {
-  console.log(`🖱️ Navigating to chapter: ${chapterId}`);
-
   // Calculate index if not provided
   if (chapterIndex === null) {
     chapterIndex = story.chapters.findIndex(ch => ch.id == chapterId);
@@ -469,7 +427,6 @@ window.navigateToChapter = async function(chapterId, chapterIndex = null) {
   }
 
   const chapter = story.chapters[chapterIndex];
-  console.log(`📍 Navigating to: ${chapter.title} (index: ${chapterIndex})`);
 
   // Update active place in horizontal navigation
   setActivePlace(chapterId);
@@ -513,14 +470,13 @@ window.toggleOrbitPause = function() {
   
   isOrbitPaused = !isOrbitPaused;
   window.isOrbitPaused = isOrbitPaused; // Update global state
-  console.log(`🎮 Orbit pause toggled: ${isOrbitPaused ? 'PAUSED' : 'PLAYING'}`);
-  
+
   if (isOrbitPaused) {
     // Pause orbit
     pauseBtn.classList.add('paused');
     pauseIcon.style.display = 'none';
     playIcon.style.display = 'block';
-    
+
     // Store which chapter has paused orbit
     try {
       const currentChapterIndex = getCurrentChapterIndex();
@@ -531,17 +487,15 @@ window.toggleOrbitPause = function() {
       console.warn('⚠️ Could not store paused chapter state:', error);
       currentChapterWithPausedOrbit = 'unknown';
     }
-    
+
     // Stop the actual orbit animation - try all possible orbit types
     let orbitStopped = false;
     if (window.stopOrbitAnimation) {
       window.stopOrbitAnimation();
-      console.log('✅ Location orbit animation stopped');
       orbitStopped = true;
     }
     if (window.stopSpainOrbitEffect) {
       window.stopSpainOrbitEffect();
-      console.log('✅ Spain overview orbit stopped');
       orbitStopped = true;
     }
     if (!orbitStopped) {
@@ -557,25 +511,19 @@ window.toggleOrbitPause = function() {
     playIcon.style.display = 'none';
     
     currentChapterWithPausedOrbit = null;
-    
+
     // Resume orbit animation based on current location
     try {
       const currentChapterIndex = getCurrentChapterIndex();
-      console.log(`🔄 Current chapter index for orbit restart: ${currentChapterIndex}`);
-      
+
       if (currentChapterIndex >= 0 && story.chapters[currentChapterIndex]) {
         const chapter = story.chapters[currentChapterIndex];
-        console.log(`📍 Restarting orbit for chapter: ${chapter.title} (style: ${chapter.cameraStyle})`);
-        
+
         // Check if we should restart an orbit animation
         if (chapter.cameraStyle === 'drone-orbit' && window.startOrbitAnimation) {
           const coords = chapter.cameraConfig?.coordinates || { lat: 40.4168, lng: -3.7038 };
           window.startOrbitAnimation(coords);
-          console.log('✅ Location orbit animation restarted');
         }
-      } else {
-        // We're at the intro/Spain overview - rotation disabled, map stays static
-        console.log('🗺️ At Spain overview - rotation disabled');
       }
     } catch (error) {
       console.warn('⚠️ Could not restart orbit:', error);
@@ -596,18 +544,15 @@ window.toggleOrbitPause = function() {
  * Toggle mobile places panel
  */
 window.toggleMobilePlaces = function() {
-  console.log('🍔 Hamburger menu clicked');
-  
   const container = document.getElementById('top-navigation-container');
   const toggleBtn = document.getElementById('mobile-places-toggle');
   const overlay = document.getElementById('mobile-overlay');
-  
+
   if (container && toggleBtn) {
     const wasOpen = container.classList.contains('open');
     container.classList.toggle('open');
-    
+
     const isOpen = container.classList.contains('open');
-    console.log(`📱 Mobile menu is now: ${isOpen ? 'OPEN' : 'CLOSED'}`);
     
     // Toggle overlay
     if (overlay) {

@@ -21,7 +21,7 @@
       "cameraStyle": "drone-orbit",
       "id": 1,
       "imageUrl": "https://static.wixstatic.com/media/18acae_053d1e23629644fc9f0434acc4519b1a~mv2.png/v1/fill/w_626,h_180,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/exponav_mcn_pegatina.png",
-      "logoUrl": "https://exponav.org/wp-content/uploads/2022/09/exponav_mcn_pegatina.png",
+      "logoUrl": "assets/logos/fundaci-n-exponav-museo-de-construcci-n-naval.jpg",
       "preserveCustomImage": true,
       "content": "El Museo de la Construcción Naval de Ferrol es el mayor museo de Europa dedicado a la actividad de construcción naval. Ubicado en el edificio de las Herrerías del siglo XVIII, alberga una importante colección sobre la construcción naval desde el siglo XVIII hasta la actualidad. Ofrece un recorrido educativo por los hitos históricos más relevantes relacionados con la construcción naval española, incluyendo modelos históricos del astillero de Ferrol y exhibiciones sobre faros y señales marítimas.",
       "dateTime": "1750-Presente",
@@ -29,10 +29,28 @@
       "address": "Edificio Herrerías, Cantón de Molins s/n, 15490 Ferrol (A Coruña)",
       "website": "https://exponav.org/",
       "etiquetas": {
-        "ubicacion": ["Ferrol", "Galicia", "España", "A Coruña"],
-        "sector": ["Naval", "Marítimo", "Militar", "Ingeniería", "Historia"],
-        "profesion": ["Ingeniería Naval", "Ingeniería Marina", "Ingeniería Industrial"],
-        "tipo": ["Fundación", "Museo"]
+        "ubicacion": [
+          "Ferrol",
+          "Galicia",
+          "España",
+          "A Coruña"
+        ],
+        "sector": [
+          "Naval",
+          "Marítimo",
+          "Militar",
+          "Ingeniería",
+          "Historia"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Ingeniería Marina",
+          "Ingeniería Industrial"
+        ],
+        "tipo": [
+          "Fundación",
+          "Museo"
+        ]
       }
     },
     {
@@ -46,7 +64,7 @@
       "cameraStyle": "drone-orbit",
       "id": 2,
       "imageUrl": "https://gondan.com/wp-content/uploads/2020/03/Gondan-pos_g.jpg",
-      "logoUrl": "https://gondan.com/wp-content/uploads/2020/03/Gondan-pos_g.jpg",
+      "logoUrl": "assets/logos/gond-n-shipbuilders.jpg",
       "preserveCustomImage": true,
       "content": "Gondán Shipbuilders es un astillero español con más de 90 años de experiencia en la construcción de buques. Ubicado en el puerto de Figueras, Asturias, cuenta con tres instalaciones en Castropol (Figueras, Barres y Vegadeo). Especializado en la construcción de buques offshore, pesqueros, oceanográficos y de apoyo a plataformas. Gondán es reconocido internacionalmente por su capacidad de innovación y calidad en construcción naval.",
       "dateTime": "1932-Presente",
@@ -54,10 +72,26 @@
       "address": "Puerto de Figueras, s/n, 33794 Castropol (Asturias)",
       "website": "https://gondan.com",
       "etiquetas": {
-        "ubicacion": ["Castropol", "Asturias", "España"],
-        "sector": ["Naval", "Construcción", "Offshore", "Ingeniería"],
-        "profesion": ["Ingeniería Naval", "Construcción Naval", "Ingeniería Industrial"],
-        "tipo": ["Astillero", "Empresa"]
+        "ubicacion": [
+          "Castropol",
+          "Asturias",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Construcción",
+          "Offshore",
+          "Ingeniería"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Construcción Naval",
+          "Ingeniería Industrial"
+        ],
+        "tipo": [
+          "Astillero",
+          "Empresa"
+        ]
       }
     },
     {
@@ -71,7 +105,7 @@
       "cameraStyle": "drone-orbit",
       "id": 3,
       "imageUrl": "https://www.museomaritimodeasturias.com/wp-content/uploads/2022/09/Museo-maritimo-asturias-logo.png",
-      "logoUrl": "https://www.museomaritimodeasturias.com/wp-content/uploads/2022/09/Museo-maritimo-asturias-logo.png",
+      "logoUrl": "assets/logos/museo-mar-timo-de-asturias.png",
       "preserveCustomImage": true,
       "content": "El Museo Marítimo de Asturias en Luanco es un espacio dedicado a la cultura marítima asturiana. El museo recoge la historia marinera de la región, con exposiciones sobre pesca, navegación y la vida de los pueblos costeros. Ubicado en el pintoresco pueblo de Luanco, capital del concejo de Gozón, el museo ofrece una valiosa colección de objetos relacionados con la mar y las tradiciones marineras asturianas.",
       "dateTime": "Presente",
@@ -79,10 +113,25 @@
       "address": "Calle de Gijón, 6, 33440 Luanco (Gozón, Asturias)",
       "website": "https://www.museosasturias.com",
       "etiquetas": {
-        "ubicacion": ["Luanco", "Gozón", "Asturias", "España"],
-        "sector": ["Marítimo", "Historia", "Cultura", "Pesca"],
-        "profesion": ["Historia", "Estudios Marítimos"],
-        "tipo": ["Museo"]
+        "ubicacion": [
+          "Luanco",
+          "Gozón",
+          "Asturias",
+          "España"
+        ],
+        "sector": [
+          "Marítimo",
+          "Historia",
+          "Cultura",
+          "Pesca"
+        ],
+        "profesion": [
+          "Historia",
+          "Estudios Marítimos"
+        ],
+        "tipo": [
+          "Museo"
+        ]
       }
     },
     {
@@ -96,7 +145,7 @@
       "cameraStyle": "drone-orbit",
       "id": 4,
       "imageUrl": "https://turismo.santander.es/sites/default/files/inline-images/Logo-dcha-web%20%2838%29.png",
-      "logoUrl": "https://turismo.santander.es/sites/default/files/inline-images/Logo-dcha-web%20%2838%29.png",
+      "logoUrl": "assets/logos/museo-mar-timo-del-cant-brico-mmc.png",
       "preserveCustomImage": true,
       "content": "El Museo Marítimo del Cantábrico es un museo y acuario dedicado al patrimonio marítimo situado en Santander, Cantabria. Ubicado entre el promontorio de San Martín y la playa de los Peligros, forma parte del paseo marítimo de Santander. El museo ofrece un viaje por la historia marítima del Cantábrico, con exposiciones sobre biología marina, historia naval, pesca tradicional y oceanografía. Cuenta con acuarios con fauna del Mar Cantábrico y exposiciones interactivas.",
       "dateTime": "Presente",
@@ -104,10 +153,26 @@
       "address": "Av. de Severiano Ballesteros, s/n, 39004 Santander (Cantabria)",
       "website": "https://www.museosdecantabria.es/museo-maritimo",
       "etiquetas": {
-        "ubicacion": ["Santander", "Cantabria", "España"],
-        "sector": ["Marítimo", "Acuario", "Historia", "Biología Marina"],
-        "profesion": ["Biología Marina", "Historia", "Oceanografía"],
-        "tipo": ["Museo", "Acuario"]
+        "ubicacion": [
+          "Santander",
+          "Cantabria",
+          "España"
+        ],
+        "sector": [
+          "Marítimo",
+          "Acuario",
+          "Historia",
+          "Biología Marina"
+        ],
+        "profesion": [
+          "Biología Marina",
+          "Historia",
+          "Oceanografía"
+        ],
+        "tipo": [
+          "Museo",
+          "Acuario"
+        ]
       }
     },
     {
@@ -121,7 +186,7 @@
       "cameraStyle": "drone-orbit",
       "id": 5,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9XAQJ0NAo-QxfJaBBvrtuzZyo0pSN1_BBxg&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9XAQJ0NAo-QxfJaBBvrtuzZyo0pSN1_BBxg&s",
+      "logoUrl": "assets/logos/euskal-itsas-museoa-museo-mar-timo-vasco.png",
       "preserveCustomImage": true,
       "content": "El Euskal Itsas Museoa (Museo Marítimo Vasco) está situado en el puerto de San Sebastián, ocupando la Casa-torre del Consulado, un edificio del siglo XVIII. El museo se dedica a la conservación y difusión del patrimonio marítimo vasco, con exposiciones sobre la historia naval, la pesca, la construcción de barcos y la navegación. Ofrece una visión completa de la relación del País Vasco con el mar.",
       "dateTime": "Presente",
@@ -129,10 +194,27 @@
       "address": "P.º del Muelle, 24, 20003 Donostia-San Sebastián (Gipuzkoa)",
       "website": "https://itsasmuseoa.eus",
       "etiquetas": {
-        "ubicacion": ["San Sebastián", "Donostia", "Gipuzkoa", "País Vasco", "España"],
-        "sector": ["Marítimo", "Historia", "Pesca", "Naval"],
-        "profesion": ["Historia", "Estudios Marítimos", "Etnografía"],
-        "tipo": ["Museo"]
+        "ubicacion": [
+          "San Sebastián",
+          "Donostia",
+          "Gipuzkoa",
+          "País Vasco",
+          "España"
+        ],
+        "sector": [
+          "Marítimo",
+          "Historia",
+          "Pesca",
+          "Naval"
+        ],
+        "profesion": [
+          "Historia",
+          "Estudios Marítimos",
+          "Etnografía"
+        ],
+        "tipo": [
+          "Museo"
+        ]
       }
     },
     {
@@ -146,7 +228,7 @@
       "cameraStyle": "drone-orbit",
       "id": 6,
       "imageUrl": "https://www.naval-technology.com/wp-content/uploads/sites/15/2023/05/1200px-NAVANTIA_1.png",
-      "logoUrl": "https://www.naval-technology.com/wp-content/uploads/sites/15/2023/05/1200px-NAVANTIA_1.png",
+      "logoUrl": "assets/logos/navantia-ferrol.png",
       "preserveCustomImage": true,
       "content": "Navantia es la empresa pública española de construcción naval militar y civil. El astillero de Ferrol es uno de los más importantes, con tres siglos de historia en construcción naval. Navantia diseña y construye buques de guerra, submarinos y buques civiles, además de ofrecer servicios de reparación y modernización. Es líder mundial en construcción de fragatas y tiene presencia en Ferrol, Cádiz (Puerto Real, San Fernando) y Cartagena.",
       "dateTime": "1730-Presente",
@@ -154,10 +236,28 @@
       "address": "C. Taxonera, s/n, 15403 Ferrol (A Coruña)",
       "website": "https://www.navantia.es",
       "etiquetas": {
-        "ubicacion": ["Ferrol", "Galicia", "A Coruña", "España"],
-        "sector": ["Naval", "Militar", "Construcción", "Ingeniería", "Defensa"],
-        "profesion": ["Ingeniería Naval", "Ingeniería Industrial", "Arquitectura Naval"],
-        "tipo": ["Astillero", "Empresa Pública"]
+        "ubicacion": [
+          "Ferrol",
+          "Galicia",
+          "A Coruña",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Militar",
+          "Construcción",
+          "Ingeniería",
+          "Defensa"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Ingeniería Industrial",
+          "Arquitectura Naval"
+        ],
+        "tipo": [
+          "Astillero",
+          "Empresa Pública"
+        ]
       }
     },
     {
@@ -171,7 +271,7 @@
       "cameraStyle": "drone-orbit",
       "id": 7,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYP9Unn55g6fMdzRbsxbJcX61cVDGuchA5bQ&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYP9Unn55g6fMdzRbsxbJcX61cVDGuchA5bQ&s",
+      "logoUrl": "assets/logos/campus-industrial-de-ferrol-udc.png",
       "preserveCustomImage": true,
       "content": "El Campus Industrial de Ferrol es parte de la Universidade da Coruña (UDC), especializado en ingeniería oceánica, naval e industrial. Ofrece once grados, siete másteres y seis programas de doctorado. El campus cuenta con seis centros académicos y es un referente en formación de ingenieros navales y oceánicos en España, con estrechos vínculos con la industria naval de la región.",
       "dateTime": "Presente",
@@ -179,10 +279,28 @@
       "address": "R/ Dr. Vázquez Cabrera, s/n, Campus de Esteiro, 15403 Ferrol (A Coruña)",
       "website": "https://campusindustrial.udc.es",
       "etiquetas": {
-        "ubicacion": ["Ferrol", "Galicia", "A Coruña", "España"],
-        "sector": ["Educación", "Ingeniería", "Naval", "Oceánica", "Industrial"],
-        "profesion": ["Ingeniería Naval", "Ingeniería Oceánica", "Ingeniería Industrial"],
-        "tipo": ["Universidad", "Campus"]
+        "ubicacion": [
+          "Ferrol",
+          "Galicia",
+          "A Coruña",
+          "España"
+        ],
+        "sector": [
+          "Educación",
+          "Ingeniería",
+          "Naval",
+          "Oceánica",
+          "Industrial"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Ingeniería Oceánica",
+          "Ingeniería Industrial"
+        ],
+        "tipo": [
+          "Universidad",
+          "Campus"
+        ]
       }
     },
     {
@@ -196,7 +314,7 @@
       "cameraStyle": "drone-orbit",
       "id": 8,
       "imageUrl": "https://media.licdn.com/dms/image/v2/C4D0BAQFV6mEXWjVshQ/company-logo_200_200/company-logo_200_200/0/1668610488259/windarrenovables_logo?e=2147483647&v=beta&t=l-nK4j25eYCATA51ejRAIJHtiZOBrwE-UXKxUP322yQ",
-      "logoUrl": "https://media.licdn.com/dms/image/v2/C4D0BAQFV6mEXWjVshQ/company-logo_200_200/company-logo_200_200/0/1668610488259/windarrenovables_logo?e=2147483647&v=beta&t=l-nK4j25eYCATA51ejRAIJHtiZOBrwE-UXKxUP322yQ",
+      "logoUrl": "assets/logos/windar-renovables.png",
       "preserveCustomImage": true,
       "content": "Windar Renovables es una empresa española especializada en la fabricación de estructuras para parques eólicos marinos. Ubicada en el Puerto de Avilés, ocupa más de 400.000 m² con acceso directo al puerto. Windar ha fabricado piezas de transición y monopilares para los mayores parques eólicos offshore de Estados Unidos, Alemania y Reino Unido. La empresa está invirtiendo más de 130 millones de euros para alcanzar una capacidad anual de 100-120 monopilares.",
       "dateTime": "Presente",
@@ -204,10 +322,26 @@
       "address": "Puerto de Avilés, Avilés (Asturias)",
       "website": "https://windar-renovables.com",
       "etiquetas": {
-        "ubicacion": ["Avilés", "Asturias", "España"],
-        "sector": ["Energías Renovables", "Eólica Marina", "Offshore", "Ingeniería"],
-        "profesion": ["Ingeniería Industrial", "Energías Renovables", "Ingeniería Offshore"],
-        "tipo": ["Empresa", "Fabricante"]
+        "ubicacion": [
+          "Avilés",
+          "Asturias",
+          "España"
+        ],
+        "sector": [
+          "Energías Renovables",
+          "Eólica Marina",
+          "Offshore",
+          "Ingeniería"
+        ],
+        "profesion": [
+          "Ingeniería Industrial",
+          "Energías Renovables",
+          "Ingeniería Offshore"
+        ],
+        "tipo": [
+          "Empresa",
+          "Fabricante"
+        ]
       }
     },
     {
@@ -221,7 +355,7 @@
       "cameraStyle": "drone-orbit",
       "id": 9,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQL8hYbp_tLKBml6-zfzPievs0-OoNOBuK_6A&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQL8hYbp_tLKBml6-zfzPievs0-OoNOBuK_6A&s",
+      "logoUrl": "assets/logos/murueta-astilleros-shipyards.png",
       "preserveCustomImage": true,
       "content": "Astilleros de Murueta construye buques en Bizkaia desde 1943. Con dos astilleros (Murueta y Erandio), la empresa es líder mundial en la construcción de buques pesqueros de cerco y arrastreros congeladores. Ubicado en la ría de Gernika, a 40 km de Bilbao, Astilleros de Murueta exporta sus buques a todo el mundo, especialmente a Europa, África y América Latina.",
       "dateTime": "1943-Presente",
@@ -229,10 +363,26 @@
       "address": "Barrio Malloape s/n, 48394 Murueta (Bizkaia)",
       "website": "https://www.astillerosmurueta.com",
       "etiquetas": {
-        "ubicacion": ["Murueta", "Bizkaia", "País Vasco", "España"],
-        "sector": ["Naval", "Construcción", "Pesca", "Ingeniería"],
-        "profesion": ["Ingeniería Naval", "Construcción Naval"],
-        "tipo": ["Astillero", "Empresa"]
+        "ubicacion": [
+          "Murueta",
+          "Bizkaia",
+          "País Vasco",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Construcción",
+          "Pesca",
+          "Ingeniería"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Construcción Naval"
+        ],
+        "tipo": [
+          "Astillero",
+          "Empresa"
+        ]
       }
     },
     {
@@ -246,7 +396,7 @@
       "cameraStyle": "drone-orbit",
       "id": 10,
       "imageUrl": "https://media.licdn.com/dms/image/v2/C4D0BAQFcXJzZvkzJgg/company-logo_200_200/company-logo_200_200/0/1664177786139/cintranaval_defcar_s_l__logo?e=2147483647&v=beta&t=9FpzbKwaFJvxBeUj6ydyMAGB9BUTkVFV-SX7qjCqWUE",
-      "logoUrl": "https://media.licdn.com/dms/image/v2/C4D0BAQFcXJzZvkzJgg/company-logo_200_200/company-logo_200_200/0/1664177786139/cintranaval_defcar_s_l__logo?e=2147483647&v=beta&t=9FpzbKwaFJvxBeUj6ydyMAGB9BUTkVFV-SX7qjCqWUE",
+      "logoUrl": "assets/logos/cintranaval-defcar.png",
       "preserveCustomImage": true,
       "content": "Cintranaval-Defcar es una oficina de ingeniería naval especializada en diseño de buques y desarrollo de software CAD/CAM para el sector naval. Formada en 2003 por la fusión de Cintranaval (País Vasco) y Defcar Ingenieros (Madrid), la empresa tiene oficinas en Getxo, Madrid y Vigo. Ofrece servicios de diseño naval, ingeniería de sistemas y soluciones tecnológicas para astilleros de todo el mundo.",
       "dateTime": "2003-Presente",
@@ -254,10 +404,28 @@
       "address": "Lauroeta Etorbidea, 4, 48180 Loiu (Bizkaia)",
       "website": "https://cintranaval.com",
       "etiquetas": {
-        "ubicacion": ["Loiu", "Bizkaia", "País Vasco", "España"],
-        "sector": ["Ingeniería", "Naval", "Software", "CAD/CAM", "Diseño"],
-        "profesion": ["Ingeniería Naval", "Diseño Naval", "Informática"],
-        "tipo": ["Ingeniería", "Empresa"]
+        "ubicacion": [
+          "Loiu",
+          "Bizkaia",
+          "País Vasco",
+          "España"
+        ],
+        "sector": [
+          "Ingeniería",
+          "Naval",
+          "Software",
+          "CAD/CAM",
+          "Diseño"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Diseño Naval",
+          "Informática"
+        ],
+        "tipo": [
+          "Ingeniería",
+          "Empresa"
+        ]
       }
     },
     {
@@ -271,7 +439,7 @@
       "cameraStyle": "drone-orbit",
       "id": 11,
       "imageUrl": "https://media.licdn.com/dms/image/v2/D4D0BAQH2MT2U9VkP9w/company-logo_200_200/company-logo_200_200/0/1738858077057/mb92barcelona_logo?e=2147483647&v=beta&t=jZYNyFKOCoiPN8DWH49Or-mTIS56wdPlPAdWZoHh56Y",
-      "logoUrl": "https://media.licdn.com/dms/image/v2/D4D0BAQH2MT2U9VkP9w/company-logo_200_200/company-logo_200_200/0/1738858077057/mb92barcelona_logo?e=2147483647&v=beta&t=jZYNyFKOCoiPN8DWH49Or-mTIS56wdPlPAdWZoHh56Y",
+      "logoUrl": "assets/logos/mb92-barcelona.png",
       "preserveCustomImage": true,
       "content": "MB92 Barcelona es un astillero especializado en refit, reparación y mantenimiento de superyates de hasta 200 metros de eslora. Ubicado en el puerto de Barcelona, cuenta con el sincrolift más grande del mundo dedicado a superyates (4.800 toneladas), capaz de acomodar hasta nueve yates simultáneamente (hasta 115m LOA). MB92 es referencia mundial en el sector de superyates, ofreciendo servicios de alta calidad y confidencialidad.",
       "dateTime": "1992-Presente",
@@ -279,10 +447,25 @@
       "address": "Passeig de Joan de Borbó 92, Barcelona",
       "website": "https://mb92.com",
       "etiquetas": {
-        "ubicacion": ["Barcelona", "Catalunya", "España"],
-        "sector": ["Naval", "Superyates", "Refit", "Reparación"],
-        "profesion": ["Ingeniería Naval", "Reparación Naval"],
-        "tipo": ["Astillero", "Empresa"]
+        "ubicacion": [
+          "Barcelona",
+          "Catalunya",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Superyates",
+          "Refit",
+          "Reparación"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Reparación Naval"
+        ],
+        "tipo": [
+          "Astillero",
+          "Empresa"
+        ]
       }
     },
     {
@@ -296,7 +479,7 @@
       "cameraStyle": "drone-orbit",
       "id": 12,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS490ksLcnZHfQgRwP1C335Bd0yKkfgxlh1Rw&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS490ksLcnZHfQgRwP1C335Bd0yKkfgxlh1Rw&s",
+      "logoUrl": "assets/logos/museu-mar-tim-de-barcelona.png",
       "preserveCustomImage": true,
       "content": "El Museu Marítim de Barcelona está alojado en el edificio de las Drassanes Reales, un edificio gótico medieval que se utilizaba para construir buques de guerra para la Corona de Aragón. Ubicado al pie de las Ramblas, junto al monumento a Colón, el museo ofrece un viaje por la historia marítima del Mediterráneo, con exposiciones sobre navegación, pesca, comercio marítimo y la historia naval de Barcelona.",
       "dateTime": "Siglo XIII-Presente",
@@ -304,10 +487,26 @@
       "address": "Avinguda de les Drassanes, s/n, 08001 Barcelona",
       "website": "https://www.mmb.cat",
       "etiquetas": {
-        "ubicacion": ["Barcelona", "Catalunya", "España"],
-        "sector": ["Marítimo", "Historia", "Cultura", "Naval"],
-        "profesion": ["Historia", "Estudios Marítimos", "Museología"],
-        "tipo": ["Museo", "Patrimonio"]
+        "ubicacion": [
+          "Barcelona",
+          "Catalunya",
+          "España"
+        ],
+        "sector": [
+          "Marítimo",
+          "Historia",
+          "Cultura",
+          "Naval"
+        ],
+        "profesion": [
+          "Historia",
+          "Estudios Marítimos",
+          "Museología"
+        ],
+        "tipo": [
+          "Museo",
+          "Patrimonio"
+        ]
       }
     },
     {
@@ -321,7 +520,7 @@
       "cameraStyle": "drone-orbit",
       "id": 13,
       "imageUrl": "https://www.nafems.org/images/tmp/8930465.pagespeed.1621959908.png",
-      "logoUrl": "https://www.nafems.org/images/tmp/8930465.pagespeed.1621959908.png",
+      "logoUrl": "assets/logos/compass-ingenier-a-y-sistemas.png",
       "preserveCustomImage": true,
       "content": "Compass Ingeniería y Sistemas es una consultora de ingeniería especializada en servicios técnicos para los sectores naval, aeroespacial, defensa e industrial. Ubicada en el Campus Nord de la Universitat Politècnica de Catalunya (UPC) en Barcelona, Compass participa en proyectos internacionales de innovación, incluyendo el proyecto Fibreship para sustituir el acero por materiales compuestos en construcción naval.",
       "dateTime": "Presente",
@@ -329,10 +528,26 @@
       "address": "Gran Capitán s/n, Campus Nord UPC - Edificio B0, 08034 Barcelona",
       "website": "https://www.compassis.com",
       "etiquetas": {
-        "ubicacion": ["Barcelona", "Catalunya", "España"],
-        "sector": ["Ingeniería", "Naval", "Aeroespacial", "Defensa"],
-        "profesion": ["Ingeniería Naval", "Ingeniería Industrial", "Ingeniería Aeroespacial"],
-        "tipo": ["Consultoría", "Empresa"]
+        "ubicacion": [
+          "Barcelona",
+          "Catalunya",
+          "España"
+        ],
+        "sector": [
+          "Ingeniería",
+          "Naval",
+          "Aeroespacial",
+          "Defensa"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Ingeniería Industrial",
+          "Ingeniería Aeroespacial"
+        ],
+        "tipo": [
+          "Consultoría",
+          "Empresa"
+        ]
       }
     },
     {
@@ -346,7 +561,7 @@
       "cameraStyle": "drone-orbit",
       "id": 14,
       "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Universidad_Polit%C3%A9cnica_de_Cartagena_Logo.svg/1200px-Universidad_Polit%C3%A9cnica_de_Cartagena_Logo.svg.png",
-      "logoUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Universidad_Polit%C3%A9cnica_de_Cartagena_Logo.svg/1200px-Universidad_Polit%C3%A9cnica_de_Cartagena_Logo.svg.png",
+      "logoUrl": "assets/logos/universidad-polit-cnica-de-cartagena-upct.png",
       "preserveCustomImage": true,
       "content": "La Escuela Técnica Superior de Ingeniería Naval y Oceánica (ETSINO) de la Universidad Politécnica de Cartagena forma parte del Campus Alfonso XIII. La UPCT ofrece grados en Ingeniería Naval y Oceánica, másteres especializados y programas de doctorado. Es un centro de referencia en formación de ingenieros navales en el Mediterráneo español, con estrechos vínculos con la industria naval de Cartagena.",
       "dateTime": "Presente",
@@ -354,10 +569,24 @@
       "address": "Paseo Alfonso XIII, 52, 30203 Cartagena (Murcia)",
       "website": "https://navales.upct.es",
       "etiquetas": {
-        "ubicacion": ["Cartagena", "Murcia", "España"],
-        "sector": ["Educación", "Ingeniería", "Naval", "Oceánica"],
-        "profesion": ["Ingeniería Naval", "Ingeniería Oceánica"],
-        "tipo": ["Universidad"]
+        "ubicacion": [
+          "Cartagena",
+          "Murcia",
+          "España"
+        ],
+        "sector": [
+          "Educación",
+          "Ingeniería",
+          "Naval",
+          "Oceánica"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Ingeniería Oceánica"
+        ],
+        "tipo": [
+          "Universidad"
+        ]
       }
     },
     {
@@ -371,7 +600,7 @@
       "cameraStyle": "drone-orbit",
       "id": 15,
       "imageUrl": "https://electronica-submarina.com/wp-content/uploads/2024/07/Logotipo-SAES_vertical-color.png",
-      "logoUrl": "https://electronica-submarina.com/wp-content/uploads/2024/07/Logotipo-SAES_vertical-color.png",
+      "logoUrl": "assets/logos/saes-electr-nica-submarina.png",
       "preserveCustomImage": true,
       "content": "SAES (Sociedad Anónima de Electrónica Submarina) es una empresa española especializada en acústica y electrónica submarina para seguridad y defensa en los sectores militar y civil. Con más de 30 años de experiencia en el sector naval, SAES tiene oficinas en Cartagena y San Fernando (Cádiz). La empresa diseña y fabrica sistemas sonar, sistemas de guerra antisubmarina y soluciones de comunicación submarina.",
       "dateTime": "Presente",
@@ -379,10 +608,27 @@
       "address": "Carretera Algameca, s/n, 30205 Cartagena (Murcia)",
       "website": "https://electronica-submarina.com",
       "etiquetas": {
-        "ubicacion": ["Cartagena", "Murcia", "España"],
-        "sector": ["Defensa", "Electrónica", "Submarina", "Acústica", "Naval"],
-        "profesion": ["Ingeniería Electrónica", "Ingeniería Submarina", "Acústica"],
-        "tipo": ["Empresa", "Defensa"]
+        "ubicacion": [
+          "Cartagena",
+          "Murcia",
+          "España"
+        ],
+        "sector": [
+          "Defensa",
+          "Electrónica",
+          "Submarina",
+          "Acústica",
+          "Naval"
+        ],
+        "profesion": [
+          "Ingeniería Electrónica",
+          "Ingeniería Submarina",
+          "Acústica"
+        ],
+        "tipo": [
+          "Empresa",
+          "Defensa"
+        ]
       }
     },
     {
@@ -396,7 +642,7 @@
       "cameraStyle": "drone-orbit",
       "id": 16,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSae9KJToD5T7osYVT5WBpbITrGuDY5xovSbw&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSae9KJToD5T7osYVT5WBpbITrGuDY5xovSbw&s",
+      "logoUrl": "assets/logos/arqva-museo-nacional-de-arqueolog-a-subacu-tica.png",
       "preserveCustomImage": true,
       "content": "ARQVA (Museo Nacional de Arqueología Subacuática) está ubicado en el puerto de Cartagena y se dedica a la investigación, conservación y difusión del patrimonio cultural subacuático español. El museo exhibe hallazgos arqueológicos submarinos del Mediterráneo, incluyendo pecios romanos, ánforas, anclas y objetos de navegación antigua. ARQVA es referencia nacional e internacional en arqueología submarina.",
       "dateTime": "Presente",
@@ -404,10 +650,26 @@
       "address": "Paseo Alfonso XII, 22, 30202 Cartagena (Murcia)",
       "website": "https://www.cultura.gob.es/mnarqua/",
       "etiquetas": {
-        "ubicacion": ["Cartagena", "Murcia", "España"],
-        "sector": ["Arqueología", "Subacuática", "Historia", "Patrimonio"],
-        "profesion": ["Arqueología", "Historia", "Conservación"],
-        "tipo": ["Museo", "Nacional"]
+        "ubicacion": [
+          "Cartagena",
+          "Murcia",
+          "España"
+        ],
+        "sector": [
+          "Arqueología",
+          "Subacuática",
+          "Historia",
+          "Patrimonio"
+        ],
+        "profesion": [
+          "Arqueología",
+          "Historia",
+          "Conservación"
+        ],
+        "tipo": [
+          "Museo",
+          "Nacional"
+        ]
       }
     },
     {
@@ -421,7 +683,7 @@
       "cameraStyle": "drone-orbit",
       "id": 17,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7zS-mlrD-bI6AGT1NZ6hu-AYuNcSun3MoSQ&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7zS-mlrD-bI6AGT1NZ6hu-AYuNcSun3MoSQ&s",
+      "logoUrl": "assets/logos/museo-naval-de-cartagena.png",
       "preserveCustomImage": true,
       "content": "El Museo Naval de Cartagena, dependiente del Museo Naval de Madrid, está ubicado en la Dársena de Botes del puerto de Cartagena. El museo expone la historia de la Armada Española en el Mediterráneo, con colecciones de maquetas navales, armas, uniformes, instrumentos de navegación y documentos históricos. Destaca su colección de submarinos y la historia del Arsenal de Cartagena.",
       "dateTime": "Presente",
@@ -429,10 +691,24 @@
       "address": "Paseo de Alfonso XII, s/n, Dársena de Botes, 30201 Cartagena (Murcia)",
       "website": "https://www.fundacionmuseonaval.com/museonavalcartagena.html",
       "etiquetas": {
-        "ubicacion": ["Cartagena", "Murcia", "España"],
-        "sector": ["Naval", "Militar", "Historia", "Armada"],
-        "profesion": ["Historia Naval", "Estudios Militares"],
-        "tipo": ["Museo"]
+        "ubicacion": [
+          "Cartagena",
+          "Murcia",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Militar",
+          "Historia",
+          "Armada"
+        ],
+        "profesion": [
+          "Historia Naval",
+          "Estudios Militares"
+        ],
+        "tipo": [
+          "Museo"
+        ]
       }
     },
     {
@@ -446,7 +722,7 @@
       "cameraStyle": "drone-orbit",
       "id": 18,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2t88cqmb7pxARooOlC37ouyt-97Qj5lcv1g&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2t88cqmb7pxARooOlC37ouyt-97Qj5lcv1g&s",
+      "logoUrl": "assets/logos/ctn-centro-tecnol-gico-naval-y-del-mar.png",
       "preserveCustomImage": true,
       "content": "El Centro Tecnológico Naval y del Mar (CTN) es un centro de innovación y desarrollo tecnológico para el sector naval, náutico y de transformación industrial. Ubicado en el Parque Tecnológico de Fuente Álamo, Murcia, CTN ofrece servicios de I+D+i, ensayos, certificación y formación especializada para la industria naval. Es un centro de referencia en la Región de Murcia para el desarrollo tecnológico del sector marítimo.",
       "dateTime": "Presente",
@@ -454,10 +730,25 @@
       "address": "Parque Tecnológico de Fuente Álamo, Ctra El Estrecho-Lobosillo Km2, 30320 Fuente Alamo (Murcia)",
       "website": "https://www.ctnaval.com",
       "etiquetas": {
-        "ubicacion": ["Fuente Álamo", "Murcia", "España"],
-        "sector": ["Tecnología", "Naval", "I+D+i", "Innovación"],
-        "profesion": ["Ingeniería Naval", "Investigación", "Desarrollo"],
-        "tipo": ["Centro Tecnológico"]
+        "ubicacion": [
+          "Fuente Álamo",
+          "Murcia",
+          "España"
+        ],
+        "sector": [
+          "Tecnología",
+          "Naval",
+          "I+D+i",
+          "Innovación"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Investigación",
+          "Desarrollo"
+        ],
+        "tipo": [
+          "Centro Tecnológico"
+        ]
       }
     },
     {
@@ -471,7 +762,7 @@
       "cameraStyle": "drone-orbit",
       "id": 19,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKht5jSaJtAxQndgmHXEVLEyvCCcpBVxsSg&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiKht5jSaJtAxQndgmHXEVLEyvCCcpBVxsSg&s",
+      "logoUrl": "assets/logos/mucain-museo-virtual-de-la-carrera-de-indias.png",
       "preserveCustomImage": true,
       "content": "MUCAIN es un innovador museo virtual inaugurado en 2021 que preserva la historia de la Carrera de Indias, la ruta comercial que conectó España con América desde 1503 hasta 1828. Describida como 'la operación naval más duradera, efectiva, decisiva y exitosa de la historia de la humanidad', esta ruta convirtió a Cádiz en uno de los centros comerciales más poderosos de Europa tras el traslado de la Casa de Contratación desde Sevilla en 1717.",
       "dateTime": "1503-1828 (Museo: 2021)",
@@ -479,10 +770,27 @@
       "address": "Plaza de la Catedral, 11005 Cádiz",
       "website": "https://mucain.com",
       "etiquetas": {
-        "ubicacion": ["Cádiz", "Andalucía", "España"],
-        "sector": ["Marítimo", "Historia", "Naval", "Comercio", "Cultura"],
-        "profesion": ["Historia", "Estudios Marítimos", "Estudios Navales"],
-        "tipo": ["Museo Virtual", "Centro Cultural"]
+        "ubicacion": [
+          "Cádiz",
+          "Andalucía",
+          "España"
+        ],
+        "sector": [
+          "Marítimo",
+          "Historia",
+          "Naval",
+          "Comercio",
+          "Cultura"
+        ],
+        "profesion": [
+          "Historia",
+          "Estudios Marítimos",
+          "Estudios Navales"
+        ],
+        "tipo": [
+          "Museo Virtual",
+          "Centro Cultural"
+        ]
       }
     },
     {
@@ -496,7 +804,7 @@
       "cameraStyle": "drone-orbit",
       "id": 20,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0dirT79S449DZSZu06paQnFsxyYJlZZWhLLSrjLXuHsIlOdc91D0R6XslTzC1PkRWqZs&usqp=CAU",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0dirT79S449DZSZu06paQnFsxyYJlZZWhLLSrjLXuHsIlOdc91D0R6XslTzC1PkRWqZs&usqp=CAU",
+      "logoUrl": "assets/logos/museo-del-mar-y-de-la-sal.png",
       "preserveCustomImage": true,
       "content": "El Museo del Mar y de la Sal de Torrevieja está dedicado a la historia de la ciudad, especialmente su conexión con el mar y la industria salinera. Ubicado a pocos minutos del paseo Vistalegre, el museo ofrece exposiciones sobre la pesca tradicional, la explotación de las salinas de Torrevieja y la evolución de la ciudad costera. Entrada gratuita.",
       "dateTime": "Presente",
@@ -504,10 +812,25 @@
       "address": "Calle Patricio Pérez, 10 bajo, Torrevieja (Alicante)",
       "website": "https://torrevieja.es",
       "etiquetas": {
-        "ubicacion": ["Torrevieja", "Alicante", "Comunidad Valenciana", "España"],
-        "sector": ["Marítimo", "Historia", "Sal", "Pesca"],
-        "profesion": ["Historia", "Etnografía"],
-        "tipo": ["Museo"]
+        "ubicacion": [
+          "Torrevieja",
+          "Alicante",
+          "Comunidad Valenciana",
+          "España"
+        ],
+        "sector": [
+          "Marítimo",
+          "Historia",
+          "Sal",
+          "Pesca"
+        ],
+        "profesion": [
+          "Historia",
+          "Etnografía"
+        ],
+        "tipo": [
+          "Museo"
+        ]
       }
     },
     {
@@ -521,7 +844,7 @@
       "cameraStyle": "drone-orbit",
       "id": 21,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDQsj3ctgbFBdOwQM_nq1BWmHV4GbfX2_5cA&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDQsj3ctgbFBdOwQM_nq1BWmHV4GbfX2_5cA&s",
+      "logoUrl": "assets/logos/ghenova-ingenier-a.png",
       "preserveCustomImage": true,
       "content": "Ghenova Ingeniería es una empresa de ingeniería multidisciplinar con fuerte presencia en el sector naval. Establecida en la Bahía de Cádiz desde 2018, trabaja en proyectos para Navantia incluyendo las corbetas Avante 2200 KSA, los BAM-IS y el Juan Sebastián Elcano. Con oficinas en Sevilla, Ferrol y otras ciudades, Ghenova es líder en ingeniería naval, offshore y energías renovables.",
       "dateTime": "Presente",
@@ -529,10 +852,27 @@
       "address": "El Puerto de Santa María (Cádiz)",
       "website": "https://ghenova.com",
       "etiquetas": {
-        "ubicacion": ["El Puerto de Santa María", "Cádiz", "Andalucía", "España"],
-        "sector": ["Ingeniería", "Naval", "Offshore", "Energías Renovables"],
-        "profesion": ["Ingeniería Naval", "Ingeniería Industrial", "Ingeniería Offshore"],
-        "tipo": ["Ingeniería", "Empresa"]
+        "ubicacion": [
+          "El Puerto de Santa María",
+          "Cádiz",
+          "Andalucía",
+          "España"
+        ],
+        "sector": [
+          "Ingeniería",
+          "Naval",
+          "Offshore",
+          "Energías Renovables"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Ingeniería Industrial",
+          "Ingeniería Offshore"
+        ],
+        "tipo": [
+          "Ingeniería",
+          "Empresa"
+        ]
       }
     },
     {
@@ -546,7 +886,7 @@
       "cameraStyle": "drone-orbit",
       "id": 22,
       "imageUrl": "https://www.navantia.es/media/46/noticias/SEANERGIES_01_1d66fef168.png",
-      "logoUrl": "https://www.navantia.es/media/46/noticias/SEANERGIES_01_1d66fef168.png",
+      "logoUrl": "assets/logos/navantia-seanergies-puerto-real.png",
       "preserveCustomImage": true,
       "content": "Navantia Seanergies es la división de Navantia dedicada al desarrollo de energías verdes, especialmente eólica marina e hidrógeno. Con instalaciones en Puerto Real (Cádiz), Fene (A Coruña) y Cartagena, Seanergies fabrica cimentaciones y estructuras para parques eólicos marinos. En dos años ha firmado contratos por valor de 550 millones de euros, consolidándose como la Marca España de la eólica marina.",
       "dateTime": "2022-Presente",
@@ -554,10 +894,27 @@
       "address": "C/ polígono Astillero s/n, 11519 Puerto Real (Cádiz)",
       "website": "https://navantiaseanergies.com",
       "etiquetas": {
-        "ubicacion": ["Puerto Real", "Cádiz", "Andalucía", "España"],
-        "sector": ["Energías Renovables", "Eólica Marina", "Hidrógeno", "Offshore"],
-        "profesion": ["Ingeniería Offshore", "Energías Renovables", "Ingeniería Naval"],
-        "tipo": ["Empresa", "Astillero"]
+        "ubicacion": [
+          "Puerto Real",
+          "Cádiz",
+          "Andalucía",
+          "España"
+        ],
+        "sector": [
+          "Energías Renovables",
+          "Eólica Marina",
+          "Hidrógeno",
+          "Offshore"
+        ],
+        "profesion": [
+          "Ingeniería Offshore",
+          "Energías Renovables",
+          "Ingeniería Naval"
+        ],
+        "tipo": [
+          "Empresa",
+          "Astillero"
+        ]
       }
     },
     {
@@ -571,7 +928,7 @@
       "cameraStyle": "drone-orbit",
       "id": 23,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUxvEyErLMdxMGTFcKrjjo5WRKgsFkoShtsg&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUxvEyErLMdxMGTFcKrjjo5WRKgsFkoShtsg&s",
+      "logoUrl": "assets/logos/museo-el-dique.png",
       "preserveCustomImage": true,
       "content": "El Museo El Dique está ubicado en el Astillero de Puerto Real (Navantia), Cádiz. El museo preserva la historia de la construcción naval en la Bahía de Cádiz, con exposiciones sobre la evolución de los astilleros, maquetas de buques históricos y la tradición naval de la zona. Se requiere cita previa para las visitas. Abierto martes y jueves de 11:00 a 13:00.",
       "dateTime": "Presente",
@@ -579,10 +936,24 @@
       "address": "Polígono Astilleros, Puerto Real (Cádiz)",
       "website": "https://museodique.navantia.es",
       "etiquetas": {
-        "ubicacion": ["Puerto Real", "Cádiz", "Andalucía", "España"],
-        "sector": ["Naval", "Historia", "Construcción Naval"],
-        "profesion": ["Historia Naval", "Ingeniería Naval"],
-        "tipo": ["Museo"]
+        "ubicacion": [
+          "Puerto Real",
+          "Cádiz",
+          "Andalucía",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Historia",
+          "Construcción Naval"
+        ],
+        "profesion": [
+          "Historia Naval",
+          "Ingeniería Naval"
+        ],
+        "tipo": [
+          "Museo"
+        ]
       }
     },
     {
@@ -596,7 +967,7 @@
       "cameraStyle": "drone-orbit",
       "id": 24,
       "imageUrl": "https://soclimpact.net/wp-content/uploads/2020/11/17.png",
-      "logoUrl": "https://soclimpact.net/wp-content/uploads/2020/11/17.png",
+      "logoUrl": "assets/logos/universidad-de-las-palmas-de-gran-canaria-ulpgc.png",
       "preserveCustomImage": true,
       "content": "La Universidad de Las Palmas de Gran Canaria (ULPGC) ofrece el Grado en Ingeniería en Tecnología Naval en la Escuela de Ingenierías Industriales y Civiles. El programa forma profesionales en diseño de buques, construcción naval, sistemas mecánicos, eléctricos y de fluidos para buques, así como procesos de construcción, reparación y mantenimiento naval. La ULPGC es un centro de referencia en formación naval en el Atlántico.",
       "dateTime": "Presente",
@@ -604,10 +975,24 @@
       "address": "Campus Universitario de Tafira s/n, 35017 Las Palmas de Gran Canaria",
       "website": "https://www.ulpgc.es",
       "etiquetas": {
-        "ubicacion": ["Las Palmas", "Gran Canaria", "Canarias", "España"],
-        "sector": ["Educación", "Ingeniería", "Naval"],
-        "profesion": ["Ingeniería Naval", "Tecnología Naval"],
-        "tipo": ["Universidad"]
+        "ubicacion": [
+          "Las Palmas",
+          "Gran Canaria",
+          "Canarias",
+          "España"
+        ],
+        "sector": [
+          "Educación",
+          "Ingeniería",
+          "Naval"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Tecnología Naval"
+        ],
+        "tipo": [
+          "Universidad"
+        ]
       }
     },
     {
@@ -621,7 +1006,7 @@
       "cameraStyle": "drone-orbit",
       "id": 25,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwqGsj1bSU79RU2MMBylK-Q3SvNuoy2eyCGA&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwqGsj1bSU79RU2MMBylK-Q3SvNuoy2eyCGA&s",
+      "logoUrl": "assets/logos/plocan-plataforma-oce-nica-de-canarias.png",
       "preserveCustomImage": true,
       "content": "PLOCAN (Plataforma Oceánica de Canarias) es una Infraestructura Científica y Técnica Singular (ICTS) ubicada en Telde, Gran Canaria. PLOCAN ofrece instalaciones en tierra y en mar para investigación marina, ensayos de tecnología oceánica, energías renovables marinas y observación oceanográfica. Ubicada estratégicamente a 20 km de Las Palmas y 8 km del aeropuerto, PLOCAN es referencia internacional en ciencias marinas.",
       "dateTime": "Presente",
@@ -629,10 +1014,27 @@
       "address": "Carretera de Taliarte, s/n, 35200 Telde (Gran Canaria)",
       "website": "https://plocan.eu",
       "etiquetas": {
-        "ubicacion": ["Telde", "Gran Canaria", "Canarias", "España"],
-        "sector": ["Investigación", "Oceanografía", "Tecnología Marina", "Energías Renovables"],
-        "profesion": ["Oceanografía", "Ingeniería Marina", "Investigación"],
-        "tipo": ["Centro de Investigación", "ICTS"]
+        "ubicacion": [
+          "Telde",
+          "Gran Canaria",
+          "Canarias",
+          "España"
+        ],
+        "sector": [
+          "Investigación",
+          "Oceanografía",
+          "Tecnología Marina",
+          "Energías Renovables"
+        ],
+        "profesion": [
+          "Oceanografía",
+          "Ingeniería Marina",
+          "Investigación"
+        ],
+        "tipo": [
+          "Centro de Investigación",
+          "ICTS"
+        ]
       }
     },
     {
@@ -646,7 +1048,7 @@
       "cameraStyle": "drone-orbit",
       "id": 26,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEvfvub4jiGbHrWcf2xpHZR3p-ri2jswFnlA&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEvfvub4jiGbHrWcf2xpHZR3p-ri2jswFnlA&s",
+      "logoUrl": "assets/logos/museo-naval-de-las-palmas-de-gran-canaria.png",
       "preserveCustomImage": true,
       "content": "El Museo Naval de Las Palmas de Gran Canaria está ubicado dentro del Arsenal de Las Palmas. El museo exhibe la historia naval de Canarias, con colecciones de maquetas, instrumentos de navegación, uniformes y armas navales. Es imprescindible presentar DNI para acceder, ya que se encuentra dentro de instalaciones militares. Entrada gratuita. Abierto de lunes a viernes de 10:00 a 13:00.",
       "dateTime": "Presente",
@@ -654,10 +1056,25 @@
       "address": "Calle León y Castillo, 310, Arsenal de Las Palmas, 35007 Las Palmas de Gran Canaria",
       "website": "https://www.fundacionmuseonaval.com/museonavalcanarias.html",
       "etiquetas": {
-        "ubicacion": ["Las Palmas", "Gran Canaria", "Canarias", "España"],
-        "sector": ["Naval", "Militar", "Historia", "Armada"],
-        "profesion": ["Historia Naval", "Estudios Militares"],
-        "tipo": ["Museo"]
+        "ubicacion": [
+          "Las Palmas",
+          "Gran Canaria",
+          "Canarias",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Militar",
+          "Historia",
+          "Armada"
+        ],
+        "profesion": [
+          "Historia Naval",
+          "Estudios Militares"
+        ],
+        "tipo": [
+          "Museo"
+        ]
       }
     },
     {
@@ -671,7 +1088,7 @@
       "cameraStyle": "drone-orbit",
       "id": 27,
       "imageUrl": "https://media.licdn.com/dms/image/v2/D4E0BAQHUjPMLHPpsww/company-logo_200_200/company-logo_200_200/0/1700235096863/astican_logo?e=2147483647&v=beta&t=nV8aM5eLIAylnkuFFDqClzZJRK6I7WuXJ_HQUwN1CBk",
-      "logoUrl": "https://media.licdn.com/dms/image/v2/D4E0BAQHUjPMLHPpsww/company-logo_200_200/company-logo_200_200/0/1700235096863/astican_logo?e=2147483647&v=beta&t=nV8aM5eLIAylnkuFFDqClzZJRK6I7WuXJ_HQUwN1CBk",
+      "logoUrl": "assets/logos/astican-astilleros-canarios.png",
       "preserveCustomImage": true,
       "content": "Astican (Astilleros Canarios S.A.) es un astillero ubicado en el Puerto de Las Palmas de Gran Canaria, especializado en reparación, mantenimiento y conversión de buques de todo tipo, estructuras offshore y dispositivos de energías renovables marinas. Estratégicamente posicionado en el Atlántico, Astican da servicio al tráfico marítimo entre Europa, África y América. Cuenta con un sincrolift de 4.800 toneladas.",
       "dateTime": "Presente",
@@ -679,10 +1096,26 @@
       "address": "Avenida Petrolíferas, S/N, Las Palmas de Gran Canaria",
       "website": "https://www.astican.es",
       "etiquetas": {
-        "ubicacion": ["Las Palmas", "Gran Canaria", "Canarias", "España"],
-        "sector": ["Naval", "Reparación", "Mantenimiento", "Offshore"],
-        "profesion": ["Ingeniería Naval", "Reparación Naval"],
-        "tipo": ["Astillero", "Empresa"]
+        "ubicacion": [
+          "Las Palmas",
+          "Gran Canaria",
+          "Canarias",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Reparación",
+          "Mantenimiento",
+          "Offshore"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Reparación Naval"
+        ],
+        "tipo": [
+          "Astillero",
+          "Empresa"
+        ]
       }
     },
     {
@@ -696,7 +1129,7 @@
       "cameraStyle": "drone-orbit",
       "id": 28,
       "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/SENER_Logo_2019.svg/1200px-SENER_Logo_2019.svg.png",
-      "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/SENER_Logo_2019.svg/1200px-SENER_Logo_2019.svg.png",
+      "logoUrl": "assets/logos/sener-sevilla.png",
       "preserveCustomImage": true,
       "content": "Sener es una empresa de ingeniería multidisciplinar con oficina en Sevilla (Tablada, junto al puerto). La oficina de Sevilla se centra principalmente en el diseño y desarrollo de sistemas de guiado, navegación y control (GNC) y sistemas de ingeniería para los mercados aeroespacial y de defensa. Sener también trabaja en proyectos del sector naval, industrial y energías renovables.",
       "dateTime": "Presente",
@@ -704,10 +1137,26 @@
       "address": "Edificio Galia Puerto Módulo 2, 1 c/ José Delgado Brackenbury, 11, 41011 Sevilla",
       "website": "https://www.group.sener",
       "etiquetas": {
-        "ubicacion": ["Sevilla", "Andalucía", "España"],
-        "sector": ["Ingeniería", "Aeroespacial", "Defensa", "Naval"],
-        "profesion": ["Ingeniería", "Aeroespacial", "Naval"],
-        "tipo": ["Ingeniería", "Empresa"]
+        "ubicacion": [
+          "Sevilla",
+          "Andalucía",
+          "España"
+        ],
+        "sector": [
+          "Ingeniería",
+          "Aeroespacial",
+          "Defensa",
+          "Naval"
+        ],
+        "profesion": [
+          "Ingeniería",
+          "Aeroespacial",
+          "Naval"
+        ],
+        "tipo": [
+          "Ingeniería",
+          "Empresa"
+        ]
       }
     },
     {
@@ -721,7 +1170,7 @@
       "cameraStyle": "drone-orbit",
       "id": 29,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmU3DqiNh5izH5pVQmVXBt1XBzmIUfXERcmQ&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmU3DqiNh5izH5pVQmVXBt1XBzmIUfXERcmQ&s",
+      "logoUrl": "assets/logos/soermar.png",
       "preserveCustomImage": true,
       "content": "Soermar (Sociedad para el Estudio de los Recursos Marítimos) es una asociación que agrupa a 18 de los principales astilleros pequeños y medianos de España. Soermar promueve la innovación tecnológica en el sector naval y organiza jornadas de innovación. Aunque no es un astillero en sí, es un actor clave en el ecosistema de I+D+i del sector naval español.",
       "dateTime": "Presente",
@@ -729,10 +1178,25 @@
       "address": "Vigo (Galicia)",
       "website": "https://www.soermar.com",
       "etiquetas": {
-        "ubicacion": ["Vigo", "Galicia", "España"],
-        "sector": ["Naval", "I+D+i", "Innovación", "Asociación"],
-        "profesion": ["Ingeniería Naval", "Investigación"],
-        "tipo": ["Asociación", "Fundación"]
+        "ubicacion": [
+          "Vigo",
+          "Galicia",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "I+D+i",
+          "Innovación",
+          "Asociación"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Investigación"
+        ],
+        "tipo": [
+          "Asociación",
+          "Fundación"
+        ]
       }
     },
     {
@@ -746,7 +1210,7 @@
       "cameraStyle": "drone-orbit",
       "id": 30,
       "imageUrl": "https://www.seaplace.es/wp-content/uploads/2025/09/Seaplace-Logo-Estandar-1.png",
-      "logoUrl": "https://www.seaplace.es/wp-content/uploads/2025/09/Seaplace-Logo-Estandar-1.png",
+      "logoUrl": "assets/logos/seaplace.png",
       "preserveCustomImage": true,
       "content": "Seaplace es una empresa española especializada en ingeniería offshore y diseño naval, con expertise en eólica marina, oil & gas y operaciones marinas. Con oficina en Vigo y Madrid, Seaplace ha desarrollado la plataforma CROWN Spar para eólica flotante offshore, certificada por DNV. La empresa ofrece servicios de ingeniería avanzada para proyectos offshore complejos.",
       "dateTime": "Presente",
@@ -754,10 +1218,26 @@
       "address": "Marqués de Valladares, 3 1ºDrcha, 36201 Vigo (Galicia)",
       "website": "https://www.seaplace.es",
       "etiquetas": {
-        "ubicacion": ["Vigo", "Galicia", "España"],
-        "sector": ["Offshore", "Ingeniería", "Eólica Marina", "Oil & Gas"],
-        "profesion": ["Ingeniería Offshore", "Ingeniería Naval", "Energías Renovables"],
-        "tipo": ["Ingeniería", "Empresa"]
+        "ubicacion": [
+          "Vigo",
+          "Galicia",
+          "España"
+        ],
+        "sector": [
+          "Offshore",
+          "Ingeniería",
+          "Eólica Marina",
+          "Oil & Gas"
+        ],
+        "profesion": [
+          "Ingeniería Offshore",
+          "Ingeniería Naval",
+          "Energías Renovables"
+        ],
+        "tipo": [
+          "Ingeniería",
+          "Empresa"
+        ]
       }
     },
     {
@@ -771,7 +1251,7 @@
       "cameraStyle": "drone-orbit",
       "id": 31,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbFnPAsewQqeQbsP1twRwd_--bfzAp3raRiQ&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbFnPAsewQqeQbsP1twRwd_--bfzAp3raRiQ&s",
+      "logoUrl": "assets/logos/real-liga-naval-espa-ola.png",
       "preserveCustomImage": true,
       "content": "La Real Liga Naval Española es una asociación centenaria y referencia indiscutible en el sector marítimo español. Fundada para fomentar el amor al mar y promover la cultura marítima, la RLNE organiza actividades educativas, conferencias y eventos relacionados con el sector naval. Ubicada en el centro de Madrid, es una institución de referencia para profesionales y entusiastas del mar.",
       "dateTime": "Presente",
@@ -779,10 +1259,22 @@
       "address": "Calle Mayor, 16, 1ª planta, Madrid",
       "website": "https://www.realliganaval.com",
       "etiquetas": {
-        "ubicacion": ["Madrid", "España"],
-        "sector": ["Marítimo", "Cultura", "Educación", "Naval"],
-        "profesion": ["Todas las profesiones marítimas"],
-        "tipo": ["Asociación"]
+        "ubicacion": [
+          "Madrid",
+          "España"
+        ],
+        "sector": [
+          "Marítimo",
+          "Cultura",
+          "Educación",
+          "Naval"
+        ],
+        "profesion": [
+          "Todas las profesiones marítimas"
+        ],
+        "tipo": [
+          "Asociación"
+        ]
       }
     },
     {
@@ -796,7 +1288,7 @@
       "cameraStyle": "drone-orbit",
       "id": 32,
       "imageUrl": "https://www.aimen.es/assets/img/logo-aimen.png",
-      "logoUrl": "https://www.aimen.es/assets/img/logo-aimen.png",
+      "logoUrl": "assets/logos/aimen-centro-tecnol-gico.png",
       "preserveCustomImage": true,
       "content": "AIMEN Centro Tecnológico es un centro de investigación metalúrgica del noroeste de España, especializado en tecnologías de fabricación avanzada, materiales y unión. Con instalaciones en O Porriño (Pontevedra), AIMEN trabaja con el sector naval, industrial y de automoción. El centro ofrece servicios de I+D+i, ensayos, certificación y formación especializada en soldadura, materiales y procesos de fabricación.",
       "dateTime": "Presente",
@@ -804,10 +1296,26 @@
       "address": "Calle Relva 27A, Torneiros, 36410 O Porriño (Pontevedra)",
       "website": "https://www.aimen.es",
       "etiquetas": {
-        "ubicacion": ["O Porriño", "Pontevedra", "Galicia", "España"],
-        "sector": ["Tecnología", "Investigación", "Metalurgia", "Fabricación"],
-        "profesion": ["Ingeniería de Materiales", "Investigación", "Ingeniería Industrial"],
-        "tipo": ["Centro Tecnológico"]
+        "ubicacion": [
+          "O Porriño",
+          "Pontevedra",
+          "Galicia",
+          "España"
+        ],
+        "sector": [
+          "Tecnología",
+          "Investigación",
+          "Metalurgia",
+          "Fabricación"
+        ],
+        "profesion": [
+          "Ingeniería de Materiales",
+          "Investigación",
+          "Ingeniería Industrial"
+        ],
+        "tipo": [
+          "Centro Tecnológico"
+        ]
       }
     },
     {
@@ -821,7 +1329,7 @@
       "cameraStyle": "drone-orbit",
       "id": 33,
       "imageUrl": "https://freireshipyard.com/wp-content/uploads/2025/09/logo-freire-noticias-entradas-251x200.png",
-      "logoUrl": "https://freireshipyard.com/wp-content/uploads/2025/09/logo-freire-noticias-entradas-251x200.png",
+      "logoUrl": "assets/logos/freire-shipyard.png",
       "preserveCustomImage": true,
       "content": "Freire Shipyard (Construcciones Navales P. Freire, S.A.) es un astillero ubicado en Vigo desde 1895. La empresa familiar construye buques de pesca, oceanográficos, ferries y buques offshore. Ubicado en el barrio de Bouzas, Freire Shipyard es reconocido por su calidad en construcción naval y ha entregado cientos de buques a clientes de todo el mundo.",
       "dateTime": "1895-Presente",
@@ -829,10 +1337,26 @@
       "address": "Av. da Beiramar 18, 36208 Vigo",
       "website": "https://freireshipyard.com",
       "etiquetas": {
-        "ubicacion": ["Vigo", "Pontevedra", "Galicia", "España"],
-        "sector": ["Naval", "Construcción", "Pesca", "Offshore"],
-        "profesion": ["Ingeniería Naval", "Construcción Naval"],
-        "tipo": ["Astillero", "Empresa"]
+        "ubicacion": [
+          "Vigo",
+          "Pontevedra",
+          "Galicia",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Construcción",
+          "Pesca",
+          "Offshore"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Construcción Naval"
+        ],
+        "tipo": [
+          "Astillero",
+          "Empresa"
+        ]
       }
     },
     {
@@ -846,7 +1370,7 @@
       "cameraStyle": "drone-orbit",
       "id": 34,
       "imageUrl": "https://museodomar.xunta.gal/imaxes/45.gif",
-      "logoUrl": "https://museodomar.xunta.gal/imaxes/45.gif",
+      "logoUrl": "assets/logos/museo-do-mar-de-galicia.jpg",
       "preserveCustomImage": true,
       "content": "El Museo do Mar de Galicia está emplazado en la vieja fábrica de conservas Alcabre-Molino de Viento (1887) en Vigo. El museo ofrece un recorrido por la relación de Galicia con el mar, desde la pesca tradicional hasta la construcción naval, pasando por la industria conservera, la navegación y la biología marina. Es un espacio de referencia para conocer la cultura marítima gallega.",
       "dateTime": "1887-Presente",
@@ -854,10 +1378,26 @@
       "address": "Avenida Atlántica, 160, 36208 Vigo",
       "website": "http://museodomar.xunta.gal",
       "etiquetas": {
-        "ubicacion": ["Vigo", "Pontevedra", "Galicia", "España"],
-        "sector": ["Marítimo", "Historia", "Pesca", "Industria Conservera"],
-        "profesion": ["Historia", "Etnografía", "Biología Marina"],
-        "tipo": ["Museo"]
+        "ubicacion": [
+          "Vigo",
+          "Pontevedra",
+          "Galicia",
+          "España"
+        ],
+        "sector": [
+          "Marítimo",
+          "Historia",
+          "Pesca",
+          "Industria Conservera"
+        ],
+        "profesion": [
+          "Historia",
+          "Etnografía",
+          "Biología Marina"
+        ],
+        "tipo": [
+          "Museo"
+        ]
       }
     },
     {
@@ -871,7 +1411,7 @@
       "cameraStyle": "drone-orbit",
       "id": 35,
       "imageUrl": "https://www.tecnologiaeinnovacion.defensa.gob.es/Lists/MaquetacionETID/ImagenesCapacidades/CEHIPAR.PNG",
-      "logoUrl": "https://www.tecnologiaeinnovacion.defensa.gob.es/Lists/MaquetacionETID/ImagenesCapacidades/CEHIPAR.PNG",
+      "logoUrl": "assets/logos/CEHIPAR.png",
       "preserveCustomImage": true,
       "content": "El Canal de Experiencias Hidrodinámicas de El Pardo (CEHIPAR) fue fundado en 1928 por la Armada Española y se dedica a la investigación y experimentación en hidrodinámica naval. Es una Infraestructura Científica y Técnica Singular (ICTS) que ofrece servicios de ensayos hidrodinámicos, pruebas de modelos de buques y estudios de resistencia al avance. CEHIPAR es referencia mundial en hidrodinámica naval.",
       "dateTime": "1928-Presente",
@@ -879,10 +1419,26 @@
       "address": "Carretera de la Sierra, 28048 Madrid",
       "website": "https://www.inta.es/ICTS-CEHIPAR/",
       "etiquetas": {
-        "ubicacion": ["El Pardo", "Madrid", "España"],
-        "sector": ["Investigación", "Hidrodinámica", "Naval", "Ingeniería"],
-        "profesion": ["Ingeniería Naval", "Hidrodinámica", "Investigación"],
-        "tipo": ["Centro de Investigación", "ICTS"]
+        "ubicacion": [
+          "El Pardo",
+          "Madrid",
+          "España"
+        ],
+        "sector": [
+          "Investigación",
+          "Hidrodinámica",
+          "Naval",
+          "Ingeniería"
+        ],
+        "profesion": [
+          "Ingeniería Naval",
+          "Hidrodinámica",
+          "Investigación"
+        ],
+        "tipo": [
+          "Centro de Investigación",
+          "ICTS"
+        ]
       }
     },
     {
@@ -896,7 +1452,7 @@
       "cameraStyle": "drone-orbit",
       "id": 36,
       "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/59/Emblem_of_the_Spanish_Naval_Museum.svg",
-      "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/5/59/Emblem_of_the_Spanish_Naval_Museum.svg",
+      "logoUrl": "assets/logos/Emblem_of_the_Spanish_Naval_Muse.png",
       "preserveCustomImage": true,
       "content": "El Museo Naval de Madrid, ubicado en el Paseo del Prado (entrada por Calle Montalbán 2), es el principal museo naval de España. Exhibe la historia de la Armada Española desde los Reyes Católicos hasta la actualidad, con colecciones de maquetas, instrumentos de navegación, mapas históricos, armas y uniformes. Entrada gratuita (contribución voluntaria de 3€). Abierto de martes a domingo de 10:00 a 19:00 (agosto hasta 15:00).",
       "dateTime": "Presente",
@@ -904,10 +1460,24 @@
       "address": "Paseo del Prado, 3, 28014 Madrid (entrada por C/ Montalbán 2)",
       "website": "https://www.fundacionmuseonaval.com/museonavalmadrid.html",
       "etiquetas": {
-        "ubicacion": ["Madrid", "España"],
-        "sector": ["Naval", "Militar", "Historia", "Armada"],
-        "profesion": ["Historia Naval", "Estudios Militares"],
-        "tipo": ["Museo", "Nacional"]
+        "ubicacion": [
+          "Madrid",
+          "España"
+        ],
+        "sector": [
+          "Naval",
+          "Militar",
+          "Historia",
+          "Armada"
+        ],
+        "profesion": [
+          "Historia Naval",
+          "Estudios Militares"
+        ],
+        "tipo": [
+          "Museo",
+          "Nacional"
+        ]
       }
     },
     {
@@ -921,7 +1491,7 @@
       "cameraStyle": "drone-orbit",
       "id": 37,
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgPzvcPmhsTWt4smKBDl_FXiLyW2YEfmG0kg&s",
-      "logoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgPzvcPmhsTWt4smKBDl_FXiLyW2YEfmG0kg&s",
+      "logoUrl": "assets/logos/Reales Atarazanas de Sevilla.png",
       "preserveCustomImage": true,
       "content": "Las Reales Atarazanas de Sevilla son un conjunto de edificios históricos ubicados junto al Guadalquivir, entre la Torre del Oro y la Torre de la Plata. Las Atarazanas se utilizaban para la construcción y reparación de buques. Tras una extensa rehabilitación financiada por la Junta de Andalucía y la Fundación La Caixa (más de 20 millones de euros), las Atarazanas han reabierto sus puertas en octubre de 2024.",
       "dateTime": "Siglo XIII-Presente",
@@ -929,10 +1499,26 @@
       "address": "Calle Temprado, s/n, 41001 Sevilla",
       "website": "https://www.juntadeandalucia.es",
       "etiquetas": {
-        "ubicacion": ["Sevilla", "Andalucía", "España"],
-        "sector": ["Historia", "Naval", "Patrimonio", "Construcción Naval"],
-        "profesion": ["Historia", "Arquitectura", "Patrimonio"],
-        "tipo": ["Monumento Histórico", "Patrimonio"]
+        "ubicacion": [
+          "Sevilla",
+          "Andalucía",
+          "España"
+        ],
+        "sector": [
+          "Historia",
+          "Naval",
+          "Patrimonio",
+          "Construcción Naval"
+        ],
+        "profesion": [
+          "Historia",
+          "Arquitectura",
+          "Patrimonio"
+        ],
+        "tipo": [
+          "Monumento Histórico",
+          "Patrimonio"
+        ]
       }
     },
     {
@@ -946,7 +1532,7 @@
       "cameraStyle": "drone-orbit",
       "id": 38,
       "imageUrl": "https://static.wixstatic.com/media/18acae_6847fdcbde304a31bf26700040246957~mv2.jpg/v1/crop/x_5,y_0,w_189,h_200/fill/w_222,h_236,al_c,lg_1,q_80,enc_avif,quality_auto/fundacion_excelem_logo.jpg",
-      "logoUrl": "https://excelem.org/wp-content/uploads/logo-excelem.svg",
+      "logoUrl": "assets/logos/fundacion_excelem_logo.png",
       "preserveCustomImage": true,
       "content": "Fundación Excelem conforma un ecosistema transversal de Robótica y Automatización que coordina acciones entre los ámbitos educativo, institucional y empresarial. Su misión es mejorar la formación tecnológica, fomentar la innovación, crear empresas punteras del sector y generar empleos de calidad en la Región de Murcia. Iniciativa conjunta de FREMM y Centro Tecnológico del Metal, la fundación promueve las materias STEAM desde edades tempranas.",
       "dateTime": "2023-Presente",
@@ -954,10 +1540,29 @@
       "address": "Polígono Industrial Oeste, Calle Perú, 5, 30820 Alcantarilla (Murcia)",
       "website": "https://excelem.org",
       "etiquetas": {
-        "ubicacion": ["Murcia", "España", "Alcantarilla"],
-        "sector": ["Robótica", "Automatización", "Tecnología", "Manufactura", "Educación", "STEAM"],
-        "profesion": ["Ingeniería", "Ingeniería Industrial", "Tecnología", "Robótica"],
-        "tipo": ["Fundación", "Centro de Investigación"]
+        "ubicacion": [
+          "Murcia",
+          "España",
+          "Alcantarilla"
+        ],
+        "sector": [
+          "Robótica",
+          "Automatización",
+          "Tecnología",
+          "Manufactura",
+          "Educación",
+          "STEAM"
+        ],
+        "profesion": [
+          "Ingeniería",
+          "Ingeniería Industrial",
+          "Tecnología",
+          "Robótica"
+        ],
+        "tipo": [
+          "Fundación",
+          "Centro de Investigación"
+        ]
       }
     }
   ]

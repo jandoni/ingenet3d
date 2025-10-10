@@ -109,7 +109,6 @@ export function createChapterCard(chapter) {
       url: chapter.logoUrl,
       type: 'logo'
     });
-    console.log(`📷 Using logoUrl for ${chapter.title}: ${chapter.logoUrl}`);
   }
 
   // Second priority: favicon from website
@@ -122,7 +121,6 @@ export function createChapterCard(chapter) {
         url: faviconUrl,
         type: 'favicon'
       });
-      console.log(`📷 Added favicon fallback for ${chapter.title}: ${faviconUrl}`);
     } catch (e) {
       console.warn(`Invalid website URL for ${chapter.title}:`, e);
     }
@@ -160,7 +158,7 @@ export function createChapterCard(chapter) {
       };
 
       chapterImage.onload = function() {
-        console.log(`✅ Successfully loaded ${source.type} for ${chapter.title}`);
+        // Successfully loaded
       };
 
       imageContainer.appendChild(chapterImage);
