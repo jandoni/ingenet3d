@@ -1,7 +1,7 @@
 /* Modern UI Design System */
 :root {
   --nav-height: 60px;
-  --bottom-sheet-min-height: 140px;
+  --bottom-sheet-min-height: 36px; /* Only show the handle when minimized */
   --bottom-sheet-height: 82vh; /* Increased to fit under top navigation */
   --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -244,6 +244,59 @@
 
 .bottom-sheet.minimized {
   transform: translateY(calc(100% - var(--bottom-sheet-min-height)));
+  animation: sheetBounceHint 13s ease-in-out infinite; /* Wait 5s, bounce 3 times, wait 8s, repeat */
+}
+
+/* Bounce animation to hint users can expand the sheet */
+/* Timeline: 0-5s wait, 5-6.5s bounce 3 times, 6.5-13s wait */
+@keyframes sheetBounceHint {
+  0%, 38.5% {
+    /* Wait 5 seconds (5/13 = 38.5%) */
+    transform: translateY(calc(100% - var(--bottom-sheet-min-height)));
+  }
+  40.4% {
+    /* First bounce up (5.25s) */
+    transform: translateY(calc(100% - var(--bottom-sheet-min-height) - 16px));
+  }
+  42.3% {
+    /* First bounce down (5.5s) */
+    transform: translateY(calc(100% - var(--bottom-sheet-min-height)));
+  }
+  44.2% {
+    /* Second bounce up (5.75s) */
+    transform: translateY(calc(100% - var(--bottom-sheet-min-height) - 12px));
+  }
+  46.2% {
+    /* Second bounce down (6s) */
+    transform: translateY(calc(100% - var(--bottom-sheet-min-height)));
+  }
+  48.1% {
+    /* Third bounce up (6.25s) */
+    transform: translateY(calc(100% - var(--bottom-sheet-min-height) - 8px));
+  }
+  50%, 100% {
+    /* Third bounce down and wait 8 more seconds (6.5s to 13s) */
+    transform: translateY(calc(100% - var(--bottom-sheet-min-height)));
+  }
+}
+
+/* Hide content when minimized */
+.bottom-sheet.minimized .photo-gallery,
+.bottom-sheet.minimized .tab-navigation,
+.bottom-sheet.minimized .tab-content {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Show content when expanded */
+.bottom-sheet:not(.minimized) .photo-gallery,
+.bottom-sheet:not(.minimized) .tab-navigation,
+.bottom-sheet:not(.minimized) .tab-content {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transition: opacity 0.3s var(--transition-smooth);
 }
 
 .bottom-sheet.fullscreen {
@@ -948,7 +1001,7 @@
 @media (max-width: 768px) {
   :root {
     --bottom-sheet-height: 85vh;
-    --bottom-sheet-min-height: 120px;
+    --bottom-sheet-min-height: 36px; /* Only show handle on mobile too */
   }
 
   .bottom-sheet.fullscreen {
@@ -1140,7 +1193,8 @@
   }
 
   .bottom-sheet.minimized {
-    transform: translateY(calc(100% - 120px));
+    transform: translateY(calc(100% - var(--bottom-sheet-min-height)));
+    animation: sheetBounceHint 13s ease-in-out infinite; /* Same timing on mobile */
   }
 
   .orbit-pause-btn {

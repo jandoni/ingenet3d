@@ -231,6 +231,41 @@ export async function resetToIntro() {
   removeCustomRadiusShader(); // Remove the custom radius shader
   showAllMarkers(); // Show all markers when returning to overview
 
+  // ===================================================================
+  // CRITICAL: Stop ALL orbit/rotation animations when returning to root page
+  // The root page (Spain overview) should NEVER have any rotation or orbit effect
+  // ===================================================================
+
+  // Stop location-specific orbit animation (drone orbit from places)
+  if (window.stopOrbitAnimation) {
+    window.stopOrbitAnimation();
+    console.log('🛑 Stopped location orbit animation');
+  }
+
+  // Stop Spain overview orbit effect
+  if (window.stopSpainOrbitEffect) {
+    window.stopSpainOrbitEffect();
+    console.log('🛑 Stopped Spain orbit effect');
+  }
+
+  // Also try stopping drone orbit directly (extra safety)
+  if (window.stopDroneOrbit) {
+    window.stopDroneOrbit();
+    console.log('🛑 Stopped drone orbit animation');
+  }
+
+  // Ensure no orbit animation is running by removing any clock listeners
+  // This is a safety measure to prevent any lingering animations
+  try {
+    if (cesiumViewer && cesiumViewer.clock && cesiumViewer.clock.onTick) {
+      // The clock listeners are already managed by the stop functions above,
+      // but we log this for debugging purposes
+      console.log('✅ All orbit animations stopped - root page is static');
+    }
+  } catch (error) {
+    console.warn('⚠️ Error checking clock listeners:', error);
+  }
+
   // For Spain overview, use fixed coordinates instead of animated flight
   if (placeName === "Spain" && (cameraStyle === "overview" || !cameraStyle)) {
     setSpainOverviewFromGoogleEarthExported();

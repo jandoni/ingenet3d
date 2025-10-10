@@ -391,12 +391,12 @@ export function setSpainOverviewFromGoogleEarthExported() {
     return;
   }
 
-  // Spain overview - top-down view centered on Spain
-  // Centered roughly on Spain to show all markers
-  const latitude = 40.4637; // Center of Spain
-  const longitude = -3.7492; // Center of Spain
+  // Spain overview - top-down view centered on Spain and Canary Islands
+  // Centered between mainland Spain and Canary Islands
+  const latitude = 38.5; // Adjusted to include Canary Islands
+  const longitude = -5.0; // Adjusted to center better
   const altitude = 0;
-  const range = 2800000; // 2.8 million meters for more zoom out
+  const range = 4800000; // 4.8 million meters to show Spain + Canary Islands with extra space (zoomed out further)
 
   // Fully vertical view (top-down)
   const heading = 0; // North up

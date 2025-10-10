@@ -426,7 +426,7 @@ window.setActivePlace = function(chapterId) {
   document.querySelectorAll('.place-card').forEach(card => {
     card.classList.toggle('active', card.dataset.chapterId == chapterId);
   });
-  
+
   // Scroll active place into view
   const activeCard = document.querySelector('.place-card.active');
   if (activeCard) {
@@ -439,6 +439,15 @@ window.setActivePlace = function(chapterId) {
       activeCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
   }
+};
+
+/**
+ * Go to home/root page (Spain overview)
+ * Called by home button and IEE logo click
+ */
+window.goToHome = function() {
+  console.log('🏠 Going to home page');
+  resetToIntro();
 };
 
 /**
