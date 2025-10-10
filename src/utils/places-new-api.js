@@ -427,14 +427,14 @@ let orbitAnimation = null;
 function startDroneOrbit() {
   stopDroneOrbit(); // Clear any existing orbit
   stopSpainOrbitIfExists(); // Stop Spain orbit if active
-  
+
   // Don't check for mobile here - let the pause button control it
   orbitAnimation = cesiumViewer.clock.onTick.addEventListener(() => {
-    // Further reduced speed from 0.005 to 0.0025 (quarter original speed)
-    cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.0025); 
+    // Reduced rotation speed for subtle animation (0.0010 - very gentle)
+    cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.0010);
   });
-  
-  console.log('✅ Drone orbit animation started');
+
+  console.log('✅ Drone orbit animation started with gentle rotation');
 }
 
 // Function to stop Spain orbit (we'll import this or check if it exists)

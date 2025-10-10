@@ -20,6 +20,37 @@ import {
 } from "./chapter-navigation.js";
 
 /**
+ * Creates a placeholder with initials for when image fails to load
+ * @param {string} title - The title to generate initials from
+ * @returns {HTMLElement} The placeholder element
+ */
+function createPlaceholder(title) {
+  const initials = title
+    .split(' ')
+    .map(word => word[0])
+    .filter(letter => letter)
+    .join('')
+    .substring(0, 3)
+    .toUpperCase();
+
+  const placeholder = document.createElement('div');
+  placeholder.style.cssText = `
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+  `;
+  placeholder.textContent = initials;
+  return placeholder;
+}
+
+/**
  * Returns a story intro card as HTML element.
  *
  * @param {StoryProperties} storyProperties - The story to create the intro card element for
@@ -55,11 +86,94 @@ export function createChapterCard(chapter) {
   card.classList.add("card", "chapter-card");
   card.id = chapter.id;
 
-  const chapterImage = document.createElement("img");
-  chapterImage.setAttribute("data-input-name", "imageUrl");
+  // Create image container that will hold either img or placeholder
+  const imageContainer = document.createElement("div");
+  imageContainer.style.cssText = `
+    width: 100%;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    overflow: hidden;
+    padding: 8px;
+    box-sizing: border-box;
+  `;
 
-  chapterImage.src = getPreviewUrl(chapter.imageUrl);
-  card.appendChild(chapterImage);
+  // Prioritize logoUrl, then try favicon from website, then fallback to initials
+  let imageSources = [];
+
+  // First priority: logoUrl
+  if (chapter.logoUrl) {
+    imageSources.push({
+      url: chapter.logoUrl,
+      type: 'logo'
+    });
+    console.log(`📷 Using logoUrl for ${chapter.title}: ${chapter.logoUrl}`);
+  }
+
+  // Second priority: favicon from website
+  if (chapter.website) {
+    try {
+      const url = chapter.website.startsWith('http') ? chapter.website : 'https://' + chapter.website;
+      const domain = new URL(url).hostname;
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+      imageSources.push({
+        url: faviconUrl,
+        type: 'favicon'
+      });
+      console.log(`📷 Added favicon fallback for ${chapter.title}: ${faviconUrl}`);
+    } catch (e) {
+      console.warn(`Invalid website URL for ${chapter.title}:`, e);
+    }
+  }
+
+  if (imageSources.length > 0) {
+    let currentSourceIndex = 0;
+
+    const tryLoadImage = () => {
+      if (currentSourceIndex >= imageSources.length) {
+        // All image sources failed, show initials
+        console.warn(`❌ All image sources failed for ${chapter.title}, showing initials`);
+        imageContainer.innerHTML = '';
+        const placeholder = createPlaceholder(chapter.title);
+        imageContainer.appendChild(placeholder);
+        return;
+      }
+
+      const source = imageSources[currentSourceIndex];
+      const chapterImage = document.createElement("img");
+      chapterImage.setAttribute("data-input-name", "imageUrl");
+      chapterImage.src = source.url;
+      chapterImage.style.cssText = `
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      `;
+
+      // Add error handler to try next source
+      chapterImage.onerror = function() {
+        console.warn(`⚠️ Failed to load ${source.type} for ${chapter.title}, trying next source`);
+        currentSourceIndex++;
+        imageContainer.innerHTML = '';
+        tryLoadImage();
+      };
+
+      chapterImage.onload = function() {
+        console.log(`✅ Successfully loaded ${source.type} for ${chapter.title}`);
+      };
+
+      imageContainer.appendChild(chapterImage);
+    };
+
+    tryLoadImage();
+  } else {
+    // No image sources available, show initials immediately
+    const placeholder = createPlaceholder(chapter.title);
+    imageContainer.appendChild(placeholder);
+  }
+
+  card.appendChild(imageContainer);
 
   const chapterTitleContainer = document.createElement("div");
   card.appendChild(chapterTitleContainer);

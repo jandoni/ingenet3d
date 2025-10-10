@@ -21,7 +21,7 @@ import {
 } from "../utils/cesium.js";
 import { flyToPlaceNew } from "../utils/places-new-api.js";
 import { simpleFlyToPlace } from "../utils/simple-geocoder.js";
-import { setSelectedMarker } from "../utils/create-markers.js";
+import { setSelectedMarker, hideAllMarkers, showAllMarkers, showLocationPin } from "../utils/create-markers.js";
 import { getParams, setParams } from "../utils/params.js";
 import { cesiumViewer } from "../utils/cesium.js";
 import { loadSvg } from "../utils/svg.js";
@@ -229,7 +229,8 @@ export async function resetToIntro() {
   updateChapterContent(story.properties); // Update the chapter details content
   activateNavigationElement("intro"); // Activate the introduction navigation
   removeCustomRadiusShader(); // Remove the custom radius shader
-  
+  showAllMarkers(); // Show all markers when returning to overview
+
   // For Spain overview, use fixed coordinates instead of animated flight
   if (placeName === "Spain" && (cameraStyle === "overview" || !cameraStyle)) {
     setSpainOverviewFromGoogleEarthExported();
@@ -275,6 +276,7 @@ export async function updateChapter(chapterIndex) {
   setParams("chapterId", chapterId); // Set the chapter parameter
   updateChapterContent(chapter, false); // Update the chapter details content
   activateNavigationElement("details"); // Activate the details navigation
+  hideAllMarkers(); // Hide all markers when viewing a specific chapter
 
   // Check if the current chapter has a focus and create or remove the custom radius shader accordingly
   const hasFocus = Boolean(
@@ -298,6 +300,17 @@ export async function updateChapter(chapterIndex) {
       cameraConfig = await flyToPlaceNew(placeName, cameraStyle || 'drone-orbit');
       flySuccessful = true;
       console.log(`✅ Successfully flew to ${placeName} using NEW Places API`);
+
+      // Show location pin at the actual location with company logo
+      if (cameraConfig && cameraConfig.location) {
+        await showLocationPin(
+          chapterId,
+          cameraConfig.location,
+          chapter.title,
+          chapter.logoUrl,
+          chapter.website
+        );
+      }
 
       // Update chapter with Google Place details if available
       if (cameraConfig && cameraConfig.placeDetails) {
@@ -325,6 +338,17 @@ export async function updateChapter(chapterIndex) {
         cameraConfig = await simpleFlyToPlace(placeName, cameraStyle || 'drone-orbit');
         flySuccessful = true;
         console.log(`✅ Simple geocoder succeeded for ${placeName}`);
+
+        // Show location pin at the actual location with company logo
+        if (cameraConfig && cameraConfig.location) {
+          await showLocationPin(
+            chapterId,
+            cameraConfig.location,
+            chapter.title,
+            chapter.logoUrl,
+            chapter.website
+          );
+        }
       } catch (geocoderError) {
         console.error(`❌ Both APIs failed for ${placeName}:`, geocoderError);
         flySuccessful = false;

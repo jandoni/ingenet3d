@@ -245,10 +245,35 @@ export async function initCesiumViewer() {
 
   // Enable camera controls for user interaction
   cesiumViewer.scene.screenSpaceCameraController.enableLook = true;
-  cesiumViewer.scene.screenSpaceCameraController.enableTranslate = true;
+  cesiumViewer.scene.screenSpaceCameraController.enableTranslate = true; // Enable panning
   cesiumViewer.scene.screenSpaceCameraController.enableZoom = true;
   cesiumViewer.scene.screenSpaceCameraController.enableRotate = true;
   cesiumViewer.scene.screenSpaceCameraController.enableTilt = true;
+
+  // Configure zoom behavior for better responsiveness
+  cesiumViewer.scene.screenSpaceCameraController.zoomEventTypes = [
+    Cesium.CameraEventType.WHEEL,
+    Cesium.CameraEventType.PINCH
+  ];
+  cesiumViewer.scene.screenSpaceCameraController.minimumZoomDistance = 100; // 100 meters minimum
+  cesiumViewer.scene.screenSpaceCameraController.maximumZoomDistance = 20000000; // 20,000 km maximum
+
+  // Configure mouse controls for better UX
+  // Left mouse = Rotate
+  // Shift + Left mouse = Pan (move around)
+  // Right mouse = Tilt
+  // Scroll = Zoom
+
+  // Set up translate (pan) with Shift modifier
+  cesiumViewer.scene.screenSpaceCameraController.translateEventTypes = [
+    {
+      eventType: Cesium.CameraEventType.LEFT_DRAG,
+      modifier: Cesium.KeyboardEventModifier.SHIFT
+    }
+  ];
+
+  // Left-click + drag for rotation (default behavior)
+  cesiumViewer.scene.screenSpaceCameraController.rotateEventTypes = Cesium.CameraEventType.LEFT_DRAG;
 
   // For Spain overview, use fixed coordinates instead of Places API
   if (story.properties.placeName === "Spain" && story.properties.cameraStyle === "overview") {
@@ -366,37 +391,26 @@ export function setSpainOverviewFromGoogleEarthExported() {
     return;
   }
 
-  // Spain overview using exact Google Earth coordinates from screenshot
-  // Lat: 40.0363445°, Lng: -4.7938347°, Alt: 313.7482751m, Range: 2,390,861.5117782m
-  // Heading: 0.2156642°, Tilt: 0.1477297°
-  
-  const latitude = 40.0363445;
-  const longitude = -4.7938347;
-  const altitude = 313.7482751;
-  const range = 2390861.5117782; // 2.39 million meters
-  
-  // Convert Google Earth angles to Cesium (degrees to radians)
-  const heading = Cesium.Math.toRadians(0.2156642);
-  const pitch = Cesium.Math.toRadians(-45); // Higher angle (less steep) for better country view
+  // Spain overview - top-down view centered on Spain
+  // Centered roughly on Spain to show all markers
+  const latitude = 40.4637; // Center of Spain
+  const longitude = -3.7492; // Center of Spain
+  const altitude = 0;
+  const range = 2800000; // 2.8 million meters for more zoom out
+
+  // Fully vertical view (top-down)
+  const heading = 0; // North up
+  const pitch = Cesium.Math.toRadians(-90); // Straight down (90 degrees)
   const roll = 0;
-  
-  // Set camera position using lookAt for exact Google Earth reproduction
+
+  // Set camera position using lookAt for top-down view
   const center = Cesium.Cartesian3.fromDegrees(longitude, latitude, altitude);
   const headingPitchRange = new Cesium.HeadingPitchRange(heading, pitch, range);
-  
+
   cesiumViewer.camera.lookAt(center, headingPitchRange);
-  
-  // Add orbit effect for Spain overview (but pause on mobile by default)
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  if (!isMobile) {
-    startSpainOrbitEffect();
-  } else {
-    console.log('📱 Mobile detected: orbit paused by default. Use pause button to start.');
-    // Set the global pause state to true on mobile
-    if (typeof window !== 'undefined') {
-      window.isOrbitPausedByDefault = true;
-    }
-  }
+
+  // Rotation effect disabled - map stays centered on Spain
+  console.log('🗺️ Spain overview set - no rotation effect');
 }
 
 /**
@@ -413,14 +427,14 @@ export function stopSpainOrbitEffect() {
 
 export function startSpainOrbitEffect() {
   stopSpainOrbitEffect(); // Clear any existing orbit
-  
+
   // Don't check for mobile here - let the pause button control it
   spainOrbitAnimation = cesiumViewer.clock.onTick.addEventListener(() => {
-    // Much slower speed for overview: 0.0003 radians/tick (quarter the previous speed)
-    cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.0003); 
+    // Very subtle rotation for overview: 0.00005 radians/tick (minimal movement)
+    cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.00005);
   });
-  
-  console.log('✅ Spain orbit effect started');
+
+  console.log('✅ Spain orbit effect started with subtle rotation');
 }
 
 // Make orbit control functions available globally for cross-module access
@@ -430,6 +444,124 @@ if (typeof window !== 'undefined') {
   // Unified naming for consistency
   window.stopOverviewOrbit = stopSpainOrbitEffect;
   window.startOverviewOrbit = startSpainOrbitEffect;
+}
+
+/**
+ * Zoom in the camera (move closer)
+ */
+export function zoomIn() {
+  if (!cesiumViewer) {
+    console.warn('Cesium viewer not initialized');
+    return;
+  }
+
+  const camera = cesiumViewer.camera;
+
+  // Get current height
+  const ellipsoid = cesiumViewer.scene.globe.ellipsoid;
+  const cartographic = ellipsoid.cartesianToCartographic(camera.position);
+  const height = cartographic.height;
+
+  // Calculate zoom amount (10% closer - reduced for smoother feel)
+  const zoomAmount = height * 0.1;
+
+  // Animate the zoom for smooth transition
+  const startHeight = height;
+  const endHeight = height - zoomAmount;
+  const duration = 300; // 300ms animation
+  const startTime = Date.now();
+
+  const animate = () => {
+    const now = Date.now();
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Ease out function for smooth deceleration
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+    const currentHeight = startHeight - (zoomAmount * easeProgress);
+
+    // Move camera to new height
+    const position = camera.position;
+    const cartographic = ellipsoid.cartesianToCartographic(position);
+    const newPosition = Cesium.Cartesian3.fromRadians(
+      cartographic.longitude,
+      cartographic.latitude,
+      currentHeight
+    );
+    camera.position = newPosition;
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+
+    cesiumViewer.scene.requestRender();
+  };
+
+  animate();
+  console.log('🔍 Zoomed in');
+}
+
+/**
+ * Zoom out the camera (move farther away)
+ */
+export function zoomOut() {
+  if (!cesiumViewer) {
+    console.warn('Cesium viewer not initialized');
+    return;
+  }
+
+  const camera = cesiumViewer.camera;
+
+  // Get current height
+  const ellipsoid = cesiumViewer.scene.globe.ellipsoid;
+  const cartographic = ellipsoid.cartesianToCartographic(camera.position);
+  const height = cartographic.height;
+
+  // Calculate zoom amount (10% farther - reduced for smoother feel)
+  const zoomAmount = height * 0.1;
+
+  // Animate the zoom for smooth transition
+  const startHeight = height;
+  const endHeight = height + zoomAmount;
+  const duration = 300; // 300ms animation
+  const startTime = Date.now();
+
+  const animate = () => {
+    const now = Date.now();
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Ease out function for smooth deceleration
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+    const currentHeight = startHeight + (zoomAmount * easeProgress);
+
+    // Move camera to new height
+    const position = camera.position;
+    const cartographic = ellipsoid.cartesianToCartographic(position);
+    const newPosition = Cesium.Cartesian3.fromRadians(
+      cartographic.longitude,
+      cartographic.latitude,
+      currentHeight
+    );
+    camera.position = newPosition;
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+
+    cesiumViewer.scene.requestRender();
+  };
+
+  animate();
+  console.log('🔎 Zoomed out');
+}
+
+// Make zoom functions available globally
+if (typeof window !== 'undefined') {
+  window.zoomIn = zoomIn;
+  window.zoomOut = zoomOut;
 }
 
 /**

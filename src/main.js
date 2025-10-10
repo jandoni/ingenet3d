@@ -565,22 +565,8 @@ window.toggleOrbitPause = function() {
           console.log('✅ Location orbit animation restarted');
         }
       } else {
-        // We're at the intro/Spain overview - always try to start overview orbit
-        console.log('🌍 Restarting Spain overview orbit effect');
-        let orbitStarted = false;
-        if (window.startSpainOrbitEffect) {
-          window.startSpainOrbitEffect();
-          console.log('✅ Spain orbit effect restarted');
-          orbitStarted = true;
-        }
-        if (window.startOverviewOrbit && !orbitStarted) {
-          window.startOverviewOrbit();
-          console.log('✅ Overview orbit restarted (unified)');
-          orbitStarted = true;
-        }
-        if (!orbitStarted) {
-          console.error('❌ No overview orbit function available');
-        }
+        // We're at the intro/Spain overview - rotation disabled, map stays static
+        console.log('🗺️ At Spain overview - rotation disabled');
       }
     } catch (error) {
       console.warn('⚠️ Could not restart orbit:', error);

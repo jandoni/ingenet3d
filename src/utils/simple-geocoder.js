@@ -25,51 +25,11 @@ import { cesiumViewer } from "./cesium.js";
  * @returns {Promise<Object>} Simple camera configuration
  */
 export async function simpleGeocodeToCamera(placeName, cameraStyle = 'static') {
-  // Simple fallback coordinates for major Spanish locations (English and Spanish names)
+  // Simple fallback coordinates - only Spain as ultimate fallback
+  // All specific locations should come from config.json
   const knownPlaces = {
     'spain': { lat: 40.4637, lng: -3.7492, altitude: 2000000 },
-    'españa': { lat: 40.4637, lng: -3.7492, altitude: 2000000 },
-    'sagrada familia': { lat: 41.4036, lng: 2.1744, altitude: 1000 },
-    'basílica de la sagrada família': { lat: 41.4036, lng: 2.1744, altitude: 1000 },
-    'barcelona': { lat: 41.3851, lng: 2.1734, altitude: 10000 },
-    'prado museum': { lat: 40.4138, lng: -3.6921, altitude: 1000 },
-    'museo nacional del prado': { lat: 40.4138, lng: -3.6921, altitude: 1000 },
-    'madrid': { lat: 40.4168, lng: -3.7038, altitude: 10000 },
-    'park güell': { lat: 41.4145, lng: 2.1527, altitude: 1000 },
-    'parque güell': { lat: 41.4145, lng: 2.1527, altitude: 1000 },
-    'giralda': { lat: 37.3862, lng: -5.9926, altitude: 1000 },
-    'la giralda': { lat: 37.3862, lng: -5.9926, altitude: 1000 },
-    'seville': { lat: 37.3886, lng: -5.9823, altitude: 5000 },
-    'sevilla': { lat: 37.3886, lng: -5.9823, altitude: 5000 },
-    'alhambra': { lat: 37.1761, lng: -3.5881, altitude: 1000 },
-    'granada': { lat: 37.1773, lng: -3.5986, altitude: 5000 },
-    'guggenheim bilbao': { lat: 43.2687, lng: -2.9340, altitude: 1000 },
-    'museo guggenheim bilbao': { lat: 43.2687, lng: -2.9340, altitude: 1000 },
-    'bilbao': { lat: 43.2627, lng: -2.9253, altitude: 5000 },
-    'royal palace madrid': { lat: 40.4180, lng: -3.7143, altitude: 1000 },
-    'palacio real de madrid': { lat: 40.4180, lng: -3.7143, altitude: 1000 },
-    'santiago de compostela': { lat: 42.8805, lng: -8.5456, altitude: 1000 },
-    'catedral de santiago de compostela': { lat: 42.8805, lng: -8.5456, altitude: 1000 },
-    
-    // Custom foundation/museum locations
-    'museo naval da armada': { lat: 43.4623, lng: -8.2343, altitude: 1000 },
-    'ferrol': { lat: 43.4623, lng: -8.2343, altitude: 1000 },
-    'exponav': { lat: 43.4623, lng: -8.2343, altitude: 1000 },
-    
-    'poligono industrial oeste': { lat: 37.9616457717492, lng: -1.1946087306841509, altitude: 1000 },
-    'alcantarilla': { lat: 37.9616457717492, lng: -1.1946087306841509, altitude: 1000 },
-    'excelem': { lat: 37.9616457717492, lng: -1.1946087306841509, altitude: 1000 },
-    'calle perú': { lat: 37.9616457717492, lng: -1.1946087306841509, altitude: 1000 },
-    'oficinas forum': { lat: 37.9616457717492, lng: -1.1946087306841509, altitude: 1000 },
-    
-    'catedral de cádiz': { lat: 36.5297, lng: -6.2930, altitude: 1000 },
-    'pl. catedral cádiz': { lat: 36.5297, lng: -6.2930, altitude: 1000 },
-    'cádiz': { lat: 36.5297, lng: -6.2930, altitude: 1000 },
-    'mucain': { lat: 36.5297, lng: -6.2930, altitude: 1000 },
-    
-    'ríos rosas madrid': { lat: 40.4416, lng: -3.6967, altitude: 1000 },
-    'chamberí madrid': { lat: 40.4416, lng: -3.6967, altitude: 1000 },
-    'upm madrid': { lat: 40.4416, lng: -3.6967, altitude: 1000 }
+    'españa': { lat: 40.4637, lng: -3.7492, altitude: 2000000 }
   };
 
   // Find matching place (case insensitive, partial match)

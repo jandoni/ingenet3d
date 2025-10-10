@@ -35,11 +35,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#000000" />
-    
+
+    <!-- Favicons - Instituto de la Ingeniería de España -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/IIE-logo.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/IIE-logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/IIE-logo.png" />
+    <link rel="shortcut icon" href="assets/IIE-logo.png" />
+
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://ajax.googleapis.com" />
     <link rel="preconnect" href="https://tile.googleapis.com" />
-    
+
     <link rel="stylesheet" type="text/css" href="./main.css" />
     <link rel="stylesheet" type="text/css" href="./styles/chapters.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Cesium.js"></script>
@@ -47,7 +53,7 @@
       href="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Widgets/widgets.css"
       rel="stylesheet"
     />
-    <title>Explorar España - 3D Interactive Story</title>
+    <title>Explorar España - Instituto de la Ingeniería de España</title>
   </head>
   <body>
     <!-- Loading screen -->
@@ -104,7 +110,42 @@
         <path id="play-icon" d="M8 5V19L19 12L8 5Z" fill="currentColor" style="display: none;"/>
       </svg>
     </button>
-    
+
+    <!-- Zoom controls -->
+    <div class="zoom-controls">
+      <button id="zoom-in-btn" class="zoom-btn" onclick="zoomIn()" title="Acercar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button id="zoom-out-btn" class="zoom-btn" onclick="zoomOut()" title="Alejar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Controls info box -->
+    <div class="controls-info">
+      <div class="controls-title">Controles</div>
+      <div class="control-item">
+        <div class="control-text">
+          <strong>Rotar:</strong> Clic izquierdo + arrastrar
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-text">
+          <strong>Mover:</strong> Shift + clic izquierdo + arrastrar
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-text">
+          <strong>Zoom:</strong> Rueda del ratón<br/>
+          <span style="font-size: 11px; color: #64748b;">o deslizar dos dedos en trackpad</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Bottom sheet for chapter details -->
     <div id="bottom-sheet" class="bottom-sheet">
       <div class="bottom-sheet-handle" onclick="toggleBottomSheet()">
@@ -252,12 +293,6 @@
 
     <div id="chat-container">
       <div class="chat-header">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C13.1 2 14 2.9 14 4V5C16.2 5.2 18 7.1 18 9.4V15.5C18 17.4 16.4 19 14.5 19H13V21C13 21.6 12.6 22 12 22S11 21.6 11 21V19H9.5C7.6 19 6 17.4 6 15.5V9.4C6 7.1 7.8 5.2 10 5V4C10 2.9 10.9 2 12 2Z" fill="white"/>
-          <circle cx="9.5" cy="11.5" r="1" fill="#1e40af"/>
-          <circle cx="14.5" cy="11.5" r="1" fill="#1e40af"/>
-          <path d="M9 14.5C9.8 15.2 10.8 15.5 12 15.5S14.2 15.2 15 14.5" stroke="#1e40af" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
         <span>Asistente de Exploración</span>
       </div>
       <div id="chat-messages"></div>
