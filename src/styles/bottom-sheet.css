@@ -661,12 +661,13 @@
   line-height: 1.2;
 }
 
-/* TAB NAVIGATION */
+/* TAB NAVIGATION - Minimalistic Design */
 .tab-navigation {
   display: flex;
   border-bottom: 1px solid #e2e8f0;
-  background: #fafbfc;
+  background: white;
   flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .tab-btn {
@@ -675,37 +676,49 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 16px;
+  padding: 16px 20px;
   border: none;
   background: transparent;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s var(--transition-smooth);
+  transition: all 0.25s var(--transition-smooth);
   border-bottom: 2px solid transparent;
   position: relative;
 }
 
 .tab-btn:hover {
-  color: var(--spain-red);
-  background: rgba(220, 38, 38, 0.04);
+  color: #475569;
+  background: rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .tab-btn.active {
-  color: var(--spain-red);
-  border-bottom-color: var(--spain-red);
+  color: #0f172a;
+  border-bottom-color: #0f172a;
   background: white;
   font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .tab-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s var(--transition-smooth);
+}
+
+.tab-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.tab-btn.active svg {
+  transform: scale(1.05);
 }
 
 .tab-btn span {
   font-family: var(--font-family-base);
+  letter-spacing: 0.01em;
 }
 
 /* TAB CONTENT */
