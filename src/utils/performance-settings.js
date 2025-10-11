@@ -54,7 +54,7 @@ const SETTINGS_MATRIX = {
     tileRequests: 18,
     imageBatchSize: 6,
     markerBatchSize: 8,
-    targetFrameRate: 60,
+    targetFrameRate: 30,
     enableOrbit: true,
     description: 'Máxima calidad - Escritorio rápido'
   },
@@ -63,7 +63,7 @@ const SETTINGS_MATRIX = {
     tileRequests: 15,
     imageBatchSize: 5,
     markerBatchSize: 6,
-    targetFrameRate: 60,
+    targetFrameRate: 30,
     enableOrbit: true,
     description: 'Alta calidad - Escritorio estándar'
   },
@@ -101,7 +101,7 @@ const SETTINGS_MATRIX = {
     tileRequests: 12,
     imageBatchSize: 4,
     markerBatchSize: 6,
-    targetFrameRate: 60,
+    targetFrameRate: 30,
     enableOrbit: true,
     description: 'Optimizado - Conexión normal'
   },
@@ -110,7 +110,7 @@ const SETTINGS_MATRIX = {
     tileRequests: 10,
     imageBatchSize: 3,
     markerBatchSize: 5,
-    targetFrameRate: 60,
+    targetFrameRate: 30,
     enableOrbit: true,
     description: 'Equilibrado - Conexión normal'
   },
@@ -142,51 +142,66 @@ const SETTINGS_MATRIX = {
     description: 'Básico - Conexión normal'
   },
 
-  // Slow Network Settings (ALL DEVICES - Conservative)
+  // Slow Network Settings (ALL DEVICES - Aggressive Optimization)
   [`${DeviceType.DESKTOP_HIGH}-${NetworkSpeed.SLOW}`]: {
     resolutionScale: 1.0,
-    tileRequests: 6,
+    tileRequests: 4,                    // Reduced from 6
     imageBatchSize: 2,
     markerBatchSize: 3,
-    targetFrameRate: 60,
+    targetFrameRate: 30,                // Reduced from 60 for thermal management
     enableOrbit: false,
-    description: 'Conexión lenta detectada - Optimizando'
+    maximumScreenSpaceError: 32,        // NEW: Aggressive LOD culling
+    enableFreezeMode: true,             // NEW: Enable freeze mode
+    enableIdleThrottling: true,         // NEW: Enable idle frame throttling
+    description: 'Conexión lenta - Optimización agresiva'
   },
   [`${DeviceType.DESKTOP_STANDARD}-${NetworkSpeed.SLOW}`]: {
     resolutionScale: 1.0,
-    tileRequests: 6,
+    tileRequests: 4,                    // Reduced from 6
     imageBatchSize: 2,
     markerBatchSize: 3,
-    targetFrameRate: 60,
+    targetFrameRate: 30,                // Reduced from 60 for thermal management
     enableOrbit: false,
-    description: 'Conexión lenta detectada - Optimizando'
+    maximumScreenSpaceError: 32,        // NEW: Aggressive LOD culling
+    enableFreezeMode: true,             // NEW: Enable freeze mode
+    enableIdleThrottling: true,         // NEW: Enable idle frame throttling
+    description: 'Conexión lenta - Optimización agresiva'
   },
   [`${DeviceType.MOBILE_HIGH}-${NetworkSpeed.SLOW}`]: {
     resolutionScale: 1.0,
-    tileRequests: 4,
+    tileRequests: 3,                    // Reduced from 4
     imageBatchSize: 1,
     markerBatchSize: 2,
     targetFrameRate: 30,
     enableOrbit: false,
-    description: 'Conexión lenta - Modo ahorro'
+    maximumScreenSpaceError: 48,        // NEW: Ultra-aggressive for mobile
+    enableFreezeMode: true,             // NEW: Enable freeze mode
+    enableIdleThrottling: true,         // NEW: Enable idle frame throttling
+    description: 'Conexión lenta móvil - Modo ultra ahorro'
   },
   [`${DeviceType.MOBILE_STANDARD}-${NetworkSpeed.SLOW}`]: {
     resolutionScale: 1.0,
-    tileRequests: 4,
+    tileRequests: 3,                    // Reduced from 4
     imageBatchSize: 1,
     markerBatchSize: 2,
     targetFrameRate: 30,
     enableOrbit: false,
-    description: 'Conexión lenta - Modo ahorro'
+    maximumScreenSpaceError: 48,        // NEW: Ultra-aggressive for mobile
+    enableFreezeMode: true,             // NEW: Enable freeze mode
+    enableIdleThrottling: true,         // NEW: Enable idle frame throttling
+    description: 'Conexión lenta móvil - Modo ultra ahorro'
   },
   [`${DeviceType.MOBILE_LOW}-${NetworkSpeed.SLOW}`]: {
     resolutionScale: 1.0,
-    tileRequests: 3,
+    tileRequests: 2,                    // Reduced from 3
     imageBatchSize: 1,
     markerBatchSize: 2,
     targetFrameRate: 30,
     enableOrbit: false,
-    description: 'Conexión lenta - Mínimo'
+    maximumScreenSpaceError: 64,        // NEW: Maximum culling for low-end
+    enableFreezeMode: true,             // NEW: Enable freeze mode
+    enableIdleThrottling: true,         // NEW: Enable idle frame throttling
+    description: 'Conexión lenta móvil - Mínimo absoluto'
   }
 };
 

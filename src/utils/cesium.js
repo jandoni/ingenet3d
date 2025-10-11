@@ -88,6 +88,13 @@ export function getCountryViewCamera(lat, lng, altitude = 2000000) {
 let tileset = null;
 
 /**
+ * Get the tileset instance (for freeze mode manager)
+ */
+export function getTileset() {
+  return tileset;
+}
+
+/**
  * Asynchronously calculates the camera position and orientation based on the given parameters.
  *
  * @param {Object} coords - The coordinates of the target point as an object with properties `lat` (latitude) and `lng` (longitude).
@@ -211,7 +218,7 @@ export async function initCesiumViewer(performanceSettings = null) {
   const settings = performanceSettings || {
     resolutionScale: 1.5,
     tileRequests: 12,
-    targetFrameRate: 30
+    targetFrameRate: 30  // Maximum FPS for all devices (30 FPS cap)
   };
 
   // Configure tile requests based on network speed (adaptive!)
@@ -243,8 +250,41 @@ export async function initCesiumViewer(performanceSettings = null) {
     targetFrameRate: settings.targetFrameRate
   });
 
-  // disable the default lighting of the globe
+  // ============================================================
+  // AGGRESSIVE PERFORMANCE: Disable Unnecessary Scene Features
+  // ============================================================
+
+  // Disable globe/terrain rendering (not needed for 3D tiles)
+  cesiumViewer.scene.globe.show = false;
   cesiumViewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
+
+  // Disable atmosphere (expensive shader effects)
+  cesiumViewer.scene.skyAtmosphere.show = false;
+
+  // Disable fog (expensive post-processing)
+  cesiumViewer.scene.fog.enabled = false;
+
+  // Disable ground primitives (unnecessary geometry)
+  cesiumViewer.scene.groundPrimitives.show = false;
+
+  // Simplify lighting (use simple directional light instead of complex lighting)
+  cesiumViewer.scene.light = new Cesium.DirectionalLight({
+    direction: new Cesium.Cartesian3(0.5, 0.5, -0.5)
+  });
+
+  // Disable shadows (expensive)
+  cesiumViewer.shadows = false;
+  cesiumViewer.scene.globe.enableLighting = false;
+
+  // Disable high dynamic range rendering (simpler rendering pipeline)
+  cesiumViewer.scene.highDynamicRange = false;
+
+  console.log(`⚡ Scene optimizations applied:`);
+  console.log(`   - Globe rendering: DISABLED`);
+  console.log(`   - Atmosphere: DISABLED`);
+  console.log(`   - Fog: DISABLED`);
+  console.log(`   - Shadows: DISABLED`);
+  console.log(`   - Ground primitives: DISABLED`);
 
   // Adaptive resolution scale based on device capabilities and network speed
   cesiumViewer.resolutionScale = settings.resolutionScale;
@@ -332,20 +372,88 @@ export async function initCesiumViewer(performanceSettings = null) {
 
 /**
  * Asynchronously creates a Google Photorealistic 3D tileset using a provided Google Maps API key
- * and adds it to a CesiumJS viewer's scene.
+ * and adds it to a CesiumJS viewer's scene with aggressive performance optimizations.
  *
  * @throws {Error} If an error occurs during tileset creation, an error message is logged to the console.
  * @returns {Promise<void>} A Promise that resolves when the tileset has been successfully added to the viewer's scene.
  */
 async function createTileset() {
   try {
+    // Get performance settings for adaptive tileset configuration
+    const settings = window.performanceSettings || {
+      maximumScreenSpaceError: 16,
+      networkSpeed: 'medium'
+    };
+
+    // Determine maximumScreenSpaceError based on network speed
+    // Higher values = fewer tiles loaded = faster but lower quality
+    let maximumScreenSpaceError = 16; // Default (good quality)
+    if (settings.networkSpeed === 'slow') {
+      maximumScreenSpaceError = 32; // Aggressive culling for slow networks
+    } else if (settings.networkSpeed === 'fast') {
+      maximumScreenSpaceError = 8; // High quality for fast networks
+    }
+
+    console.log(`🎯 Tileset LOD: maximumScreenSpaceError = ${maximumScreenSpaceError} (${settings.networkSpeed} network)`);
+
     tileset = await Cesium.Cesium3DTileset.fromUrl(
       "https://tile.googleapis.com/v1/3dtiles/root.json?key=" +
-        GOOGLE_MAPS_API_KEY
+        GOOGLE_MAPS_API_KEY,
+      {
+        // === PERFORMANCE OPTIMIZATIONS ===
+
+        // LOD Control - Higher value = fewer tiles, faster loading
+        maximumScreenSpaceError: maximumScreenSpaceError,
+
+        // Skip intermediate LOD levels for faster loading
+        skipLevelOfDetail: true,
+        baseScreenSpaceError: 1024,
+        skipScreenSpaceErrorFactor: 16,
+        skipLevels: 1,
+
+        // Dynamic LOD - Reduce detail when camera is moving
+        dynamicScreenSpaceError: true,
+        dynamicScreenSpaceErrorDensity: 0.00278,
+        dynamicScreenSpaceErrorFactor: 4.0,
+        dynamicScreenSpaceErrorHeightFalloff: 0.25,
+
+        // Aggressive Culling - Don't load tiles outside view
+        cullWithChildrenBounds: true,
+        cullRequestsWhileMoving: true,
+        cullRequestsWhileMovingMultiplier: 60.0,
+
+        // Memory Management - Prevent unlimited tile accumulation
+        maximumMemoryUsage: 512, // 512 MB limit
+
+        // Preloading Disabled - Don't load tiles we might not need
+        preloadWhenHidden: false,
+        preloadFlightDestinations: false,
+
+        // Progressive Rendering - Show something quickly
+        progressiveResolutionHeightFraction: 0.3,
+
+        // Immediate Mode - Don't wait for all tiles
+        immediatelyLoadDesiredLevelOfDetail: false,
+
+        // Tile Loading - Prioritize closest tiles first
+        foveatedScreenSpaceError: true,
+        foveatedConeSize: 0.1,
+        foveatedMinimumScreenSpaceErrorRelaxation: 0.0
+      }
     );
-    
+
     // This property is required to properly display attributions
     tileset.showCreditsOnScreen = true;
+
+    // Set tile cache size limit (prevent unlimited tile accumulation)
+    tileset.maximumCacheSize = 200; // Keep only 200 tiles in memory
+
+    console.log(`✅ Tileset created with aggressive performance limits`);
+    console.log(`   - Max tiles in cache: 200`);
+    console.log(`   - Max memory: 512 MB`);
+    console.log(`   - Skip LOD: enabled`);
+    console.log(`   - Dynamic LOD: enabled`);
+    console.log(`   - Cull while moving: enabled`);
 
     // Add tileset to the scene
     cesiumViewer.scene.primitives.add(tileset);

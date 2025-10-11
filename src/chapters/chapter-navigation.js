@@ -345,12 +345,8 @@ export async function updateChapter(chapterIndex) {
           chapter.content = cameraConfig.placeDetails.editorialSummary;
         }
 
-        // Update image with first Google photo if available (unless preserveCustomImage is true)
-        if (cameraConfig.placeDetails.photos && cameraConfig.placeDetails.photos.length > 0) {
-          if (!chapter.preserveCustomImage) {
-            chapter.imageUrl = cameraConfig.placeDetails.photos[0];
-          }
-        }
+        // Use local imageUrl from config.json
+        // Google Photo API has been removed to save costs
 
         // Update chapter details in UI
         updateChapterContent(chapter, false);

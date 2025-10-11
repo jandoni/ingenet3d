@@ -188,19 +188,27 @@ async function getPlacePhotos(place) {
 }
 
 /**
- * Get elevation for a location
+ * Get elevation for a location (with caching)
  */
 async function getElevation(location) {
-  return new Promise((resolve, reject) => {
-    elevationService.getElevationForLocations({
-      locations: [location]
-    }, (results, status) => {
-      if (status === 'OK' && results[0]) {
-        resolve(results[0].elevation || 0);
-      } else {
-        // Default elevation if service fails
-        resolve(10);
-      }
+  // Cache key using rounded coordinates (within ~11m accuracy)
+  const lat = location.lat().toFixed(4);
+  const lng = location.lng().toFixed(4);
+  const cacheKey = `elevation_${lat}_${lng}`;
+
+  return await rateLimitedApiCall(cacheKey, async () => {
+    return new Promise((resolve, reject) => {
+      elevationService.getElevationForLocations({
+        locations: [location]
+      }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          console.log(`🏔️ Elevation API called for ${lat}, ${lng}: ${results[0].elevation}m`);
+          resolve(results[0].elevation || 0);
+        } else {
+          console.warn(`⚠️ Elevation API failed, using default`);
+          resolve(10);
+        }
+      });
     });
   });
 }
@@ -216,7 +224,45 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
   if (!geocoder || !elevationService) {
     throw new Error('Google Maps services not initialized. Call initGoogleMapsServicesNew() first.');
   }
-  
+
+  // ✅ Check for pre-cached coordinates - Skip ALL Google API calls if available
+  // Look for chapter in story configuration
+  if (typeof window !== 'undefined' && window.story && window.story.chapters) {
+    const chapter = window.story.chapters.find(ch =>
+      ch.placeName === placeName || ch.title === placeName
+    );
+
+    if (chapter && chapter.cameraCoordinates) {
+      console.log(`✅ Using pre-cached coordinates for ${placeName} (0 API calls)`);
+      const coords = chapter.cameraCoordinates;
+
+      // Create location object compatible with Google Maps
+      const location = {
+        lat: () => coords.lat,
+        lng: () => coords.lng
+      };
+
+      // Skip ALL Google API calls
+      const cameraConfig = calculateOptimalCamera(
+        { location, viewport: null },
+        coords.elevation || 10,
+        cameraStyle
+      );
+
+      return {
+        ...cameraConfig,
+        placeName,
+        location,
+        viewport: null,
+        elevation: coords.elevation || 10,
+        placeDetails: {
+          displayName: { text: placeName },
+          formattedAddress: chapter.address || placeName
+        }
+      };
+    }
+  }
+
   // Use caching for place resolution
   const cacheKey = `place_${placeName}_${cameraStyle}`;
   
@@ -233,15 +279,24 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
     const location = place.location;
     const viewport = place.viewport;
     
-    // Get photos
-    const photos = await getPlacePhotos(place);
+    // Photos are stored locally in config.json imageUrl
+    // Skip Google Photo API to save costs
+    const photos = [];
     
     // Get elevation for the location
     const elevation = await getElevation(location);
-    
+
     // Calculate optimal camera position
     const cameraConfig = calculateOptimalCamera({ location, viewport }, elevation, cameraStyle);
-    
+
+    // Log coordinates for manual addition to config.json
+    console.log(`📍 Add to config.json for ${placeName}:`);
+    console.log(`"cameraCoordinates": ${JSON.stringify({
+      lat: parseFloat(location.lat().toFixed(6)),
+      lng: parseFloat(location.lng().toFixed(6)),
+      elevation: Math.round(elevation)
+    }, null, 2)}`);
+
     // Return comprehensive place data
     return {
       ...cameraConfig,
@@ -255,7 +310,7 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
         editorialSummary: place.editorialSummary,
         rating: place.rating,
         userRatingCount: place.userRatingCount,
-        photos: photos,
+        // photos removed - use local imageUrl from config.json
         phoneNumber: place.internationalPhoneNumber,
         openingHours: place.regularOpeningHours,
         priceLevel: place.priceLevel

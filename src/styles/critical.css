@@ -1,0 +1,252 @@
+/* ===================================
+ * CRITICAL CSS - Above-the-fold only
+ * Inlined in HTML for fastest render
+ * ===================================*/
+
+/* CSS Variables */
+:root {
+  --nav-height: 60px;
+  --bottom-sheet-min-height: 36px;
+  --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --spain-red: #dc2626;
+  --text-color-primary: #3c4043;
+  --accent-color: #1a73e8;
+  --font-family-base: "Google Sans", Roboto, sans-serif;
+  --font-family-inter: "Inter", sans-serif;
+}
+
+/* Reset & Base */
+*, *::after, *::before {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--text-color-primary);
+  background-color: #000000;
+}
+
+/* Loading Screen - CRITICAL (shows first) */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loading-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-logo {
+  width: 80px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.loading-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 280px;
+  margin-top: 8px;
+}
+
+.loading-status {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  text-align: center;
+  min-height: 21px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background-color: #f1f5f9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.loading-percentage {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.network-warning {
+  color: #f97316;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* Map Container */
+.map-container {
+  position: relative;
+  height: 100%;
+  padding-top: 0;
+}
+
+#cesium-container {
+  position: relative;
+  height: 100%;
+}
+
+/* Organization Logo */
+.organization-logo {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.organization-logo img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+/* Top Navigation - CRITICAL (visible immediately after load) */
+#top-navigation-container {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  height: var(--nav-height);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  pointer-events: none;
+}
+
+#top-navigation-bar {
+  flex: 1;
+  height: 100%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  pointer-events: auto;
+  min-width: 0;
+  max-width: calc(100vw - 140px);
+}
+
+#places-scroll-container {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0 8px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  min-width: 0;
+  width: 100%;
+}
+
+#places-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+#places-list {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 0;
+  min-width: max-content;
+}
+
+.place-card {
+  flex-shrink: 0;
+  width: 140px;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s var(--transition-smooth);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.place-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Hide Cesium credits */
+.cesium-credit-logoContainer,
+.cesium-credit-expand-link,
+.cesium-attribution-container,
+.cesium-widget-credits,
+.cesium-viewer-bottom {
+  display: none !important;
+}

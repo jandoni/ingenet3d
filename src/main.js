@@ -1,7 +1,6 @@
-import { initCesiumViewer, cesiumViewer } from "./utils/cesium.js";
+import { initCesiumViewer, cesiumViewer, getTileset } from "./utils/cesium.js";
 import { loadConfig } from "./utils/config.js";
 import createMarkers from "./utils/create-markers.js";
-import { addChaptersBar } from "./chapters/chapters.js";
 import { initGoogleMaps } from "./utils/places.js";
 import { initChapterNavigation, updateChapter, resetToIntro, getCurrentChapterIndex } from "./chapters/chapter-navigation.js";
 import { initGoogleMapsServicesNew, resolvePlaceToCameraNew } from "./utils/places-new-api.js";
@@ -9,7 +8,9 @@ import { simpleGeocodeToCamera } from "./utils/simple-geocoder.js";
 import { initChatbot } from "./utils/chatbot.js";
 import { loadingManager } from "./utils/loading-manager.js";
 import { preloadChapterImages } from "./utils/image-preloader.js";
-import { detectAndConfigurePerformance, getPerformanceSettings } from "./utils/performance-settings.js";
+import { detectAndConfigurePerformance } from "./utils/performance-settings.js";
+import { initIdleFrameManager } from "./utils/idle-frame-manager.js";
+// import { initFreezeModeManager, freezeAtLocation } from "./utils/freeze-mode-manager.js"; // DISABLED - causing tile thrashing
 
 /**
  * The story configuration object
@@ -86,104 +87,6 @@ function truncateText(text, maxLength) {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength - 3) + '...';
 }
-
-/**
- * Create basic markers from chapter data without API calls
- */
-async function createBasicMarkers(chapters) {
-  // Simple hardcoded coordinates for Spanish landmarks to avoid API calls
-  const basicCoordinates = {
-    1: { lat: 43.3247, lng: -8.4115 },   // Fundación Exponav - Ferrol
-    2: { lat: 37.9838, lng: -1.1300 },   // Fundación Excelem - Murcia
-    3: { lat: 36.5298, lng: -6.2927 },   // MUCAIN - Cádiz
-    4: { lat: 40.4478, lng: -3.7189 },   // UPM Museum - Madrid
-    5: { lat: 41.4036, lng: 2.1744 },    // Sagrada Familia - Barcelona
-    6: { lat: 40.4138, lng: -3.6923 },   // Museo del Prado - Madrid
-    7: { lat: 41.4145, lng: 2.1527 },    // Park Güell - Barcelona
-    8: { lat: 37.1770, lng: -3.5880 },   // Alhambra - Granada
-    9: { lat: 37.1770, lng: -3.5880 },   // Alhambra Palace - Granada (same location)
-    10: { lat: 43.2630, lng: -2.9350 },  // Guggenheim - Bilbao
-    11: { lat: 40.4180, lng: -3.7144 },  // Royal Palace - Madrid
-    12: { lat: 42.8805, lng: -8.5446 }   // Santiago Cathedral - Santiago
-  };
-  
-  try {
-    // Only create markers for chapters with known coordinates
-    let markerCount = 0;
-    
-    for (const chapter of chapters) {
-      const coords = basicCoordinates[chapter.id];
-      if (coords) {
-        // Create a position slightly above ground for better visibility
-        const position = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat, 200);
-        
-        // Create marker entity with both billboard and label
-        const entity = cesiumViewer.entities.add({
-          id: `marker-${chapter.id}`,
-          name: chapter.title,
-          position: position,
-          billboard: {
-            image: 'data:image/svg+xml;base64,' + btoa(`
-              <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow dx="1" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.4)"/>
-                  </filter>
-                </defs>
-                <circle cx="14" cy="14" r="12" fill="white" stroke="rgba(0,0,0,0.2)" stroke-width="1" filter="url(#shadow)"/>
-                <circle cx="14" cy="14" r="6" fill="#f1f5f9" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
-                <circle cx="14" cy="14" r="3" fill="#64748b"/>
-              </svg>
-            `),
-            scale: 1.2,
-            verticalOrigin: Cesium.VerticalOrigin.CENTER,
-            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-            scaleByDistance: new Cesium.NearFarScalar(1000, 1.2, 15000, 0.9)
-          },
-          label: {
-            text: truncateText(chapter.title, 20), // Truncate long titles
-            font: 'bold 13pt Arial, sans-serif',
-            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-            fillColor: Cesium.Color.WHITE, // White text for better visibility
-            outlineColor: Cesium.Color.BLACK,
-            outlineWidth: 3, // Thicker outline for better contrast
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-            pixelOffset: new Cesium.Cartesian2(0, -35), // Position label above marker
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-            scaleByDistance: new Cesium.NearFarScalar(1000, 1.0, 12000, 0.6),
-            translucencyByDistance: new Cesium.NearFarScalar(1000, 1.0, 15000, 0.2),
-            // Solid dark background for maximum readability
-            backgroundPadding: new Cesium.Cartesian2(10, 5),
-            backgroundColor: new Cesium.Color(0, 0, 0, 0.8), // Dark semi-transparent background
-            showBackground: true,
-            eyeOffset: new Cesium.Cartesian3(0, 0, -50)
-          },
-          properties: {
-            chapterId: chapter.id,
-            title: chapter.title
-          }
-        });
-        
-        markerCount++;
-      }
-    }
-
-    // Set up click handler for markers
-    setupMarkerClickHandler();
-    
-    // Set up hover effects for markers
-    setupMarkerHoverEffects();
-    
-  } catch (error) {
-    console.error('❌ Failed to create basic markers:', error);
-  }
-}
-
-// Note: Marker click handlers are now managed by the unified marker system in create-markers.js
 
 /**
  * The main function. This function is called when the page is loaded.
@@ -293,6 +196,35 @@ async function main() {
 
     loadingManager.complete();
 
+    // ==========================================
+    // PHASE 7A: INITIALIZE PERFORMANCE MANAGERS
+    // ==========================================
+    // Initialize idle frame manager (network-aware dynamic frame rate throttling)
+    if (performanceSettings.enableIdleThrottling !== false) {
+      console.log(`🎬 Initializing idle frame manager (network-aware)...`);
+      const tileset = getTileset();
+      initIdleFrameManager(cesiumViewer, performanceSettings.targetFrameRate, tileset);
+    }
+
+    // Freeze mode DISABLED - was causing tile loading thrashing
+    // Let Cesium naturally finish loading tiles without interference
+    // Idle frame manager will handle CPU/GPU optimization after network is quiet
+    // if (performanceSettings.enableFreezeMode !== false) {
+    //   console.log(`❄️ Initializing freeze mode manager...`);
+    //   const tileset = getTileset();
+    //   if (tileset) {
+    //     initFreezeModeManager(tileset, {
+    //       freezeDelay: 10000,
+    //       moveThresholdDistance: 500,
+    //       zoomThresholdPercent: 0.3
+    //     });
+    //   } else {
+    //     console.warn('⚠️ Tileset not available for freeze mode manager');
+    //   }
+    // }
+
+    console.log(`✅ Phase 7A: Aggressive Cesium optimization complete!`);
+
   } catch (error) {
     console.error('💥 Critical error during initialization:', error);
     console.trace('Error stack:');
@@ -300,20 +232,6 @@ async function main() {
     loadingManager.complete();
   }
 }
-
-/**
- * Hide the loading screen after initialization
- * NOTE: This function is now replaced by loadingManager.complete()
- * Kept for backward compatibility but should not be called directly
- */
-function hideLoadingScreen() {
-  const loadingScreen = document.getElementById('loading-screen');
-  if (loadingScreen) {
-    loadingScreen.classList.add('hidden');
-    // Note: We no longer remove from DOM to allow loading screen to be reused if needed
-  }
-}
-
 
 /**
  * Initialize the new UI components
@@ -516,6 +434,9 @@ window.navigateToChapter = async function(chapterId, chapterIndex = null) {
 
   // Navigate to the chapter
   updateChapter(chapterIndex);
+
+  // Freeze mode will activate automatically after idle detection (8+ seconds)
+  // Don't manually trigger freeze - let the idle system handle it
 };
 
 /**

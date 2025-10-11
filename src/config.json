@@ -22,6 +22,11 @@
       "id": 1,
       "imageUrl": "assets/logos/fundaci-n-exponav-museo-de-construcci-n-naval.jpg",
       "logoUrl": "assets/logos/fundaci-n-exponav-museo-de-construcci-n-naval.jpg",
+      "cameraCoordinates": {
+        "lat": 43.484,
+        "lng": -8.234,
+        "elevation": 10
+      },
       "preserveCustomImage": true,
       "content": "El Museo de la Construcción Naval de Ferrol es el mayor museo de Europa dedicado a la actividad de construcción naval. Ubicado en el edificio de las Herrerías del siglo XVIII, alberga una importante colección sobre la construcción naval desde el siglo XVIII hasta la actualidad. Ofrece un recorrido educativo por los hitos históricos más relevantes relacionados con la construcción naval española, incluyendo modelos históricos del astillero de Ferrol y exhibiciones sobre faros y señales marítimas.",
       "dateTime": "1750-Presente",

@@ -59,12 +59,18 @@
     <link rel="preload" href="assets/IIE-logo.webp" as="image" type="image/webp" />
     <link rel="preload" href="assets/IIE-logo.png" as="image" type="image/png" />
 
-    <!-- Preload critical CSS for faster rendering -->
-    <link rel="preload" href="./main.css" as="style" />
+    <!-- Critical CSS inlined for instant rendering -->
+    <style>
+      /* Load critical CSS inline */
+      @import url("./styles/critical.css");
+    </style>
+
+    <!-- Preload Cesium CSS (external dependency) -->
     <link rel="preload" href="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Widgets/widgets.css" as="style" />
 
-    <link rel="stylesheet" type="text/css" href="./main.css" />
-    <link rel="stylesheet" type="text/css" href="./styles/chapters.css" />
+    <!-- Non-critical CSS loaded with low priority -->
+    <link rel="stylesheet" type="text/css" href="./main.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" type="text/css" href="./main.css" /></noscript>
 
     <!-- Cesium script with defer - downloads in parallel, executes before modules -->
     <script defer src="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Cesium.js"></script>
