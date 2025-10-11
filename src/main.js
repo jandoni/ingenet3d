@@ -272,10 +272,20 @@ function initializeNewUI() {
     showSheetHint();
   };
   
-  // Add intro image
+  // Add intro image (load immediately without delay)
   const introImg = document.createElement('img');
-  introImg.src = story.properties.imageUrl || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="%233b82f6"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial" font-size="12">Explorar España</text></svg>';
   introImg.alt = 'Explorar España';
+
+  if (story.properties.imageUrl) {
+    introImg.src = story.properties.imageUrl;
+    introImg.onerror = () => {
+      console.warn('⚠️ Failed to load intro image, using fallback');
+      introImg.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="%233b82f6"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial" font-size="12">Explorar España</text></svg>';
+    };
+  } else {
+    introImg.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="%233b82f6"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial" font-size="12">Explorar España</text></svg>';
+  }
+
   introCard.appendChild(introImg);
   
   // Add intro title
@@ -303,14 +313,18 @@ function initializeNewUI() {
     // Add image with strict error handling to prevent loops
     const img = document.createElement('img');
     img.alt = chapter.title;
-    
+
     let imageAttempted = false; // Prevent multiple attempts
-    
+
     // Load image with proper error handling
     if (chapter.imageUrl && !imageAttempted) {
       imageAttempted = true;
 
-      // Add a small delay for each image to prevent rate limiting
+      // MOBILE FIX: Reduce delay to ensure images load before menu is shown
+      // Desktop can handle simultaneous loads, mobile needs slight delay
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const loadDelay = isMobile ? index * 10 : index * 50; // 10ms on mobile, 50ms on desktop
+
       setTimeout(() => {
         // Check if image element still exists (hasn't been removed)
         if (!img.parentNode) {
@@ -318,27 +332,45 @@ function initializeNewUI() {
         }
 
         img.src = chapter.imageUrl;
-      }, index * 50); // 50ms delay between each image
+      }, loadDelay);
       
       img.onerror = (e) => {
-        console.error(`❌ FAILED to load image for ${chapter.title}:`, chapter.imageUrl);
-        console.error('Error details:', e);
-        
+        console.error(`❌ MOBILE/DESKTOP: FAILED to load image for ${chapter.title}:`, chapter.imageUrl);
+        console.error('Error type:', e.type, 'Error target:', e.target);
+        console.error('Image src attempted:', img.src);
+
         // Prevent further error attempts by removing error handler
         img.onerror = null;
-        
-        // Fallback to a colorful placeholder with the place name
-        const placeholderColor = '#3b82f6';
-        img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="${placeholderColor}"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">${encodeURIComponent(chapter.title.substring(0, 20))}</text></svg>`;
+
+        // MOBILE FIX: Use chapter.logoUrl as fallback before showing placeholder
+        if (chapter.logoUrl && chapter.logoUrl !== chapter.imageUrl) {
+          console.log(`🔄 Attempting fallback to logoUrl for ${chapter.title}:`, chapter.logoUrl);
+          img.src = chapter.logoUrl;
+
+          // Add one-time error handler for logoUrl
+          img.onerror = () => {
+            console.error(`❌ Fallback logoUrl also failed for ${chapter.title}`);
+            // Final fallback to colorful placeholder with the place name
+            const placeholderColor = '#3b82f6';
+            img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="${placeholderColor}"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">${encodeURIComponent(chapter.title.substring(0, 20))}</text></svg>`;
+            img.onerror = null; // Prevent infinite loop
+          };
+        } else {
+          // Fallback to a colorful placeholder with the place name
+          const placeholderColor = '#3b82f6';
+          img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="${placeholderColor}"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">${encodeURIComponent(chapter.title.substring(0, 20))}</text></svg>`;
+        }
       };
       
       img.onload = () => {
+        console.log(`✅ Successfully loaded image for ${chapter.title}`);
         // Remove handlers to prevent memory leaks
         img.onload = null;
         img.onerror = null;
       };
     } else {
       // No image URL, use placeholder
+      console.warn(`⚠️ No imageUrl found for ${chapter.title}, using placeholder`);
       const placeholderColor = '#3b82f6';
       img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="${placeholderColor}"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">${encodeURIComponent(chapter.title.substring(0, 20))}</text></svg>`;
     }

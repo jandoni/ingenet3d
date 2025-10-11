@@ -1183,12 +1183,12 @@
     bottom: 0 !important;
     width: 200px !important;
     height: 100vh !important;
-    background: rgba(255, 255, 255, 0.98) !important;
-    backdrop-filter: blur(20px) !important;
+    background: transparent !important; /* MOBILE FIX: Transparent background like desktop */
+    backdrop-filter: none !important; /* Remove blur for clean look */
     flex-direction: column !important;
     gap: 0 !important;
     padding: 70px 8px 50px !important;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: none !important; /* Remove shadow - let cards have their own shadows */
     transition: right 0.3s var(--transition-smooth) !important;
     z-index: 1000 !important;
     transform: none !important;
@@ -1205,6 +1205,11 @@
     text-align: center;
     margin-top: -25px;
     flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.95) !important; /* MOBILE FIX: Keep white background for logo visibility */
+    border-radius: 8px !important;
+    padding: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
   }
 
   .organization-logo img {
@@ -1220,6 +1225,7 @@
     flex: 1;
     display: flex !important;
     min-height: 0;
+    background: transparent !important; /* MOBILE FIX: Transparent like desktop */
   }
 
   .nav-scroll-btn {
@@ -1249,9 +1255,10 @@
     flex: 1;
     margin: 6px 0;
     scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.5) transparent; /* MOBILE FIX: Light scrollbar for dark background */
     max-height: calc(100vh - 200px);
     min-height: 200px;
+    background: transparent !important; /* MOBILE FIX: Transparent like desktop */
   }
 
   #places-scroll-container::-webkit-scrollbar {
@@ -1260,13 +1267,17 @@
   }
 
   #places-scroll-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.1); /* MOBILE FIX: Light track for visibility */
     border-radius: 2px;
   }
 
   #places-scroll-container::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.5); /* MOBILE FIX: Light thumb for visibility */
     border-radius: 2px;
+  }
+
+  #places-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.7); /* MOBILE FIX: Brighter on hover */
   }
 
   #places-list {
@@ -1340,12 +1351,7 @@
   }
 
   .controls-info {
-    top: 50%; /* Vertically centered on mobile too */
-    transform: translateY(-50%); /* Center perfectly */
-    left: 20px; /* LEFT side */
-    min-width: 180px;
-    font-size: 11px;
-    padding: 10px 12px;
+    display: none !important; /* Hide on mobile - touch controls are intuitive */
   }
 
   .controls-title {

@@ -899,14 +899,12 @@ export async function createMarkers(chapters) {
     return;
   }
 
-  // Mobile optimization: reduce number of markers loaded simultaneously
+  // Mobile optimization: show all markers but with optimized rendering
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const maxMarkersOnMobile = 8; // Limit to 8 markers on mobile
 
+  // IMPORTANT: Show ALL markers on mobile for complete user experience
+  // Previous limit of 8 was too aggressive - users couldn't see all locations
   let chaptersToProcess = chapters;
-  if (isMobile && chapters.length > maxMarkersOnMobile) {
-    chaptersToProcess = chapters.slice(0, maxMarkersOnMobile);
-  }
 
   // Use hardcoded coordinates for fast loading (no API calls needed for initial display)
   const hardcodedCoordinates = {
