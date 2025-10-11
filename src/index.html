@@ -42,13 +42,32 @@
     <link rel="apple-touch-icon" sizes="180x180" href="assets/IIE-logo.png" />
     <link rel="shortcut icon" href="assets/IIE-logo.png" />
 
-    <!-- Preload critical resources -->
-    <link rel="preconnect" href="https://ajax.googleapis.com" />
-    <link rel="preconnect" href="https://tile.googleapis.com" />
+    <!-- DNS Prefetch - Resolve DNS early for third-party domains -->
+    <link rel="dns-prefetch" href="https://ajax.googleapis.com" />
+    <link rel="dns-prefetch" href="https://tile.googleapis.com" />
+    <link rel="dns-prefetch" href="https://www.google.com" />
+
+    <!-- Preconnect - Establish early connections to critical origins -->
+    <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://tile.googleapis.com" crossorigin />
+
+    <!-- Preload critical fonts - Load immediately for faster text rendering -->
+    <link rel="preload" href="assets/fonts/Inter-Regular.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="assets/fonts/New-York.ttf" as="font" type="font/ttf" crossorigin />
+
+    <!-- Preload critical images - Load logo immediately for loading screen -->
+    <link rel="preload" href="assets/IIE-logo.webp" as="image" type="image/webp" />
+    <link rel="preload" href="assets/IIE-logo.png" as="image" type="image/png" />
+
+    <!-- Preload critical CSS for faster rendering -->
+    <link rel="preload" href="./main.css" as="style" />
+    <link rel="preload" href="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Widgets/widgets.css" as="style" />
 
     <link rel="stylesheet" type="text/css" href="./main.css" />
     <link rel="stylesheet" type="text/css" href="./styles/chapters.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Cesium.js"></script>
+
+    <!-- Cesium script with defer - downloads in parallel, executes before modules -->
+    <script defer src="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Cesium.js"></script>
     <link
       href="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Widgets/widgets.css"
       rel="stylesheet"
@@ -65,6 +84,13 @@
         </picture>
         <div class="loading-text">Explorar España</div>
         <div class="loading-spinner"></div>
+        <div class="loading-progress">
+          <div class="loading-status">Inicializando...</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+          <div class="loading-percentage">0%</div>
+        </div>
       </div>
     </div>
     <!-- Top navigation container with logo and places -->
@@ -290,7 +316,7 @@
     <button id="chat-toggle-btn" onclick="toggleChat()">
       <picture>
         <source srcset="assets/robot.webp" type="image/webp">
-        <img src="assets/robot.png" alt="Robot Assistant" class="robot-icon">
+        <img src="assets/robot.png" alt="Robot Assistant" class="robot-icon" loading="lazy">
       </picture>
       <div class="chat-bubble">
         ¡Úsame para buscar organizaciones de tu campo profesional!

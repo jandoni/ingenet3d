@@ -18,6 +18,7 @@ import {
   performFlyTo,
   removeCustomRadiusShader,
   setSpainOverviewFromGoogleEarthExported,
+  animateEarthToSpain,
 } from "../utils/cesium.js";
 import { flyToPlaceNew } from "../utils/places-new-api.js";
 import { simpleFlyToPlace } from "../utils/simple-geocoder.js";
@@ -261,9 +262,9 @@ export async function resetToIntro() {
     console.error('Error checking clock listeners:', error);
   }
 
-  // For Spain overview, use fixed coordinates instead of animated flight
+  // For Spain overview, use epic Earth-to-Spain zoom animation
   if (placeName === "Spain" && (cameraStyle === "overview" || !cameraStyle)) {
-    setSpainOverviewFromGoogleEarthExported();
+    animateEarthToSpain();
   } else {
     try {
       // Try NEW Places API first, fallback to simple geocoder
@@ -324,15 +325,17 @@ export async function updateChapter(chapterIndex) {
       cameraConfig = await flyToPlaceNew(placeName, cameraStyle || 'drone-orbit');
       flySuccessful = true;
 
-      // Show location pin at the actual location with company logo
+      // Show location pin at the actual location with company logo (non-blocking)
       if (cameraConfig && cameraConfig.location) {
-        await showLocationPin(
+        showLocationPin(
           chapterId,
           cameraConfig.location,
           chapter.title,
           chapter.logoUrl,
           chapter.website
-        );
+        ).catch(err => {
+          console.warn('⚠️ Location pin failed to load (non-critical):', err.message);
+        });
       }
 
       // Update chapter with Google Place details if available
@@ -358,15 +361,17 @@ export async function updateChapter(chapterIndex) {
         cameraConfig = await simpleFlyToPlace(placeName, cameraStyle || 'drone-orbit');
         flySuccessful = true;
 
-        // Show location pin at the actual location with company logo
+        // Show location pin at the actual location with company logo (non-blocking)
         if (cameraConfig && cameraConfig.location) {
-          await showLocationPin(
+          showLocationPin(
             chapterId,
             cameraConfig.location,
             chapter.title,
             chapter.logoUrl,
             chapter.website
-          );
+          ).catch(err => {
+            console.warn('⚠️ Location pin failed to load (non-critical):', err.message);
+          });
         }
       } catch (geocoderError) {
         console.error(`❌ Both APIs failed for ${placeName}:`, geocoderError);

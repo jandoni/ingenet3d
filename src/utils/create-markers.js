@@ -144,12 +144,20 @@ function loadImage(url, websiteUrl = null) {
 
         img.src = imageUrl;
 
-        // Set a timeout to prevent hanging
+        // Set timeout based on file type (local files load instantly, remote files may be slow)
+        const isLocalFile = imageUrl.startsWith('assets/') || imageUrl.startsWith('/') || imageUrl.startsWith('./');
+        const isGoogleFavicon = imageUrl.includes('google.com/s2/favicons');
+
+        // Local files: 30s (generous timeout, they should load in <100ms)
+        // Google favicons: 10s (external, often slow)
+        // Other remote: 20s
+        const timeout = isLocalFile ? 30000 : (isGoogleFavicon ? 10000 : 20000);
+
         setTimeout(() => {
           if (!img.complete) {
             rej(new Error(`Image load timeout for ${imageUrl}`));
           }
-        }, 5000);
+        }, timeout);
       });
     };
 
@@ -948,24 +956,24 @@ export async function createMarkers(chapters) {
   for (const chapter of chaptersToProcess) {
     const coords = hardcodedCoordinates[chapter.id];
     if (coords) {
-      // Use hardcoded coordinates for fast initial display
-      const cartesian = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat);
+      // Use hardcoded coordinates with approximate height (200m above sea level)
+      // This allows instant marker display without waiting for terrain data
+      const cartesian = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat, 200);
       markerCoordinates.push(cartesian);
       chapterLocations.push(coords);
     } else {
       console.warn(`⚠️ No hardcoded coordinates for chapter ${chapter.id}: ${chapter.title}`);
       // Fallback to default coordinates if no hardcoded coords available
-      const fallbackCoord = Cesium.Cartesian3.fromDegrees(-3.7492, 40.4637);
+      const fallbackCoord = Cesium.Cartesian3.fromDegrees(-3.7492, 40.4637, 200);
       markerCoordinates.push(fallbackCoord);
       chapterLocations.push({ lat: 40.4637, lng: -3.7492 });
     }
   }
 
-  // Modify the position to be on top of terrain (e.g. Rooftops, trees, etc.)
-  // this has to be done with the whole coordinates array, because clamping single
-  // coords to the ground terrain like this will not work.
-  const coordsWithAdjustedHeight =
-    await cesiumViewer.scene.clampToHeightMostDetailed(markerCoordinates);
+  // PERFORMANCE: Skip terrain clamping for instant marker display
+  // Using approximate height (200m) is good enough for Spain's terrain
+  // We could refine heights in the background later if needed
+  const coordsWithAdjustedHeight = markerCoordinates;
 
   // Spain center for calculating line directions (approximate center of Spain)
   const spainCenter = Cesium.Cartesian3.fromDegrees(-3.7492, 40.4637, 0);

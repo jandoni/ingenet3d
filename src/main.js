@@ -7,6 +7,9 @@ import { initChapterNavigation, updateChapter, resetToIntro, getCurrentChapterIn
 import { initGoogleMapsServicesNew, resolvePlaceToCameraNew } from "./utils/places-new-api.js";
 import { simpleGeocodeToCamera } from "./utils/simple-geocoder.js";
 import { initChatbot } from "./utils/chatbot.js";
+import { loadingManager } from "./utils/loading-manager.js";
+import { preloadChapterImages } from "./utils/image-preloader.js";
+import { detectAndConfigurePerformance, getPerformanceSettings } from "./utils/performance-settings.js";
 
 /**
  * The story configuration object
@@ -31,21 +34,25 @@ async function loadChapterDetails(chapterId) {
   }
 
   try {
-    // Initialize Google APIs if not already done
-    if (!window.googleMapsLoaded) {
-      await initGoogleMaps();
-      initGoogleMapsServicesNew();
-      window.googleMapsLoaded = true;
+    // Ensure Google Maps API is loaded
+    // This should already be loaded during app startup, but check just in case
+    if (typeof google === 'undefined' || !google.maps) {
+      console.warn('⚠️ Google Maps API not loaded yet, loading now...');
+      if (!window.googleMapsLoaded) {
+        await initGoogleMaps();
+        initGoogleMapsServicesNew();
+        window.googleMapsLoaded = true;
+      }
     }
 
     let cameraConfig;
 
     // Try NEW Places API first, fallback to simple geocoder
     try {
-      cameraConfig = await resolvePlaceToCameraNew(chapter.placeName, 'static');
+      cameraConfig = await resolvePlaceToCameraNew(chapter.placeName, chapter.cameraStyle || 'static');
     } catch (placesError) {
       console.warn(`⚠️ NEW Places API failed for ${chapter.title}, trying simple geocoder...`);
-      cameraConfig = await simpleGeocodeToCamera(chapter.placeName, 'static');
+      cameraConfig = await simpleGeocodeToCamera(chapter.placeName, chapter.cameraStyle || 'static');
     }
 
     // Store camera configuration and place details
@@ -190,47 +197,120 @@ async function main() {
     console.trace('Call stack:');
     return;
   }
-  
+
   mainFunctionCalled = true;
 
   try {
+    // ==========================================
+    // STAGE 1: INITIALIZE 3D VIEWER (0-15%)
+    // ==========================================
+    loadingManager.startStage('INIT');
+
+    // Detect device and network capabilities FIRST for adaptive optimization
+    loadingManager.updateStage('INIT', 0.2, 'Detectando red y dispositivo...');
+    const performanceSettings = await detectAndConfigurePerformance();
+
+    // Store globally for other modules to access
+    window.performanceSettings = performanceSettings;
+
+    // Show network warning ONLY if slow (minimal, professional)
+    const isSlow = performanceSettings.networkSpeed === 'slow';
+    if (isSlow) {
+      loadingManager.showNetworkStatus('Conexión lenta - Optimizando rendimiento');
+    }
+    loadingManager.updateStage('INIT', 0.4, `${performanceSettings.description}`);
+
     // Show initial UI immediately with curated images
     initializeNewUI();
 
-    // Initialize Cesium first for fast map display
-    await initCesiumViewer();
+    // Initialize Cesium with adaptive performance settings
+    loadingManager.updateStage('INIT', 0.6, 'Inicializando visor 3D...');
+    await initCesiumViewer(performanceSettings);
 
-    // Hide loading screen after Cesium is ready
-    hideLoadingScreen();
+    loadingManager.completeStage('INIT');
 
-    // Initialize chapter navigation with basic data
-    initChapterNavigation();
+    // ==========================================
+    // STAGE 2: PRELOAD IMAGES (15-40%)
+    // ==========================================
+    // Preload all chapter images in batches (adaptive batch size based on network)
+    await preloadChapterImages(chapters, performanceSettings.imageBatchSize);
+
+    // ==========================================
+    // STAGE 3: CREATE MARKERS (40-70%)
+    // ==========================================
+    loadingManager.startStage('LOCATIONS');
 
     // Create unified markers using the advanced marker system
     await createMarkers(chapters);
 
+    loadingManager.completeStage('LOCATIONS');
+
+    // ==========================================
+    // STAGE 4: PREPARE CONTENT (70-90%)
+    // ==========================================
+    loadingManager.startStage('CONTENT');
+
+    // Initialize chapter navigation with basic data
+    initChapterNavigation();
+
     // Initialize the chatbot with story data
     initChatbot(story);
-    
+
+    loadingManager.completeStage('CONTENT');
+
+    // ==========================================
+    // STAGE 5: FINALIZE (90-100%)
+    // ==========================================
+    loadingManager.startStage('FINALIZE');
+
+    // ============================================================
+    // CRITICAL: Load Google Maps API ONCE during app startup
+    // ============================================================
+    // Google Maps API can ONLY be loaded once per page.
+    // If we try to load it again (e.g., when clicking markers),
+    // it will fail with ERR_CONNECTION_CLOSED and prevent navigation.
+    // Therefore, we MUST load it here during initial app startup.
+    // ============================================================
+    try {
+      if (typeof google === 'undefined' || !google.maps) {
+        console.log('📍 Loading Google Maps API...');
+        await initGoogleMaps();
+        initGoogleMapsServicesNew();
+        window.googleMapsLoaded = true;
+        console.log('✅ Google Maps API loaded successfully');
+      } else {
+        console.log('✅ Google Maps API already available');
+        initGoogleMapsServicesNew();
+        window.googleMapsLoaded = true;
+      }
+    } catch (error) {
+      console.error('⚠️ Failed to load Google Maps API (will retry on-demand):', error);
+      window.googleMapsLoaded = false;
+    }
+
+    // Give UI time to settle
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    loadingManager.complete();
+
   } catch (error) {
     console.error('💥 Critical error during initialization:', error);
     console.trace('Error stack:');
     // Hide loading screen even on error
-    hideLoadingScreen();
+    loadingManager.complete();
   }
 }
 
 /**
  * Hide the loading screen after initialization
+ * NOTE: This function is now replaced by loadingManager.complete()
+ * Kept for backward compatibility but should not be called directly
  */
 function hideLoadingScreen() {
   const loadingScreen = document.getElementById('loading-screen');
   if (loadingScreen) {
     loadingScreen.classList.add('hidden');
-    // Remove from DOM after transition
-    setTimeout(() => {
-      loadingScreen.remove();
-    }, 300);
+    // Note: We no longer remove from DOM to allow loading screen to be reused if needed
   }
 }
 
@@ -757,7 +837,14 @@ function initializeGallery(chapter) {
     // Create slide
     const slide = document.createElement('div');
     slide.className = 'gallery-slide';
-    slide.innerHTML = `<img src="${image.url}" alt="${chapter.title}" />`;
+
+    // Create image with lazy loading (gallery images aren't immediately visible)
+    const img = document.createElement('img');
+    img.src = image.url;
+    img.alt = chapter.title;
+    img.loading = 'lazy'; // Lazy load gallery images
+
+    slide.appendChild(img);
     galleryTrack.appendChild(slide);
 
     // Create dot

@@ -203,17 +203,27 @@ export function getCameraOptions() {
  * The `initializeCesiumViewer` function is responsible for initializing a CesiumJS 3D map viewer,
  * configuring its default camera position and orientation, and adding both a 3D
  * tileset and attribution to the viewer.
+ *
+ * @param {Object} performanceSettings - Adaptive performance settings (optional)
  */
-export async function initCesiumViewer() {
-  // Enable simultaneous requests for better tile loading performance
-  Cesium.RequestScheduler.requestsByServer["tile.googleapis.com:443"] = 18;
-  
+export async function initCesiumViewer(performanceSettings = null) {
+  // Get performance settings or use safe defaults
+  const settings = performanceSettings || {
+    resolutionScale: 1.5,
+    tileRequests: 12,
+    targetFrameRate: 30
+  };
+
+  // Configure tile requests based on network speed (adaptive!)
+  Cesium.RequestScheduler.requestsByServer["tile.googleapis.com:443"] = settings.tileRequests;
+  console.log(`📡 Configured ${settings.tileRequests} simultaneous tile requests`);
+
   // Set the default access token to null to prevent the CesiumJS viewer from requesting an access token
   Cesium.Ion.defaultAccessToken = null;
 
   // Detect if we're on mobile for performance optimizations
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
+
   // most options prevent the creation of certain built-in widgets (cesium ui elements)
   cesiumViewer = new Cesium.Viewer("cesium-container", {
     baseLayerPicker: false,
@@ -229,19 +239,16 @@ export async function initCesiumViewer() {
     animation: false,
     // Enable request render mode for better performance
     requestRenderMode: true,
-    // Mobile optimizations (but keep resolution high)
-    ...(isMobile && {
-      // Use lower frame rate for mobile (but keep quality high)
-      targetFrameRate: 30,
-    })
+    // Adaptive frame rate based on device and network
+    targetFrameRate: settings.targetFrameRate
   });
 
   // disable the default lighting of the globe
   cesiumViewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
 
-  // this is foremost to improve the resolution of icons and text displayed in the cesium viewer
-  // Keep high resolution even on mobile for better quality
-  cesiumViewer.resolutionScale = 2;
+  // Adaptive resolution scale based on device capabilities and network speed
+  cesiumViewer.resolutionScale = settings.resolutionScale;
+  console.log(`🎨 Resolution scale: ${settings.resolutionScale}x`);
 
   // Enable camera controls for user interaction
   cesiumViewer.scene.screenSpaceCameraController.enableLook = true;
@@ -275,9 +282,10 @@ export async function initCesiumViewer() {
   // Left-click + drag for rotation (default behavior)
   cesiumViewer.scene.screenSpaceCameraController.rotateEventTypes = Cesium.CameraEventType.LEFT_DRAG;
 
-  // For Spain overview, use fixed coordinates instead of Places API
+  // For Spain overview, use epic Earth-to-Spain zoom animation on initial load
   if (story.properties.placeName === "Spain" && story.properties.cameraStyle === "overview") {
-    setSpainOverviewFromGoogleEarth();
+    // Use the epic zoom animation on first load
+    animateEarthToSpain();
   } else if (story.properties.placeName) {
     try {
       // Check if Google Maps services are available
@@ -408,6 +416,56 @@ export function setSpainOverviewFromGoogleEarthExported() {
   const headingPitchRange = new Cesium.HeadingPitchRange(heading, pitch, range);
 
   cesiumViewer.camera.lookAt(center, headingPitchRange);
+}
+
+/**
+ * Animate from Earth view to Spain overview (epic zoom effect)
+ * Shows the entire Earth, then zooms into Spain smoothly
+ */
+export function animateEarthToSpain() {
+  if (!cesiumViewer) {
+    console.error('Cesium viewer not initialized');
+    return;
+  }
+
+  // Final Spain position (same as setSpainOverviewFromGoogleEarthExported)
+  const latitude = 38.5;
+  const longitude = -5.0;
+  const altitude = 0;
+  const finalRange = 6000000; // 6 million meters
+
+  // Start from Earth view (show entire planet)
+  const earthCenter = Cesium.Cartesian3.fromDegrees(longitude, latitude, altitude);
+  const earthRange = 20000000; // 20 million meters (view entire Earth)
+  const earthHeading = 0;
+  const earthPitch = Cesium.Math.toRadians(-90); // Top-down
+  const earthRoll = 0;
+
+  // First, immediately set camera to Earth view
+  cesiumViewer.camera.lookAt(
+    earthCenter,
+    new Cesium.HeadingPitchRange(earthHeading, earthPitch, earthRange)
+  );
+
+  // Then, animate smooth zoom to Spain (3.5 seconds)
+  setTimeout(() => {
+    const spainCenter = Cesium.Cartesian3.fromDegrees(longitude, latitude, altitude);
+    const spainHeading = 0;
+    const spainPitch = Cesium.Math.toRadians(-90);
+    const spainRoll = 0;
+
+    // Use flyTo for smooth animation
+    cesiumViewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, finalRange),
+      orientation: {
+        heading: spainHeading,
+        pitch: spainPitch,
+        roll: spainRoll
+      },
+      duration: 3.5, // 3.5 seconds for epic zoom
+      easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT
+    });
+  }, 100); // Small delay to ensure Earth view is set first
 }
 
 /**
