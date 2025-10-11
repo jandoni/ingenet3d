@@ -258,8 +258,15 @@ export async function initCesiumViewer(performanceSettings = null) {
   cesiumViewer.scene.globe.show = false;
   cesiumViewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
 
-  // Disable atmosphere (expensive shader effects)
-  cesiumViewer.scene.skyAtmosphere.show = false;
+  // Enable atmosphere with reduced quality (fixes black sky issue)
+  // Using lower brightness and saturation for better performance
+  cesiumViewer.scene.skyAtmosphere.show = true;
+  cesiumViewer.scene.skyAtmosphere.brightnessShift = -0.3; // Reduce brightness for performance
+  cesiumViewer.scene.skyAtmosphere.saturationShift = -0.3; // Reduce saturation for performance
+  cesiumViewer.scene.skyAtmosphere.hueShift = 0.0;
+
+  // Set a light blue background color for far distances
+  cesiumViewer.scene.backgroundColor = new Cesium.Color(0.53, 0.81, 0.92, 1.0); // Sky blue
 
   // Disable fog (expensive post-processing)
   cesiumViewer.scene.fog.enabled = false;
@@ -281,7 +288,8 @@ export async function initCesiumViewer(performanceSettings = null) {
 
   console.log(`⚡ Scene optimizations applied:`);
   console.log(`   - Globe rendering: DISABLED`);
-  console.log(`   - Atmosphere: DISABLED`);
+  console.log(`   - Atmosphere: ENABLED (reduced quality for performance)`);
+  console.log(`   - Background: Sky blue color set`);
   console.log(`   - Fog: DISABLED`);
   console.log(`   - Shadows: DISABLED`);
   console.log(`   - Ground primitives: DISABLED`);
@@ -296,6 +304,33 @@ export async function initCesiumViewer(performanceSettings = null) {
   cesiumViewer.scene.screenSpaceCameraController.enableZoom = true;
   cesiumViewer.scene.screenSpaceCameraController.enableRotate = true;
   cesiumViewer.scene.screenSpaceCameraController.enableTilt = true;
+
+  // ============================================================
+  // CRITICAL: Camera Idle Detection to Prevent Tile Thrashing
+  // ============================================================
+  let lastCameraMove = Date.now();
+  let cameraIdleTimeout = null;
+
+  // Listen for camera movement
+  cesiumViewer.camera.moveEnd.addEventListener(() => {
+    lastCameraMove = Date.now();
+
+    // Clear existing timeout
+    if (cameraIdleTimeout) {
+      clearTimeout(cameraIdleTimeout);
+    }
+
+    // After 2 seconds of no camera movement, force tiles to settle
+    cameraIdleTimeout = setTimeout(() => {
+      const tileset = getTileset();
+      if (tileset && window.tileSettlingComplete) {
+        // Force disable dynamic LOD after camera stops moving
+        tileset.dynamicScreenSpaceError = false;
+        tileset.foveatedScreenSpaceError = false;
+        console.log(`📷 Camera idle - tile refinement disabled`);
+      }
+    }, 2000);
+  });
 
   // Configure zoom behavior for better responsiveness
   cesiumViewer.scene.screenSpaceCameraController.zoomEventTypes = [
@@ -387,11 +422,12 @@ async function createTileset() {
 
     // Determine maximumScreenSpaceError based on network speed
     // Higher values = fewer tiles loaded = faster but lower quality
-    let maximumScreenSpaceError = 16; // Default (good quality)
+    // OPTIMIZED: Increased values to reduce constant tile updating
+    let maximumScreenSpaceError = 20; // Default (balanced quality/performance)
     if (settings.networkSpeed === 'slow') {
       maximumScreenSpaceError = 32; // Aggressive culling for slow networks
     } else if (settings.networkSpeed === 'fast') {
-      maximumScreenSpaceError = 8; // High quality for fast networks
+      maximumScreenSpaceError = 16; // Good quality for fast networks (increased from 8)
     }
 
     console.log(`🎯 Tileset LOD: maximumScreenSpaceError = ${maximumScreenSpaceError} (${settings.networkSpeed} network)`);
@@ -405,8 +441,8 @@ async function createTileset() {
         // LOD Control - Higher value = fewer tiles, faster loading
         maximumScreenSpaceError: maximumScreenSpaceError,
 
-        // Skip intermediate LOD levels for faster loading
-        skipLevelOfDetail: true,
+        // Skip intermediate LOD levels - DISABLED to prevent quality jumps
+        skipLevelOfDetail: false, // Changed from true - prevents jarring transitions
         baseScreenSpaceError: 1024,
         skipScreenSpaceErrorFactor: 16,
         skipLevels: 1,
@@ -414,7 +450,7 @@ async function createTileset() {
         // Dynamic LOD - Reduce detail when camera is moving
         dynamicScreenSpaceError: true,
         dynamicScreenSpaceErrorDensity: 0.00278,
-        dynamicScreenSpaceErrorFactor: 4.0,
+        dynamicScreenSpaceErrorFactor: 2.0, // Reduced from 4.0 - less aggressive refinement
         dynamicScreenSpaceErrorHeightFalloff: 0.25,
 
         // Aggressive Culling - Don't load tiles outside view
@@ -429,16 +465,19 @@ async function createTileset() {
         preloadWhenHidden: false,
         preloadFlightDestinations: false,
 
-        // Progressive Rendering - Show something quickly
-        progressiveResolutionHeightFraction: 0.3,
+        // Progressive Rendering - Show something quickly (improved from 0.3)
+        progressiveResolutionHeightFraction: 0.5, // Better initial quality
 
-        // Immediate Mode - Don't wait for all tiles
-        immediatelyLoadDesiredLevelOfDetail: false,
+        // Immediate Mode - Load target quality faster, then stop
+        immediatelyLoadDesiredLevelOfDetail: true, // Changed from false - reduces constant updates
 
         // Tile Loading - Prioritize closest tiles first
         foveatedScreenSpaceError: true,
         foveatedConeSize: 0.1,
-        foveatedMinimumScreenSpaceErrorRelaxation: 0.0
+        foveatedMinimumScreenSpaceErrorRelaxation: 0.0,
+
+        // Limit concurrent tile downloads to prevent thrashing
+        loadingDescendantLimit: 10 // NEW: Limits how many child tiles load at once
       }
     );
 
@@ -446,14 +485,53 @@ async function createTileset() {
     tileset.showCreditsOnScreen = true;
 
     // Set tile cache size limit (prevent unlimited tile accumulation)
-    tileset.maximumCacheSize = 200; // Keep only 200 tiles in memory
+    // OPTIMIZED: Increased from 300 to 500 to prevent disk cache thrashing
+    tileset.maximumCacheSize = 500; // Keep 500 tiles in memory (prevents re-requesting from disk)
 
-    console.log(`✅ Tileset created with aggressive performance limits`);
-    console.log(`   - Max tiles in cache: 200`);
+    console.log(`✅ Tileset created with optimized performance settings`);
+    console.log(`   - Max tiles in cache: 500 (prevents disk cache re-requests)`);
     console.log(`   - Max memory: 512 MB`);
-    console.log(`   - Skip LOD: enabled`);
-    console.log(`   - Dynamic LOD: enabled`);
+    console.log(`   - Skip LOD: DISABLED (smoother transitions)`);
+    console.log(`   - Dynamic LOD: enabled (factor 2.0)`);
     console.log(`   - Cull while moving: enabled`);
+    console.log(`   - Immediate load desired LOD: enabled (faster settling)`);
+    console.log(`   - Loading descendant limit: 10 (prevents thrashing)`);
+
+    // ============================================================
+    // CRITICAL: Stop Tile Thrashing After Initial Load
+    // ============================================================
+    // Track tile loading state to prevent endless refinement
+    let tilesSettled = false;
+    let tileLoadingTimeout = null;
+    let initialLoadComplete = false;
+
+    // Listen for tile loading events
+    tileset.tileLoad.addEventListener(() => {
+      // Clear existing timeout
+      if (tileLoadingTimeout) {
+        clearTimeout(tileLoadingTimeout);
+      }
+
+      // Set new timeout - if no tiles load for 3 seconds, consider load complete
+      tileLoadingTimeout = setTimeout(() => {
+        if (!tilesSettled) {
+          tilesSettled = true;
+          initialLoadComplete = true;
+          console.log(`🎯 Tiles settled - disabling aggressive refinement to stop network requests`);
+
+          // Disable dynamic LOD refinement (stops continuous tile updates)
+          tileset.dynamicScreenSpaceError = false;
+
+          // Disable foveated rendering (stops center tile refinement)
+          tileset.foveatedScreenSpaceError = false;
+
+          // Store settled state globally for orbit animation to check
+          window.tileSettlingComplete = true;
+
+          console.log(`✅ Tile loading complete - network requests should stop now`);
+        }
+      }, 3000); // 3 seconds of no tile loading = settled
+    });
 
     // Add tileset to the scene
     cesiumViewer.scene.primitives.add(tileset);
@@ -585,16 +663,45 @@ export function stopSpainOrbitEffect() {
   if (spainOrbitAnimation) {
     spainOrbitAnimation();
     spainOrbitAnimation = null;
+
+    // Notify idle manager that orbit stopped
+    if (window.idleFrameManager) {
+      window.idleFrameManager.setOrbitMode(false);
+    }
   }
 }
 
 export function startSpainOrbitEffect() {
   stopSpainOrbitEffect(); // Clear any existing orbit
 
+  // CRITICAL FIX: Notify idle manager that orbit is starting
+  // This prevents orbit from breaking idle state (FPS oscillation fix)
+  if (window.idleFrameManager) {
+    window.idleFrameManager.setOrbitMode(true);
+  }
+
   // Don't check for mobile here - let the pause button control it
   spainOrbitAnimation = cesiumViewer.clock.onTick.addEventListener(() => {
+    // CRITICAL FIX: Only rotate if tiles have settled
+    // This prevents orbit animation from triggering endless tile refinement
+    if (!window.tileSettlingComplete) {
+      // Skip rotation during initial tile loading
+      return;
+    }
+
     // Very subtle rotation for overview: 0.00005 radians/tick (minimal movement)
+    // Temporarily disable screen space error checking during rotation to prevent tile updates
+    const originalDynamicSSE = getTileset()?.dynamicScreenSpaceError;
+    if (getTileset()) {
+      getTileset().dynamicScreenSpaceError = false;
+    }
+
     cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.00005);
+
+    // Restore original setting (though it should stay false after settling)
+    if (getTileset() && originalDynamicSSE !== undefined) {
+      getTileset().dynamicScreenSpaceError = originalDynamicSSE;
+    }
   });
 }
 

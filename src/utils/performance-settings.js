@@ -51,7 +51,7 @@ const SETTINGS_MATRIX = {
   // Fast Network Settings
   [`${DeviceType.DESKTOP_HIGH}-${NetworkSpeed.FAST}`]: {
     resolutionScale: 2.0,
-    tileRequests: 18,
+    tileRequests: 12, // Reduced from 18 - prevents tile thrashing
     imageBatchSize: 6,
     markerBatchSize: 8,
     targetFrameRate: 30,
@@ -60,7 +60,7 @@ const SETTINGS_MATRIX = {
   },
   [`${DeviceType.DESKTOP_STANDARD}-${NetworkSpeed.FAST}`]: {
     resolutionScale: 1.5,
-    tileRequests: 15,
+    tileRequests: 10, // Reduced from 15 - prevents tile thrashing
     imageBatchSize: 5,
     markerBatchSize: 6,
     targetFrameRate: 30,
@@ -69,7 +69,7 @@ const SETTINGS_MATRIX = {
   },
   [`${DeviceType.MOBILE_HIGH}-${NetworkSpeed.FAST}`]: {
     resolutionScale: 1.5,
-    tileRequests: 12,
+    tileRequests: 10, // Reduced from 12 - prevents tile thrashing
     imageBatchSize: 4,
     markerBatchSize: 6,
     targetFrameRate: 30,
@@ -78,7 +78,7 @@ const SETTINGS_MATRIX = {
   },
   [`${DeviceType.MOBILE_STANDARD}-${NetworkSpeed.FAST}`]: {
     resolutionScale: 1.25,
-    tileRequests: 10,
+    tileRequests: 8, // Reduced from 10 - prevents tile thrashing
     imageBatchSize: 4,
     markerBatchSize: 5,
     targetFrameRate: 30,
@@ -87,7 +87,7 @@ const SETTINGS_MATRIX = {
   },
   [`${DeviceType.MOBILE_LOW}-${NetworkSpeed.FAST}`]: {
     resolutionScale: 1.0,
-    tileRequests: 8,
+    tileRequests: 6, // Reduced from 8 - prevents tile thrashing
     imageBatchSize: 3,
     markerBatchSize: 4,
     targetFrameRate: 30,
@@ -98,7 +98,7 @@ const SETTINGS_MATRIX = {
   // Medium Network Settings
   [`${DeviceType.DESKTOP_HIGH}-${NetworkSpeed.MEDIUM}`]: {
     resolutionScale: 1.5,
-    tileRequests: 12,
+    tileRequests: 10, // Reduced from 12 - prevents tile thrashing
     imageBatchSize: 4,
     markerBatchSize: 6,
     targetFrameRate: 30,
@@ -107,7 +107,7 @@ const SETTINGS_MATRIX = {
   },
   [`${DeviceType.DESKTOP_STANDARD}-${NetworkSpeed.MEDIUM}`]: {
     resolutionScale: 1.5,
-    tileRequests: 10,
+    tileRequests: 8, // Reduced from 10 - prevents tile thrashing
     imageBatchSize: 3,
     markerBatchSize: 5,
     targetFrameRate: 30,
@@ -116,7 +116,7 @@ const SETTINGS_MATRIX = {
   },
   [`${DeviceType.MOBILE_HIGH}-${NetworkSpeed.MEDIUM}`]: {
     resolutionScale: 1.25,
-    tileRequests: 8,
+    tileRequests: 6, // Reduced from 8 - prevents tile thrashing
     imageBatchSize: 3,
     markerBatchSize: 4,
     targetFrameRate: 30,

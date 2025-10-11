@@ -4,10 +4,10 @@
  *
  * Frame Rate Strategy:
  * - Active (camera moving OR tiles loading): 30 FPS
- * - Idle (camera + network quiet > 2s): 15 FPS (minimum for smooth viewing)
+ * - Idle (camera + network quiet > 2s): 20 FPS (minimum for smooth viewing)
  *
  * Key: Network must be quiet (no tile loading) before FPS reduction
- * Minimum FPS is always 15 to maintain smooth visual experience
+ * Minimum FPS is always 20 to maintain smooth visual experience (15 FPS is too choppy)
  */
 
 export class IdleFrameManager {
@@ -32,12 +32,15 @@ export class IdleFrameManager {
     this.lastTilesLoading = 0;
     this.networkQuietThreshold = 20000; // 20 seconds of no tile loading before deep idle
 
-    // Frame rate levels (minimum 15 FPS for smooth viewing)
+    // Orbit mode tracking (prevents orbit animation from breaking idle state)
+    this.orbitModeActive = false;
+
+    // Frame rate levels (minimum 20 FPS for smooth viewing)
     this.frameRateLevels = {
       0: targetFrameRate,           // Active: full FPS (30)
-      1: 15,                        // Idle: 15 FPS
-      2: 15,                        // Very idle: 15 FPS
-      3: 15                         // Deeply idle: 15 FPS (still smooth)
+      1: 20,                        // Idle: 20 FPS (smoother than 15)
+      2: 20,                        // Very idle: 20 FPS (maintain smoothness)
+      3: 20                         // Deeply idle: 20 FPS (never drop below 20)
     };
 
     // Idle thresholds (milliseconds)
@@ -100,6 +103,14 @@ export class IdleFrameManager {
    */
   onCameraMove() {
     if (!this.enabled) return;
+
+    // CRITICAL FIX: Ignore camera movements during orbit mode
+    // Orbit animation should not break idle state
+    if (this.orbitModeActive) {
+      // Still update camera state to track position, but don't reset idle timer
+      this.updateCameraState();
+      return;
+    }
 
     // Check if camera actually moved (not just a tiny float drift)
     if (this.hasCameraActuallyMoved()) {
@@ -265,6 +276,22 @@ export class IdleFrameManager {
       this.start();
     } else {
       this.stop();
+    }
+  }
+
+  /**
+   * Set orbit mode (tells idle manager to ignore orbit-induced camera movement)
+   * @param {boolean} active - True if orbit animation is running
+   */
+  setOrbitMode(active) {
+    if (this.orbitModeActive === active) return;
+
+    this.orbitModeActive = active;
+
+    if (active) {
+      console.log(`🔄 Orbit mode enabled - camera rotation will not break idle state`);
+    } else {
+      console.log(`⏹️ Orbit mode disabled - normal idle detection resumed`);
     }
   }
 }
