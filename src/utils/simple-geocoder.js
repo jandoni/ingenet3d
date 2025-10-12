@@ -140,28 +140,37 @@ export async function simpleGeocodeToCamera(placeName, cameraStyle = 'static') {
 export async function simpleFlyToPlace(placeName, cameraStyle = 'static') {
   try {
     const cameraConfig = await simpleGeocodeToCamera(placeName, cameraStyle);
-    
+
     // Simple camera positioning using flyTo with calculated position
     const lat = cameraConfig.location.lat();
     const lng = cameraConfig.location.lng();
-    
+
     // Calculate camera position based on distance and angles
     const position = Cesium.Cartesian3.fromDegrees(lng, lat, cameraConfig.distance);
-    
+
     console.log(`Simple geocoder flying to: ${lat}, ${lng} at distance ${cameraConfig.distance}`);
-    
-    // Use flyTo for all camera styles for consistency
-    cesiumViewer.camera.flyTo({
-      destination: position,
-      orientation: {
-        heading: cameraConfig.heading,
-        pitch: cameraConfig.pitch,
-        roll: cameraConfig.roll
-      },
-      duration: 3.0 // 3 second animation
+
+    // Return a promise that resolves when the animation completes
+    return new Promise((resolve, reject) => {
+      // Use flyTo for all camera styles for consistency
+      cesiumViewer.camera.flyTo({
+        destination: position,
+        orientation: {
+          heading: cameraConfig.heading,
+          pitch: cameraConfig.pitch,
+          roll: cameraConfig.roll
+        },
+        duration: 3.0, // 3 second animation
+        complete: () => {
+          // Resolve the promise after animation completes
+          resolve(cameraConfig);
+        },
+        cancel: () => {
+          // If animation is cancelled, still resolve
+          resolve(cameraConfig);
+        }
+      });
     });
-    
-    return cameraConfig;
   } catch (error) {
     console.error(`Error flying to place ${placeName}:`, error);
     throw error;

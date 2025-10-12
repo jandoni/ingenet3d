@@ -19,6 +19,8 @@ import {
   removeCustomRadiusShader,
   setSpainOverviewFromGoogleEarthExported,
   animateEarthToSpain,
+  enableSpaceView,
+  enableBlueSkyView,
 } from "../utils/cesium.js";
 import { flyToPlaceNew } from "../utils/places-new-api.js";
 import { simpleFlyToPlace } from "../utils/simple-geocoder.js";
@@ -252,6 +254,9 @@ export async function resetToIntro() {
     window.stopDroneOrbit();
   }
 
+  // Switch to space view (dark with stars) for root page
+  enableSpaceView();
+
   // Ensure no orbit animation is running by removing any clock listeners
   // This is a safety measure to prevent any lingering animations
   try {
@@ -305,6 +310,9 @@ export async function updateChapter(chapterIndex) {
   activateNavigationElement("details"); // Activate the details navigation
   hideAllMarkers(); // Hide all markers when viewing a specific chapter
 
+  // DON'T switch to blue sky yet - wait for camera animation to complete
+  // enableBlueSkyView(); // Moved to after flyTo completes
+
   // Check if the current chapter has a focus and create or remove the custom radius shader accordingly
   const hasFocus = Boolean(
     story.chapters[chapterIndex]?.focusOptions?.showFocus
@@ -324,6 +332,9 @@ export async function updateChapter(chapterIndex) {
     try {
       cameraConfig = await flyToPlaceNew(placeName, cameraStyle || 'drone-orbit');
       flySuccessful = true;
+
+      // AFTER animation completes, switch to blue sky
+      enableBlueSkyView();
 
       // Show location pin at the actual location with company logo (non-blocking)
       if (cameraConfig && cameraConfig.location) {
@@ -356,6 +367,9 @@ export async function updateChapter(chapterIndex) {
       try {
         cameraConfig = await simpleFlyToPlace(placeName, cameraStyle || 'drone-orbit');
         flySuccessful = true;
+
+        // AFTER animation completes, switch to blue sky
+        enableBlueSkyView();
 
         // Show location pin at the actual location with company logo (non-blocking)
         if (cameraConfig && cameraConfig.location) {

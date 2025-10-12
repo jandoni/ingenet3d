@@ -1,4 +1,4 @@
-Luego en cd src correc: python3 -m http.server 8080
+Luego en cd src correc: npm run dev
 
 Every time you update your code, run these 2 commands:
 

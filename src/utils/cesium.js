@@ -244,6 +244,7 @@ export async function initCesiumViewer(performanceSettings = null) {
     selectionIndicator: false,
     timeline: false,
     animation: false,
+    // Keep default skybox for now (will hide stars with atmosphere settings)
     // Enable request render mode for better performance
     requestRenderMode: true,
     // Adaptive frame rate based on device and network
@@ -254,19 +255,24 @@ export async function initCesiumViewer(performanceSettings = null) {
   // AGGRESSIVE PERFORMANCE: Disable Unnecessary Scene Features
   // ============================================================
 
-  // Disable globe/terrain rendering (not needed for 3D tiles)
+  // Disable globe rendering (not needed for 3D tiles)
   cesiumViewer.scene.globe.show = false;
   cesiumViewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
 
-  // Enable atmosphere with reduced quality (fixes black sky issue)
-  // Using lower brightness and saturation for better performance
+  // Start with space view (stars visible) for root page
+  // Will switch to blue sky when viewing chapters
+  if (cesiumViewer.scene.skyBox) {
+    cesiumViewer.scene.skyBox.show = true; // Show stars initially
+  }
+
+  // Start with dim atmosphere for space look on root page
   cesiumViewer.scene.skyAtmosphere.show = true;
-  cesiumViewer.scene.skyAtmosphere.brightnessShift = -0.3; // Reduce brightness for performance
-  cesiumViewer.scene.skyAtmosphere.saturationShift = -0.3; // Reduce saturation for performance
+  cesiumViewer.scene.skyAtmosphere.brightnessShift = -0.3; // Dim for space view
+  cesiumViewer.scene.skyAtmosphere.saturationShift = -0.3; // Desaturated for space
   cesiumViewer.scene.skyAtmosphere.hueShift = 0.0;
 
-  // Set a light blue background color for far distances
-  cesiumViewer.scene.backgroundColor = new Cesium.Color(0.53, 0.81, 0.92, 1.0); // Sky blue
+  // Dark background for space view
+  cesiumViewer.scene.backgroundColor = new Cesium.Color(0.0, 0.0, 0.05, 1.0); // Dark blue/black
 
   // Disable fog (expensive post-processing)
   cesiumViewer.scene.fog.enabled = false;
@@ -288,8 +294,9 @@ export async function initCesiumViewer(performanceSettings = null) {
 
   console.log(`⚡ Scene optimizations applied:`);
   console.log(`   - Globe rendering: DISABLED`);
-  console.log(`   - Atmosphere: ENABLED (reduced quality for performance)`);
-  console.log(`   - Background: Sky blue color set`);
+  console.log(`   - Sky mode: DYNAMIC (space view on root, blue sky on chapters)`);
+  console.log(`   - Initial mode: Space view with stars`);
+  console.log(`   - Background: Dynamic based on view mode`);
   console.log(`   - Fog: DISABLED`);
   console.log(`   - Shadows: DISABLED`);
   console.log(`   - Ground primitives: DISABLED`);
@@ -574,6 +581,48 @@ export function removeCustomRadiusShader() {
   if (tileset.customShader) {
     tileset.customShader = undefined;
   }
+}
+
+/**
+ * Switch to space view (dark with stars) - for root/overview page
+ */
+export function enableSpaceView() {
+  if (!cesiumViewer) return;
+
+  // Show starfield skybox
+  if (cesiumViewer.scene.skyBox) {
+    cesiumViewer.scene.skyBox.show = true;
+  }
+
+  // Dim atmosphere for space look
+  cesiumViewer.scene.skyAtmosphere.brightnessShift = -0.3;
+  cesiumViewer.scene.skyAtmosphere.saturationShift = -0.3;
+
+  // Dark background
+  cesiumViewer.scene.backgroundColor = new Cesium.Color(0.0, 0.0, 0.05, 1.0);
+
+  console.log('🌌 Space view enabled (stars visible)');
+}
+
+/**
+ * Switch to blue sky view - for chapter/location pages
+ */
+export function enableBlueSkyView() {
+  if (!cesiumViewer) return;
+
+  // Hide starfield skybox
+  if (cesiumViewer.scene.skyBox) {
+    cesiumViewer.scene.skyBox.show = false;
+  }
+
+  // Bright atmosphere for vivid blue sky
+  cesiumViewer.scene.skyAtmosphere.brightnessShift = 1.5;
+  cesiumViewer.scene.skyAtmosphere.saturationShift = 0.5;
+
+  // Bright sky blue background
+  cesiumViewer.scene.backgroundColor = new Cesium.Color(0.529, 0.808, 0.922, 1.0);
+
+  console.log('☀️ Blue sky view enabled');
 }
 
 /**

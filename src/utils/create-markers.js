@@ -551,23 +551,33 @@ export async function showLocationPin(chapterId, location, title, logoUrl, websi
     lat = location.lat;
   }
 
-  // Get the location coordinates
-  const position = Cesium.Cartesian3.fromDegrees(lng, lat, 0);
+  // Get the location coordinates - clamp to terrain height for proper 3D placement
+  let position;
+  try {
+    // Try to get accurate terrain height
+    const cartesian = Cesium.Cartesian3.fromDegrees(lng, lat, 0);
+    const clampedPositions = await cesiumViewer.scene.clampToHeightMostDetailed([cartesian]);
+    position = clampedPositions[0];
+  } catch (error) {
+    // Fallback to approximate ground level if terrain clamping fails
+    console.warn('Terrain clamping failed, using approximate ground level:', error);
+    position = Cesium.Cartesian3.fromDegrees(lng, lat, 10); // 10m above sea level
+  }
 
-  // Add the pin billboard at the actual location
+  // Add the pin billboard at the actual location with proper grounding
   const pinEntity = cesiumViewer.entities.add({
     id: `location-pin-${chapterId}`,
     position: position,
     billboard: {
       image: pinImage,
-      width: 80,
-      height: 80,
-      verticalOrigin: Cesium.VerticalOrigin.CENTER,
+      width: 90,
+      height: 90,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Anchor at bottom so pin sits ON the ground
       horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
       pixelOffset: new Cesium.Cartesian2(0, 0),
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
       heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-      scale: 1.0,
+      scale: 1.2, // Slightly larger for better visibility
       show: true,
     },
     show: true,
@@ -576,6 +586,7 @@ export async function showLocationPin(chapterId, location, title, logoUrl, websi
 
 /**
  * Creates the pin image with company logo inside a white circle using SVG
+ * Designed as a map pin that points downward to the exact location
  * @param {string} title - The location title
  * @param {string} logoUrl - URL of the company logo
  * @param {string} websiteUrl - Website URL for favicon fallback
@@ -584,8 +595,8 @@ export async function showLocationPin(chapterId, location, title, logoUrl, websi
 async function createLocationPinImage(title, logoUrl, websiteUrl) {
   const size = 100;
   const centerX = size / 2;
-  const centerY = size / 2;
-  const circleRadius = 35;
+  const centerY = 35; // Circle positioned higher to make room for pin point
+  const circleRadius = 30; // Slightly smaller circle
 
   let svgContent;
 
@@ -613,7 +624,7 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
     }
 
     if (logoDataUri) {
-      // Use SVG with embedded data URI or direct URL
+      // Use SVG with embedded data URI or direct URL - pin design pointing downward
       svgContent = `
         <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -632,6 +643,10 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
               <circle cx="${centerX}" cy="${centerY}" r="${circleRadius - 5}"/>
             </clipPath>
           </defs>
+
+          <!-- Pin point at bottom (triangle) -->
+          <path d="M ${centerX} ${size - 5} L ${centerX - 12} ${centerY + circleRadius - 2} L ${centerX + 12} ${centerY + circleRadius - 2} Z"
+                fill="#3b82f6" filter="url(#pin-shadow)"/>
 
           <!-- White circle background with shadow -->
           <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="white" fill-opacity="1.0" filter="url(#pin-shadow)"/>
@@ -658,7 +673,7 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
   }
 
   if (!logoUrl) {
-    // Draw initials as fallback
+    // Draw initials as fallback with pin point
     const initials = title
       .split(' ')
       .map(word => word[0])
@@ -683,6 +698,10 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
           </filter>
         </defs>
 
+        <!-- Pin point at bottom (triangle) -->
+        <path d="M ${centerX} ${size - 5} L ${centerX - 12} ${centerY + circleRadius - 2} L ${centerX + 12} ${centerY + circleRadius - 2} Z"
+              fill="#3b82f6" filter="url(#pin-shadow)"/>
+
         <!-- White circle background with shadow -->
         <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="white" fill-opacity="1.0" filter="url(#pin-shadow)"/>
 
@@ -694,7 +713,7 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
           x="${centerX}"
           y="${centerY}"
           font-family="Arial, sans-serif"
-          font-size="24"
+          font-size="20"
           font-weight="bold"
           fill="#3b82f6"
           text-anchor="middle"

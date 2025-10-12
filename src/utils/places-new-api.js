@@ -518,23 +518,31 @@ if (typeof window !== 'undefined') {
 export async function flyToPlaceNew(placeName, cameraStyle = 'static') {
   try {
     const cameraConfig = await resolvePlaceToCameraNew(placeName, cameraStyle);
-    
-    // Animate to the new position
-    cesiumViewer.camera.flyTo({
-      destination: cameraConfig.target,
-      orientation: {
-        heading: cameraConfig.heading,
-        pitch: cameraConfig.pitch,
-        roll: cameraConfig.roll
-      },
-      duration: 5.0, // 5 second animation for smoother Google Earth-like travel
-      complete: () => {
-        // Apply final camera configuration after animation
-        applyCameraConfigNew(cameraConfig);
-      }
+
+    // Return a promise that resolves when the animation completes
+    return new Promise((resolve, reject) => {
+      // Animate to the new position
+      cesiumViewer.camera.flyTo({
+        destination: cameraConfig.target,
+        orientation: {
+          heading: cameraConfig.heading,
+          pitch: cameraConfig.pitch,
+          roll: cameraConfig.roll
+        },
+        duration: 5.0, // 5 second animation for smoother Google Earth-like travel
+        complete: () => {
+          // Apply final camera configuration after animation
+          applyCameraConfigNew(cameraConfig);
+
+          // Resolve the promise with camera config after animation completes
+          resolve(cameraConfig);
+        },
+        cancel: () => {
+          // If animation is cancelled, still resolve
+          resolve(cameraConfig);
+        }
+      });
     });
-    
-    return cameraConfig;
   } catch (error) {
     console.error(`Error flying to place ${placeName}:`, error);
     throw error;
