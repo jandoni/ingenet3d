@@ -774,48 +774,17 @@ export function zoomIn() {
 
   const camera = cesiumViewer.camera;
 
-  // Get current height
-  const ellipsoid = cesiumViewer.scene.globe.ellipsoid;
-  const cartographic = ellipsoid.cartesianToCartographic(camera.position);
-  const height = cartographic.height;
+  // Check if we're viewing a specific chapter location
+  const urlParams = new URLSearchParams(window.location.hash.substring(1));
+  const isViewingChapter = urlParams.has('chapterId');
 
-  // Calculate zoom amount (10% closer - reduced for smoother feel)
-  const zoomAmount = height * 0.1;
+  // Use FIXED distances instead of percentages for consistent behavior
+  // This avoids issues with globe being disabled and pickEllipsoid failing
+  // - Chapter view: 50 meters (gentle, precise)
+  // - Overview: 400km (fast navigation)
+  const zoomDistance = isViewingChapter ? 50 : 400000;
 
-  // Animate the zoom for smooth transition
-  const startHeight = height;
-  const endHeight = height - zoomAmount;
-  const duration = 300; // 300ms animation
-  const startTime = Date.now();
-
-  const animate = () => {
-    const now = Date.now();
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-
-    // Ease out function for smooth deceleration
-    const easeProgress = 1 - Math.pow(1 - progress, 3);
-
-    const currentHeight = startHeight - (zoomAmount * easeProgress);
-
-    // Move camera to new height
-    const position = camera.position;
-    const cartographic = ellipsoid.cartesianToCartographic(position);
-    const newPosition = Cesium.Cartesian3.fromRadians(
-      cartographic.longitude,
-      cartographic.latitude,
-      currentHeight
-    );
-    camera.position = newPosition;
-
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    }
-
-    cesiumViewer.scene.requestRender();
-  };
-
-  animate();
+  camera.zoomOut(zoomDistance);  // SWAPPED: zoomOut moves camera closer
 }
 
 /**
@@ -829,48 +798,17 @@ export function zoomOut() {
 
   const camera = cesiumViewer.camera;
 
-  // Get current height
-  const ellipsoid = cesiumViewer.scene.globe.ellipsoid;
-  const cartographic = ellipsoid.cartesianToCartographic(camera.position);
-  const height = cartographic.height;
+  // Check if we're viewing a specific chapter location
+  const urlParams = new URLSearchParams(window.location.hash.substring(1));
+  const isViewingChapter = urlParams.has('chapterId');
 
-  // Calculate zoom amount (10% farther - reduced for smoother feel)
-  const zoomAmount = height * 0.1;
+  // Use FIXED distances instead of percentages for consistent behavior
+  // This avoids issues with globe being disabled and pickEllipsoid failing
+  // - Chapter view: 50 meters (gentle, precise)
+  // - Overview: 400km (fast navigation)
+  const zoomDistance = isViewingChapter ? 50 : 400000;
 
-  // Animate the zoom for smooth transition
-  const startHeight = height;
-  const endHeight = height + zoomAmount;
-  const duration = 300; // 300ms animation
-  const startTime = Date.now();
-
-  const animate = () => {
-    const now = Date.now();
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-
-    // Ease out function for smooth deceleration
-    const easeProgress = 1 - Math.pow(1 - progress, 3);
-
-    const currentHeight = startHeight + (zoomAmount * easeProgress);
-
-    // Move camera to new height
-    const position = camera.position;
-    const cartographic = ellipsoid.cartesianToCartographic(position);
-    const newPosition = Cesium.Cartesian3.fromRadians(
-      cartographic.longitude,
-      cartographic.latitude,
-      currentHeight
-    );
-    camera.position = newPosition;
-
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    }
-
-    cesiumViewer.scene.requestRender();
-  };
-
-  animate();
+  camera.zoomIn(zoomDistance);  // SWAPPED: zoomIn moves camera away
 }
 
 // Make zoom functions available globally
