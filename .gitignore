@@ -1,3 +1,25 @@
 env.js
 .DS_Store
 .vscode
+
+# Build output
+dist/
+dist-ssr/
+
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Production config (contains AWS IDs)
+production-config.sh
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/

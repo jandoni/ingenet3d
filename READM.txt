@@ -1,7 +1,49 @@
-correr comando para copiar del repositorio a local: AWS_PROFILE=ingenet3d aws s3 sync s3://ingenet3d-webapp-1751575263 ./src --delete
-
-Y para subir de local a repositorio para eso correrlo en el directorio / de ingenet3d: AWS_PROFILE=ingenet3d aws s3 sync ./src s3://ingenet3d-webapp-1751575263 --delete
-
 Luego en cd src correc: python3 -m http.server 8080
 
-/Users/MacBook/Projects/ingenet3d/src/assets/IIE-logo.png
+Every time you update your code, run these 2 commands:
+
+  npm run build
+  ./build-and-deploy-production.sh
+
+  Or just run this single command (it does both):
+
+  npm run deploy
+
+  That's it! 🎉
+
+  ---
+  🚀 What Happens:
+
+  1. npm run build - Bundles and minifies your code (creates dist/ folder)
+  2. ./build-and-deploy-production.sh - Uploads to S3 + invalidates CloudFront
+
+  ---
+  ⏰ Wait Times:
+
+  - Upload to S3: ~30 seconds
+  - CloudFront invalidation: ~1-3 minutes
+  - Total: ~2-4 minutes until live
+
+  ---
+  📱 Testing After Deploy:
+
+  1. Wait 2-3 minutes after deployment
+  2. Open iPhone Safari in Private/Incognito mode
+  3. Visit: https://d6bj2oo3yl8y7.cloudfront.net (your CloudFront domain)
+  4. Verify changes are live
+
+  ---
+  🔍 Quick Reference:
+
+  # Development (local testing)
+  npm run dev              # Runs at http://localhost:3000
+
+  # Production (deploy to Spain)
+  npm run deploy           # Build + Deploy in one command
+
+  # Or separately:
+  npm run build            # Just build
+  ./build-and-deploy-production.sh  # Just deploy
+
+  That's your complete workflow! Super simple. 
+
