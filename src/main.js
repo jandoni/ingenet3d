@@ -2,7 +2,7 @@ import { initCesiumViewer, cesiumViewer, getTileset } from "./utils/cesium.js";
 import { loadConfig } from "./utils/config.js";
 import createMarkers from "./utils/create-markers.js";
 import { initGoogleMaps } from "./utils/places.js";
-import { initChapterNavigation, updateChapter, resetToIntro, getCurrentChapterIndex } from "./chapters/chapter-navigation.js";
+import { initChapterNavigation, updateChapter, resetToIntro, getCurrentChapterIndex, showSearchResultsOnMap } from "./chapters/chapter-navigation.js";
 import { initGoogleMapsServicesNew, resolvePlaceToCameraNew } from "./utils/places-new-api.js";
 import { simpleGeocodeToCamera } from "./utils/simple-geocoder.js";
 import { initChatbot } from "./utils/chatbot.js";
@@ -439,6 +439,12 @@ window.setActivePlace = function(chapterId) {
 window.goToHome = function() {
   resetToIntro();
 };
+
+/**
+ * Show search results on map - navigate to Spain overview and show only matching pins
+ * Used by chatbot when search returns results
+ */
+window.showSearchResultsOnMap = showSearchResultsOnMap;
 
 /**
  * Navigate to a chapter by ID - reusable function for both horizontal bar and markers
@@ -1212,8 +1218,6 @@ let originalStyles = {};
  */
 window.toggleFullscreen = function() {
   const bottomSheet = document.getElementById('bottom-sheet');
-  const expandIcon = document.querySelector('.fullscreen-expand');
-  const collapseIcon = document.querySelector('.fullscreen-collapse');
 
   if (!bottomSheet) return;
 
@@ -1248,18 +1252,10 @@ window.toggleFullscreen = function() {
     bottomSheet.classList.add('fullscreen');
     isFullscreen = true;
 
-    // Update button icons
-    if (expandIcon) expandIcon.style.display = 'none';
-    if (collapseIcon) collapseIcon.style.display = 'block';
-
   } else {
     // Exit fullscreen
     bottomSheet.classList.remove('fullscreen');
     bottomSheet.classList.add('fullscreen-exit');
-
-    // Update button icons
-    if (expandIcon) expandIcon.style.display = 'block';
-    if (collapseIcon) collapseIcon.style.display = 'none';
 
     // Wait for animation to complete, then restore original styles
     setTimeout(() => {

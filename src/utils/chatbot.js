@@ -9,7 +9,7 @@ export function initChatbot(story) {
 
   const welcomeMessage = {
     type: 'bot',
-    text: '¡Hola! ¿A qué lugar de España te gustaría ir? Puedo llevarte a la Sagrada Familia, Alhambra, Museo del Prado, o cualquier otro lugar de nuestra lista.',
+    text: '¡Hola! Busca cualquier institución de nuestra red: museos, universidades, empresas, centros de investigación... Puedes buscar por nombre, ciudad (Ferrol, Cartagena, Cádiz...), sector (naval, marítimo, tecnológico) o tipo de institución.',
     timestamp: new Date()
   };
 
@@ -118,6 +118,16 @@ export function sendMessage() {
   chatInput.value = '';
 
   const matches = findMatchingPlaces(userInput);
+
+  // Show search results on map - navigate to Spain overview with filtered markers
+  if (matches.length > 0 && window.showSearchResultsOnMap) {
+    try {
+      const matchingIds = matches.map(m => m.id);
+      window.showSearchResultsOnMap(matchingIds);
+    } catch (error) {
+      console.error('Error showing search results on map:', error);
+    }
+  }
 
   if (matches.length === 0) {
     const botMessage = {

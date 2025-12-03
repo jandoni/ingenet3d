@@ -24,7 +24,7 @@ import {
 } from "../utils/cesium.js";
 import { flyToPlaceNew } from "../utils/places-new-api.js";
 import { simpleFlyToPlace } from "../utils/simple-geocoder.js";
-import { setSelectedMarker, hideAllMarkers, showAllMarkers, showLocationPin } from "../utils/create-markers.js";
+import { setSelectedMarker, hideAllMarkers, showAllMarkers, showLocationPin, showFilteredMarkers } from "../utils/create-markers.js";
 import { getParams, setParams } from "../utils/params.js";
 import { cesiumViewer } from "../utils/cesium.js";
 import { loadSvg } from "../utils/svg.js";
@@ -293,6 +293,33 @@ export async function resetToIntro() {
       });
     }
   }
+}
+
+/**
+ * Navigate to Spain overview and show only markers for specific chapter IDs (search results)
+ * @param {Array<number>} chapterIds - Array of chapter IDs to show on the map
+ */
+export function showSearchResultsOnMap(chapterIds) {
+  // Clear any active chapter parameter
+  setParams("chapterId", null);
+
+  // Deselect any currently selected marker
+  setSelectedMarker(null);
+  setSelectedChapterCard(null, true);
+
+  // Stop all orbit animations
+  if (window.stopOrbitAnimation) window.stopOrbitAnimation();
+  if (window.stopSpainOrbitEffect) window.stopSpainOrbitEffect();
+  if (window.stopDroneOrbit) window.stopDroneOrbit();
+
+  // Switch to space view (dark with stars) for overview
+  enableSpaceView();
+
+  // Animate camera to Spain overview
+  animateEarthToSpain();
+
+  // Show only the filtered markers for search results
+  showFilteredMarkers(chapterIds);
 }
 
 /**

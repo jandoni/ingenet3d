@@ -523,6 +523,34 @@ export function showAllMarkers() {
 }
 
 /**
+ * Show only markers for specific chapter IDs - used for search filtering
+ * @param {Array<number>} chapterIds - Array of chapter IDs to show
+ */
+export function showFilteredMarkers(chapterIds) {
+  if (!cesiumViewer) return;
+
+  // Hide all markers first
+  hideAllMarkers();
+
+  // Show only markers matching the provided chapter IDs
+  for (let i = 0; i < cesiumViewer.entities.values.length; i++) {
+    const entity = cesiumViewer.entities.values[i];
+    const entityId = entity.id;
+
+    // Check if entity belongs to one of the filtered chapters
+    const isMatchingMarker = chapterIds.some(id => {
+      return entityId === id ||
+             entityId === `dot-${id}` ||
+             entityId === `line-${id}`;
+    });
+
+    if (isMatchingMarker) {
+      entity.show = true;
+    }
+  }
+}
+
+/**
  * Creates a location pin with company logo at the actual location
  * @param {string} chapterId - The chapter/location ID
  * @param {Object} location - Location coordinates {lat, lng}
