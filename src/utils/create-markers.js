@@ -592,7 +592,9 @@ export async function showLocationPin(chapterId, location, title, logoUrl, websi
     position = Cesium.Cartesian3.fromDegrees(lng, lat, 10); // 10m above sea level
   }
 
-  // Add the pin billboard at the actual location with proper grounding
+  // Add the pin billboard at the actual location
+  // Use NONE for heightReference to prevent shaking during orbit animation
+  // The position is already clamped to terrain, so we use that fixed position
   const pinEntity = cesiumViewer.entities.add({
     id: `location-pin-${chapterId}`,
     position: position,
@@ -600,12 +602,12 @@ export async function showLocationPin(chapterId, location, title, logoUrl, websi
       image: pinImage,
       width: 90,
       height: 90,
-      verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // Anchor at bottom so pin sits ON the ground
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
       pixelOffset: new Cesium.Cartesian2(0, 0),
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-      scale: 1.2, // Slightly larger for better visibility
+      heightReference: Cesium.HeightReference.NONE, // Fixed position - no continuous terrain recalculation
+      scale: 1.2,
       show: true,
     },
     show: true,
@@ -674,13 +676,13 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
 
           <!-- Pin point at bottom (triangle) -->
           <path d="M ${centerX} ${size - 5} L ${centerX - 12} ${centerY + circleRadius - 2} L ${centerX + 12} ${centerY + circleRadius - 2} Z"
-                fill="#3b82f6" filter="url(#pin-shadow)"/>
+                fill="#0f172a" filter="url(#pin-shadow)"/>
 
           <!-- White circle background with shadow -->
           <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="white" fill-opacity="1.0" filter="url(#pin-shadow)"/>
 
-          <!-- Blue border -->
-          <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="none" stroke="#3b82f6" stroke-width="3"/>
+          <!-- Dark border -->
+          <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="none" stroke="#0f172a" stroke-width="3"/>
 
           <!-- Logo image (clipped to circle) - fully opaque -->
           <image
@@ -728,13 +730,13 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
 
         <!-- Pin point at bottom (triangle) -->
         <path d="M ${centerX} ${size - 5} L ${centerX - 12} ${centerY + circleRadius - 2} L ${centerX + 12} ${centerY + circleRadius - 2} Z"
-              fill="#3b82f6" filter="url(#pin-shadow)"/>
+              fill="#0f172a" filter="url(#pin-shadow)"/>
 
         <!-- White circle background with shadow -->
         <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="white" fill-opacity="1.0" filter="url(#pin-shadow)"/>
 
-        <!-- Blue border -->
-        <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="none" stroke="#3b82f6" stroke-width="3"/>
+        <!-- Dark border -->
+        <circle cx="${centerX}" cy="${centerY}" r="${circleRadius}" fill="none" stroke="#0f172a" stroke-width="3"/>
 
         <!-- Initials text -->
         <text
@@ -743,7 +745,7 @@ async function createLocationPinImage(title, logoUrl, websiteUrl) {
           font-family="Arial, sans-serif"
           font-size="20"
           font-weight="bold"
-          fill="#3b82f6"
+          fill="#0f172a"
           text-anchor="middle"
           dominant-baseline="central"
         >${initials}</text>
@@ -857,10 +859,10 @@ function createMarkerClickHandler() {
  * Checks if two markers are too close together in 3D space
  * @param {Cesium.Cartesian3} pos1 - First marker position
  * @param {Cesium.Cartesian3} pos2 - Second marker position
- * @param {number} minDistance - Minimum distance in meters (default 150km)
+ * @param {number} minDistance - Minimum distance in meters (default 50km)
  * @returns {boolean} True if markers are too close
  */
-function checkCollision(pos1, pos2, minDistance = 150000) {
+function checkCollision(pos1, pos2, minDistance = 50000) {
   const distance = Cesium.Cartesian3.distance(pos1, pos2);
   return distance < minDistance;
 }
@@ -871,10 +873,10 @@ function checkCollision(pos1, pos2, minDistance = 150000) {
  * @returns {Array<Cesium.Cartesian3>} Adjusted label positions
  */
 function resolveCollisions(markers) {
-  const maxIterations = 15; // Reduced from 25 to prevent markers going too far
-  const adjustmentFactor = 1.2; // Reduced from 1.4 - 20% longer per iteration
-  const angleAdjustment = 0.15; // Reduced from 0.2 - ~8.6 degrees
-  const maxLineLength = 500000; // Maximum 500km - prevents markers extending into Africa!
+  const maxIterations = 10; // Reduced iterations to prevent markers going too far
+  const adjustmentFactor = 1.15; // Reduced - 15% longer per iteration
+  const angleAdjustment = 0.2; // ~11.5 degrees rotation
+  const maxLineLength = 80000; // Maximum 80km - keeps markers near their actual location
 
   for (let iteration = 0; iteration < maxIterations; iteration++) {
     let hasCollisions = false;
@@ -953,46 +955,46 @@ export async function createMarkers(chapters) {
   // Previous limit of 8 was too aggressive - users couldn't see all locations
   let chaptersToProcess = chapters;
 
-  // Use hardcoded coordinates for fast loading (no API calls needed for initial display)
+  // Use hardcoded coordinates for fast loading (verified December 2025)
   const hardcodedCoordinates = {
-    1: { lat: 43.4833, lng: -8.2167 },   // Fundación Exponav - Ferrol
-    2: { lat: 43.5333, lng: -7.0500 },   // Gondán Shipbuilders - Castropol
-    3: { lat: 43.6167, lng: -5.7833 },   // Museo Marítimo de Asturias - Luanco
-    4: { lat: 43.4647, lng: -3.8044 },   // Museo Marítimo del Cantábrico - Santander
-    5: { lat: 43.3229, lng: -1.9933 },   // Euskal Itsas Museoa - San Sebastián
-    6: { lat: 43.4833, lng: -8.2167 },   // Navantia Ferrol
-    7: { lat: 43.4817, lng: -8.2206 },   // Campus Industrial de Ferrol - UDC
-    8: { lat: 43.5590, lng: -5.9250 },   // Windar Renovables - Avilés
-    9: { lat: 43.3500, lng: -2.6833 },   // Murueta Astilleros - Bizkaia
-    10: { lat: 43.3000, lng: -2.9333 },  // Cintranaval-Defcar - Loiu
-    11: { lat: 41.3788, lng: 2.1894 },   // MB92 Barcelona
-    12: { lat: 41.3764, lng: 2.1758 },   // Museu Marítim de Barcelona
-    13: { lat: 41.3900, lng: 2.1159 },   // Compass Ingeniería - Barcelona
-    14: { lat: 37.6030, lng: -0.9870 },  // Universidad Politécnica de Cartagena (UPCT)
-    15: { lat: 37.6500, lng: -0.9800 },  // SAES - Electrónica Submarina - Cartagena
-    16: { lat: 37.6000, lng: -0.9833 },  // ARQVA - Museo Arqueología Subacuática - Cartagena
-    17: { lat: 37.6000, lng: -0.9833 },  // Museo Naval de Cartagena
-    18: { lat: 37.7167, lng: -1.0000 },  // CTN - Centro Tecnológico Naval - Fuente Álamo
-    19: { lat: 36.5298, lng: -6.2927 },  // MUCAIN - Museo Carrera de Indias - Cádiz
-    20: { lat: 37.9792, lng: -0.6925 },  // Museo del Mar y de la Sal - Torrevieja
-    21: { lat: 36.5972, lng: -6.2278 },  // Ghenova Ingeniería - El Puerto de Santa María
-    22: { lat: 36.5264, lng: -6.2056 },  // Navantia Seanergies - Puerto Real
-    23: { lat: 36.5264, lng: -6.2056 },  // Museo El Dique - Puerto Real
-    24: { lat: 28.1024, lng: -15.4130 },  // Universidad de Las Palmas (ULPGC)
-    25: { lat: 27.9833, lng: -15.3667 },  // PLOCAN - Plataforma Oceánica de Canarias - Telde
-    26: { lat: 28.1500, lng: -15.4333 },  // Museo Naval de Las Palmas
-    27: { lat: 28.1500, lng: -15.4167 },  // Astican - Astilleros Canarios - Las Palmas
-    28: { lat: 37.3891, lng: -5.9845 },  // Sener - Sevilla
-    29: { lat: 42.2406, lng: -8.7207 },  // Soermar - Vigo
-    30: { lat: 42.2328, lng: -8.7226 },  // Seaplace - Vigo
-    31: { lat: 40.4168, lng: -3.7038 },  // Real Liga Naval Española - Madrid
-    32: { lat: 42.1667, lng: -8.6167 },  // AIMEN Centro Tecnológico - O Porriño
-    33: { lat: 42.2333, lng: -8.7333 },  // Freire Shipyard - Vigo
-    34: { lat: 42.2167, lng: -8.7667 },  // Museo do Mar de Galicia - Vigo
-    35: { lat: 40.5167, lng: -3.7667 },  // CEHIPAR - Canal El Pardo - Madrid
-    36: { lat: 40.4168, lng: -3.6914 },  // Museo Naval de Madrid
-    37: { lat: 37.3828, lng: -5.9964 },  // Reales Atarazanas de Sevilla
-    38: { lat: 37.9838, lng: -1.1300 }   // Fundación Excelem - Murcia
+    1: { lat: 43.4824, lng: -8.2316 },   // Fundación Exponav - Ferrol
+    2: { lat: 43.5384, lng: -7.0233 },   // Gondán Shipbuilders - Castropol
+    3: { lat: 43.6136, lng: -5.7931 },   // Museo Marítimo de Asturias - Luanco
+    4: { lat: 43.4685, lng: -3.7873 },   // Museo Marítimo del Cantábrico - Santander
+    5: { lat: 43.3230, lng: -1.9911 },   // Euskal Itsas Museoa - San Sebastián
+    6: { lat: 43.4833, lng: -8.2333 },   // Navantia Ferrol
+    7: { lat: 43.4820, lng: -8.2235 },   // Campus Industrial de Ferrol - UDC
+    8: { lat: 43.5595, lng: -5.9029 },   // Windar Renovables - Avilés
+    9: { lat: 43.3500, lng: -2.6700 },   // Murueta Astilleros - Bizkaia
+    10: { lat: 43.3060, lng: -2.9410 },  // Cintranaval-Defcar - Loiu
+    11: { lat: 41.3750, lng: 2.1830 },   // MB92 Barcelona
+    12: { lat: 41.3756, lng: 2.1758 },   // Museu Marítim de Barcelona
+    13: { lat: 41.3890, lng: 2.1126 },   // Compass Ingeniería - Barcelona
+    14: { lat: 37.6025, lng: -0.9865 },  // Universidad Politécnica de Cartagena (UPCT)
+    15: { lat: 37.5800, lng: -0.9750 },  // SAES - Electrónica Submarina - Cartagena
+    16: { lat: 37.5967, lng: -0.9839 },  // ARQVA - Museo Arqueología Subacuática - Cartagena
+    17: { lat: 37.5983, lng: -0.9863 },  // Museo Naval de Cartagena
+    18: { lat: 37.7180, lng: -1.1530 },  // CTN - Centro Tecnológico Naval - Fuente Álamo
+    19: { lat: 40.9136, lng: -4.0611 },  // MUCAIN - Museo Virtual - Palazuelos de Eresma, Segovia
+    20: { lat: 37.9784, lng: -0.6826 },  // Museo del Mar y de la Sal - Torrevieja
+    21: { lat: 36.6010, lng: -6.2290 },  // Ghenova Ingeniería - El Puerto de Santa María
+    22: { lat: 36.5328, lng: -6.2053 },  // Navantia Seanergies - Puerto Real
+    23: { lat: 36.5328, lng: -6.2053 },  // Museo El Dique - Puerto Real
+    24: { lat: 28.0706, lng: -15.4532 },  // Universidad de Las Palmas (ULPGC) - Tafira
+    25: { lat: 27.9922, lng: -15.3683 },  // PLOCAN - Plataforma Oceánica de Canarias - Telde
+    26: { lat: 28.1400, lng: -15.4270 },  // Museo Naval de Las Palmas
+    27: { lat: 28.1558, lng: -15.4089 },  // Astican - Astilleros Canarios - Las Palmas
+    28: { lat: 37.3660, lng: -5.9987 },  // Sener - Sevilla
+    29: { lat: 40.4570, lng: -3.6910 },  // Soermar - Madrid (Paseo Castellana)
+    30: { lat: 42.2350, lng: -8.7250 },  // Seaplace - Vigo
+    31: { lat: 40.4156, lng: -3.7073 },  // Real Liga Naval Española - Madrid
+    32: { lat: 42.1541, lng: -8.6315 },  // AIMEN Centro Tecnológico - O Porriño
+    33: { lat: 42.2256, lng: -8.7450 },  // Freire Shipyard - Vigo
+    34: { lat: 42.2180, lng: -8.7770 },  // Museo do Mar de Galicia - Vigo
+    35: { lat: 40.5264, lng: -3.7781 },  // CEHIPAR - Canal El Pardo - Madrid
+    36: { lat: 40.4178, lng: -3.6927 },  // Museo Naval de Madrid
+    37: { lat: 37.3847, lng: -5.9954 },  // Reales Atarazanas de Sevilla
+    38: { lat: 37.9694, lng: -1.2247 }   // Fundación Excelem - Avda Descubrimiento, Alcantarilla, Murcia
   };
 
   const markerCoordinates = [];

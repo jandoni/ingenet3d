@@ -247,8 +247,6 @@ export async function detectAndConfigurePerformance() {
     timestamp: Date.now()
   };
 
-  console.log(`⚙️ ${settings.description} (${deviceType}, ${networkInfo.measuredSpeed.toFixed(1)} Mbps)`);
-
   return performanceSettings;
 }
 

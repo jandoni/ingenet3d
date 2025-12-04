@@ -13,20 +13,12 @@
 // limitations under the License.
 
 import { story } from "../main.js";
-import {
-  createCustomRadiusShader,
-  performFlyTo,
-  removeCustomRadiusShader,
-  setSpainOverviewFromGoogleEarthExported,
-  animateEarthToSpain,
-  enableSpaceView,
-  enableBlueSkyView,
-} from "../utils/cesium.js";
+// Google Maps 3D replaces Cesium
+import { map3d, flyToLocation, flyToSpainOverview, setCamera, stopAnimation } from "../utils/google-maps-3d.js";
 import { flyToPlaceNew } from "../utils/places-new-api.js";
 import { simpleFlyToPlace } from "../utils/simple-geocoder.js";
-import { setSelectedMarker, hideAllMarkers, showAllMarkers, showLocationPin, showFilteredMarkers } from "../utils/create-markers.js";
+import { setSelectedMarker, hideAllMarkers, showAllMarkers, showLocationPin, showFilteredMarkers } from "../utils/google-markers-3d.js";
 import { getParams, setParams } from "../utils/params.js";
-import { cesiumViewer } from "../utils/cesium.js";
 import { loadSvg } from "../utils/svg.js";
 import { setTextContent } from "../utils/ui.js";
 import {
@@ -231,45 +223,25 @@ export async function resetToIntro() {
   setSelectedChapterCard(null, true); // Set the selected chapter card
   updateChapterContent(story.properties); // Update the chapter details content
   activateNavigationElement("intro"); // Activate the introduction navigation
-  removeCustomRadiusShader(); // Remove the custom radius shader
   showAllMarkers(); // Show all markers when returning to overview
 
   // ===================================================================
   // CRITICAL: Stop ALL orbit/rotation animations when returning to root page
   // The root page (Spain overview) should NEVER have any rotation or orbit effect
   // ===================================================================
+  stopAnimation();
 
-  // Stop location-specific orbit animation (drone orbit from places)
+  // Stop any window-level orbit functions
   if (window.stopOrbitAnimation) {
     window.stopOrbitAnimation();
   }
-
-  // Stop Spain overview orbit effect
   if (window.stopSpainOrbitEffect) {
     window.stopSpainOrbitEffect();
   }
 
-  // Also try stopping drone orbit directly (extra safety)
-  if (window.stopDroneOrbit) {
-    window.stopDroneOrbit();
-  }
-
-  // Switch to space view (dark with stars) for root page
-  enableSpaceView();
-
-  // Ensure no orbit animation is running by removing any clock listeners
-  // This is a safety measure to prevent any lingering animations
-  try {
-    if (cesiumViewer && cesiumViewer.clock && cesiumViewer.clock.onTick) {
-      // The clock listeners are already managed by the stop functions above
-    }
-  } catch (error) {
-    console.error('Error checking clock listeners:', error);
-  }
-
-  // For Spain overview, use epic Earth-to-Spain zoom animation
+  // For Spain overview, fly to Spain overview position
   if (placeName === "Spain" && (cameraStyle === "overview" || !cameraStyle)) {
-    animateEarthToSpain();
+    await flyToSpainOverview();
   } else {
     try {
       // Try NEW Places API first, fallback to simple geocoder
@@ -282,15 +254,14 @@ export async function resetToIntro() {
     } catch (error) {
       console.error(`Error returning to intro (${placeName}):`, error);
       // Final fallback to manual camera positioning
-      performFlyTo({
-        position: Cesium.Cartesian3.fromDegrees(-3.7492, 40.4637, 2000000),
-        orientation: {
-          roll: 0,
-          pitch: -1.2,
-          heading: 0,
-        },
-        duration: FLY_TO_DURATION,
-      });
+      await flyToLocation({
+        lat: 40.0,
+        lng: -3.7,
+        altitude: 0,
+        range: 2000000,
+        tilt: 0,
+        heading: 0
+      }, 8000);
     }
   }
 }
@@ -299,7 +270,7 @@ export async function resetToIntro() {
  * Navigate to Spain overview and show only markers for specific chapter IDs (search results)
  * @param {Array<number>} chapterIds - Array of chapter IDs to show on the map
  */
-export function showSearchResultsOnMap(chapterIds) {
+export async function showSearchResultsOnMap(chapterIds) {
   // Clear any active chapter parameter
   setParams("chapterId", null);
 
@@ -308,15 +279,12 @@ export function showSearchResultsOnMap(chapterIds) {
   setSelectedChapterCard(null, true);
 
   // Stop all orbit animations
+  stopAnimation();
   if (window.stopOrbitAnimation) window.stopOrbitAnimation();
   if (window.stopSpainOrbitEffect) window.stopSpainOrbitEffect();
-  if (window.stopDroneOrbit) window.stopDroneOrbit();
-
-  // Switch to space view (dark with stars) for overview
-  enableSpaceView();
 
   // Animate camera to Spain overview
-  animateEarthToSpain();
+  await flyToSpainOverview();
 
   // Show only the filtered markers for search results
   showFilteredMarkers(chapterIds);
@@ -337,18 +305,20 @@ export async function updateChapter(chapterIndex) {
   activateNavigationElement("details"); // Activate the details navigation
   hideAllMarkers(); // Hide all markers when viewing a specific chapter
 
-  // DON'T switch to blue sky yet - wait for camera animation to complete
-  // enableBlueSkyView(); // Moved to after flyTo completes
-
-  // Check if the current chapter has a focus and create or remove the custom radius shader accordingly
-  const hasFocus = Boolean(
-    story.chapters[chapterIndex]?.focusOptions?.showFocus
-  );
+  // ALWAYS collapse the bottom sheet when starting to fly to a new place
+  const bottomSheet = document.getElementById('bottom-sheet');
+  if (bottomSheet && !bottomSheet.classList.contains('minimized')) {
+    if (window.collapseBottomSheet) {
+      window.collapseBottomSheet();
+    } else {
+      bottomSheet.classList.add('minimized');
+    }
+  }
 
   try {
-    // Check if cesiumViewer is available
-    if (!cesiumViewer) {
-      console.error(`❌ CesiumViewer not available for navigation to ${placeName}`);
+    // Check if Google Maps 3D is available
+    if (!map3d) {
+      console.error(`Google Maps 3D not available for navigation to ${placeName}`);
       return;
     }
 
@@ -360,10 +330,7 @@ export async function updateChapter(chapterIndex) {
       cameraConfig = await flyToPlaceNew(placeName, cameraStyle || 'drone-orbit');
       flySuccessful = true;
 
-      // AFTER animation completes, switch to blue sky
-      enableBlueSkyView();
-
-      // Show location pin at the actual location with company logo (non-blocking)
+      // Show location pin at the actual location with company logo
       if (cameraConfig && cameraConfig.location) {
         showLocationPin(
           chapterId,
@@ -371,9 +338,7 @@ export async function updateChapter(chapterIndex) {
           chapter.title,
           chapter.logoUrl,
           chapter.website
-        ).catch(err => {
-          console.warn('⚠️ Location pin failed to load (non-critical):', err.message);
-        });
+        );
       }
 
       // Update chapter with Google Place details if available
@@ -383,22 +348,26 @@ export async function updateChapter(chapterIndex) {
           chapter.content = cameraConfig.placeDetails.editorialSummary;
         }
 
-        // Use local imageUrl from config.json
-        // Google Photo API has been removed to save costs
-
         // Update chapter details in UI
         updateChapterContent(chapter, false);
       }
+
+      // Open bottom sheet AFTER flight completes (arrival)
+      if (bottomSheet && bottomSheet.classList.contains('minimized')) {
+        if (window.expandBottomSheet) {
+          window.expandBottomSheet();
+        } else if (window.toggleBottomSheet) {
+          window.toggleBottomSheet();
+        }
+      }
+
     } catch (placesError) {
       // Fallback to simple geocoder
       try {
         cameraConfig = await simpleFlyToPlace(placeName, cameraStyle || 'drone-orbit');
         flySuccessful = true;
 
-        // AFTER animation completes, switch to blue sky
-        enableBlueSkyView();
-
-        // Show location pin at the actual location with company logo (non-blocking)
+        // Show location pin at the actual location with company logo
         if (cameraConfig && cameraConfig.location) {
           showLocationPin(
             chapterId,
@@ -406,36 +375,30 @@ export async function updateChapter(chapterIndex) {
             chapter.title,
             chapter.logoUrl,
             chapter.website
-          ).catch(err => {
-            console.warn('⚠️ Location pin failed to load (non-critical):', err.message);
-          });
+          );
         }
+
+        // Open bottom sheet AFTER flight completes (arrival) - fallback path
+        if (bottomSheet && bottomSheet.classList.contains('minimized')) {
+          if (window.expandBottomSheet) {
+            window.expandBottomSheet();
+          } else if (window.toggleBottomSheet) {
+            window.toggleBottomSheet();
+          }
+        }
+
       } catch (geocoderError) {
-        console.error(`❌ Both APIs failed for ${placeName}:`, geocoderError);
+        console.error(`Both APIs failed for ${placeName}:`, geocoderError);
         flySuccessful = false;
       }
     }
 
     if (!flySuccessful) {
-      console.error(`❌ Camera navigation failed for ${placeName}`);
+      console.error(`Camera navigation failed for ${placeName}`);
     }
-    
-    // Handle focus options after camera is positioned
-    if (hasFocus) {
-      const radius = story.chapters[chapterIndex].focusOptions.focusRadius;
-      // Convert lat/lng from cameraConfig to coords format for shader
-      const coords = {
-        lat: cameraConfig.location.lat(),
-        lng: cameraConfig.location.lng()
-      };
-      createCustomRadiusShader(coords, radius); // Create the custom radius shader
-    } else {
-      removeCustomRadiusShader(); // Remove the custom radius shader
-    }
-    
+
   } catch (error) {
     console.error(`Error navigating to ${placeName}:`, error);
-    removeCustomRadiusShader(); // Remove any existing shader on error
   }
 }
 

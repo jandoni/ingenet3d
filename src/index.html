@@ -6,7 +6,7 @@
       (function() {
         const originalError = window.Error;
         const originalEval = window.eval;
-        
+
         // Override Error constructor to catch extension errors
         window.addEventListener('error', function(e) {
           if (e.filename && (e.filename.includes('inject-script') || e.filename.includes('extension://') || e.filename.includes('VM'))) {
@@ -15,18 +15,47 @@
             return false;
           }
         }, true); // Use capture phase
-        
+
         // Suppress console errors from extensions
         const originalConsoleError = console.error;
         console.error = function(...args) {
           const errorString = args.join(' ');
-          if (errorString.includes('foregroundEntryPoint') || 
+          if (errorString.includes('foregroundEntryPoint') ||
               errorString.includes('inject-script') ||
               errorString.includes('extension://')) {
             return;
           }
           originalConsoleError.apply(console, args);
         };
+      })();
+
+      // Remove Google Maps alpha warning immediately when it appears
+      (function() {
+        const removeAlphaWarning = () => {
+          document.querySelectorAll('div').forEach(div => {
+            if (div.textContent &&
+                div.textContent.includes('alpha channel') &&
+                div.textContent.includes('development purposes')) {
+              div.remove();
+            }
+          });
+        };
+
+        // Start observing immediately
+        const observer = new MutationObserver(removeAlphaWarning);
+
+        // Observe as soon as body exists
+        if (document.body) {
+          observer.observe(document.body, { childList: true, subtree: true });
+        } else {
+          document.addEventListener('DOMContentLoaded', () => {
+            observer.observe(document.body, { childList: true, subtree: true });
+          });
+        }
+
+        // Also run on various load events
+        document.addEventListener('DOMContentLoaded', removeAlphaWarning);
+        window.addEventListener('load', removeAlphaWarning);
       })();
     </script>
     <meta charset="UTF-8" />
@@ -65,19 +94,17 @@
       @import url("./styles/critical.css");
     </style>
 
-    <!-- Preload Cesium CSS (external dependency) -->
-    <link rel="preload" href="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Widgets/widgets.css" as="style" />
-
     <!-- Non-critical CSS loaded with low priority -->
     <link rel="stylesheet" type="text/css" href="./main.css" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" type="text/css" href="./main.css" /></noscript>
 
-    <!-- Cesium script with defer - downloads in parallel, executes before modules -->
-    <script defer src="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Cesium.js"></script>
-    <link
-      href="https://ajax.googleapis.com/ajax/libs/cesiumjs/1.105/Build/Cesium/Widgets/widgets.css"
-      rel="stylesheet"
-    />
+    <!-- Google Maps 3D API - loads maps3d and places libraries -->
+    <script>
+      (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]);for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+        key: "AIzaSyAukppSOQGuZwauyVBBDtqQUJW5C-Pdisw",
+        v: "alpha"
+      });
+    </script>
     <title>Explorar España - Instituto de la Ingeniería de España</title>
   </head>
   <body>
@@ -135,26 +162,18 @@
       </svg>
     </button>
     
-    <!-- Orbit pause button -->
-    <button id="orbit-pause-btn" class="orbit-pause-btn" onclick="toggleOrbitPause()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path id="pause-icon" d="M6 4H8V20H6V4ZM16 4H18V20H16V4Z" fill="currentColor"/>
-        <path id="play-icon" d="M8 5V19L19 12L8 5Z" fill="currentColor" style="display: none;"/>
+    <!-- 360° rotation button -->
+    <button id="orbit-pause-btn" class="orbit-pause-btn" onclick="toggleOrbitPause()" title="Vista 360°">
+      <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+        <!-- Circular arrow around 360 text -->
+        <path d="M24 6C14.06 6 6 14.06 6 24C6 33.94 14.06 42 24 42C31.73 42 38.26 37.04 40.67 30H36.5C34.36 34.5 29.54 38 24 38C16.27 38 10 31.73 10 24C10 16.27 16.27 10 24 10C28.77 10 32.94 12.36 35.5 16L30 17L42 24V8L37.5 12.5C33.83 8.17 28.23 6 24 6Z" fill="currentColor" opacity="0.9"/>
+        <!-- 360° text -->
+        <text x="24" y="27" text-anchor="middle" font-size="11" font-weight="600" font-family="system-ui, -apple-system, sans-serif" fill="currentColor">360°</text>
       </svg>
     </button>
 
-    <!-- Zoom controls -->
+    <!-- Home button only (zoom +/- removed) -->
     <div class="zoom-controls">
-      <button id="zoom-in-btn" class="zoom-btn" onclick="zoomOut()" title="Acercar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <button id="zoom-out-btn" class="zoom-btn" onclick="zoomIn()" title="Alejar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
       <button id="home-btn" class="zoom-btn" onclick="goToHome()" title="Inicio">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -163,24 +182,30 @@
       </button>
     </div>
 
-    <!-- Controls info box -->
-    <div class="controls-info">
-      <div class="controls-title">Controles</div>
-      <div class="control-item">
-        <div class="control-text">
-          <strong>Rotar:</strong> Clic izquierdo + arrastrar
+    <!-- Category Navigation Menu -->
+    <div class="category-menu">
+      <div class="category-menu-header">
+        <span class="category-menu-title">Explorar</span>
+        <div class="category-search">
+          <svg class="category-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="text" class="category-search-input" placeholder="Buscar..." oninput="searchCategories(this.value)">
         </div>
       </div>
-      <div class="control-item">
-        <div class="control-text">
-          <strong>Mover:</strong> Shift + clic izquierdo + arrastrar
-        </div>
+
+      <!-- Category Tabs -->
+      <div class="category-tabs">
+        <button class="category-tab active" data-category="ubicacion" onclick="switchCategoryTab('ubicacion')">Ubicación</button>
+        <button class="category-tab" data-category="sector" onclick="switchCategoryTab('sector')">Sector</button>
+        <button class="category-tab" data-category="profesion" onclick="switchCategoryTab('profesion')">Profesión</button>
+        <button class="category-tab" data-category="tipo" onclick="switchCategoryTab('tipo')">Tipo</button>
       </div>
-      <div class="control-item">
-        <div class="control-text">
-          <strong>Zoom:</strong> Rueda del ratón<br/>
-          <span style="font-size: 11px; color: #64748b;">o deslizar dos dedos en trackpad</span>
-        </div>
+
+      <!-- Category Content -->
+      <div class="category-content" id="category-content">
+        <!-- Populated dynamically by JavaScript -->
       </div>
     </div>
 
@@ -296,7 +321,7 @@
     </div>
     
     <div class="map-container">
-      <div id="cesium-container"></div>
+      <gmp-map-3d id="map3d" mode="SATELLITE" style="width: 100%; height: 100%;"></gmp-map-3d>
     </div>
 
     <!-- Chatbot Container -->

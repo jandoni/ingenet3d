@@ -384,3 +384,37 @@ input[type="range"]::-moz-range-track {
     font-size: 12px;
   }
 }
+
+/* ---- Hide Google Maps Alpha Warning ---- */
+/* This hides the "Using the alpha channel..." warning banner for production use */
+
+/* Target the alpha warning bar directly */
+div[style*="background-color: rgb(25, 27, 36)"],
+div[style*="background: rgb(25, 27, 36)"],
+div[style*="background-color:#191b24"],
+div[style*="background:#191b24"] {
+  display: none !important;
+}
+
+/* Target by the dismiss button class */
+.dismissButton {
+  display: none !important;
+}
+
+/* Target warning bars with specific characteristics */
+body > div[style*="position: fixed"][style*="top: 0"],
+body > div[style*="position: absolute"][style*="top: 0"][style*="z-index"] {
+  display: none !important;
+}
+
+/* Hide the Google Maps alpha channel warning specifically */
+div[style*="z-index: 999999"],
+div[style*="z-index:999999"] {
+  display: none !important;
+}
+
+/* Alternative: target by content structure (warning + dismiss) */
+div[style*="position: fixed"] > div[style*="Dismiss"],
+div[style*="position: fixed"]:has(.dismissButton) {
+  display: none !important;
+}

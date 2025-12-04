@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { cesiumViewer } from "./cesium.js";
+import { map3d, flyToLocation, setCamera, startOrbit, stopAnimation } from "./google-maps-3d.js";
 
 /**
  * Service for handling NEW Places API integration with automatic camera positioning
@@ -93,6 +93,9 @@ export function initGoogleMapsServicesNew() {
  */
 async function searchPlace(query) {
   try {
+    // Import places library first (required for Place.searchByText)
+    await google.maps.importLibrary('places');
+
     // First try NEW API without type restriction for addresses
     let request = {
       textQuery: query,
@@ -110,11 +113,9 @@ async function searchPlace(query) {
     }
     
     // If no results, try Legacy Find Place API (better for addresses)
-    console.log(`NEW API failed for ${query}, trying Legacy Find Place API...`);
     return await searchPlaceLegacy(query);
-    
+
   } catch (error) {
-    console.error(`Error searching for place ${query}:`, error);
     throw error;
   }
 }
@@ -126,21 +127,18 @@ async function searchPlace(query) {
  */
 async function searchPlaceLegacy(query) {
   try {
-    console.log(`Trying Legacy Find Place API for: ${query}`);
-    
     const service = new google.maps.places.PlacesService(document.createElement('div'));
-    
+
     return new Promise((resolve, reject) => {
       const request = {
         query: query,
         fields: ['place_id', 'name', 'formatted_address', 'geometry', 'photos', 'rating', 'types']
       };
-      
+
       service.findPlaceFromQuery(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
           const place = results[0];
-          console.log(`Legacy Find Place API found: ${place.name} at ${place.formatted_address}`);
-          
+
           // Convert legacy format to NEW API format
           const convertedPlace = {
             id: place.place_id,
@@ -151,16 +149,14 @@ async function searchPlaceLegacy(query) {
             photos: place.photos || [],
             rating: place.rating
           };
-          
+
           resolve(convertedPlace);
         } else {
-          console.error(`Legacy Find Place API failed with status: ${status}`);
           reject(new Error(`Legacy Find Place API failed: ${status}`));
         }
       });
     });
   } catch (error) {
-    console.error(`Error in Legacy Find Place API for ${query}:`, error);
     throw error;
   }
 }
@@ -202,11 +198,9 @@ async function getElevation(location) {
         locations: [location]
       }, (results, status) => {
         if (status === 'OK' && results[0]) {
-          console.log(`🏔️ Elevation API called for ${lat}, ${lng}: ${results[0].elevation}m`);
           resolve(results[0].elevation || 0);
         } else {
-          console.warn(`⚠️ Elevation API failed, using default`);
-          resolve(10);
+          resolve(10); // Default elevation if API fails
         }
       });
     });
@@ -225,15 +219,60 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
     throw new Error('Google Maps services not initialized. Call initGoogleMapsServicesNew() first.');
   }
 
-  // ✅ Check for pre-cached coordinates - Skip ALL Google API calls if available
-  // Look for chapter in story configuration
-  if (typeof window !== 'undefined' && window.story && window.story.chapters) {
-    const chapter = window.story.chapters.find(ch =>
-      ch.placeName === placeName || ch.title === placeName
+  // ✅ PRIORITY 1: Check for marker click coordinates (most accurate)
+  // When user clicks a marker, use its exact coordinates
+  if (typeof window !== 'undefined' && window._markerClickCoordinates) {
+    const markerCoords = window._markerClickCoordinates;
+
+    // Clear after use to avoid stale data
+    window._markerClickCoordinates = null;
+
+    // Create location object compatible with Google Maps
+    const location = {
+      lat: () => markerCoords.lat,
+      lng: () => markerCoords.lng
+    };
+
+    // Skip ALL Google API calls - use marker's exact position
+    const cameraConfig = calculateOptimalCamera(
+      { location, viewport: null },
+      10, // Default elevation
+      cameraStyle
     );
 
+    return {
+      ...cameraConfig,
+      placeName,
+      location,
+      viewport: null,
+      elevation: 10,
+      placeDetails: {
+        displayName: { text: placeName },
+        formattedAddress: placeName
+      }
+    };
+  }
+
+  // ✅ PRIORITY 2: Check for pre-cached coordinates in chapter config
+  // Look for chapter in story configuration
+  if (typeof window !== 'undefined' && window.story && window.story.chapters) {
+    // Try to find chapter by placeName or title
+    let chapter = window.story.chapters.find(ch => ch.placeName === placeName);
+
+    if (!chapter) {
+      // Fallback: try matching by title
+      chapter = window.story.chapters.find(ch => ch.title === placeName);
+    }
+
+    if (!chapter) {
+      // Fallback: try partial match on first part of placeName
+      chapter = window.story.chapters.find(ch =>
+        ch.placeName && placeName && placeName.includes(ch.placeName.split(',')[0])
+      );
+    }
+
     if (chapter && chapter.cameraCoordinates) {
-      console.log(`✅ Using pre-cached coordinates for ${placeName} (0 API calls)`);
+      console.log(`✅ Using cameraCoordinates for "${chapter.title}":`, chapter.cameraCoordinates);
       const coords = chapter.cameraCoordinates;
 
       // Create location object compatible with Google Maps
@@ -260,9 +299,14 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
           formattedAddress: chapter.address || placeName
         }
       };
+    } else if (chapter) {
+      console.log(`⚠️ Chapter "${chapter.title}" found but no cameraCoordinates`);
+    } else {
+      console.log(`⚠️ No chapter found for placeName: "${placeName}"`);
     }
   }
 
+  console.log(`🔍 Using Google Places API for: "${placeName}"`);
   // Use caching for place resolution
   const cacheKey = `place_${placeName}_${cameraStyle}`;
   
@@ -288,14 +332,6 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
 
     // Calculate optimal camera position
     const cameraConfig = calculateOptimalCamera({ location, viewport }, elevation, cameraStyle);
-
-    // Log coordinates for manual addition to config.json
-    console.log(`📍 Add to config.json for ${placeName}:`);
-    console.log(`"cameraCoordinates": ${JSON.stringify({
-      lat: parseFloat(location.lat().toFixed(6)),
-      lng: parseFloat(location.lng().toFixed(6)),
-      elevation: Math.round(elevation)
-    }, null, 2)}`);
 
     // Return comprehensive place data
     return {
@@ -325,11 +361,12 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
 }
 
 /**
- * Calculate optimal camera position (same as before but with adjustments)
+ * Calculate optimal camera position for Google Maps 3D
+ * Returns {lat, lng, altitude, range, tilt, heading} format
  */
 function calculateOptimalCamera(placeDetails, elevation, cameraStyle) {
   const { location, viewport } = placeDetails;
-  
+
   if (!viewport) {
     // Fallback for places without viewport
     return createDefaultCameraConfig(location, elevation, cameraStyle);
@@ -338,211 +375,195 @@ function calculateOptimalCamera(placeDetails, elevation, cameraStyle) {
   // Calculate optimal distance based on viewport size
   const ne = viewport.getNorthEast();
   const sw = viewport.getSouthWest();
-  
-  const distance = Cesium.Cartesian3.distance(
-    Cesium.Cartesian3.fromDegrees(sw.lng(), sw.lat(), elevation),
-    Cesium.Cartesian3.fromDegrees(ne.lng(), ne.lat(), elevation)
-  ) / 2;
+
+  // Calculate distance using simple approximation (in meters)
+  const latDiff = Math.abs(ne.lat() - sw.lat()) * 111000; // ~111km per degree
+  const lngDiff = Math.abs(ne.lng() - sw.lng()) * 111000 * Math.cos(location.lat() * Math.PI / 180);
+  const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff) / 2;
 
   // Ensure minimum distance for close-up locations
-  const minDistance = 500; // 500 meters minimum
-  const maxDistance = 10000; // 10km maximum for buildings
+  // Reduced for better building visibility
+  const minDistance = 400; // 400 meters minimum - close enough to see building
+  const maxDistance = 5000; // 5km maximum for buildings
   const adjustedDistance = Math.max(minDistance, Math.min(maxDistance, distance));
 
   // Camera settings based on style
+  // Google Maps 3D uses tilt (0 = down, 90 = horizon) instead of pitch
   let heading = 0;
-  let pitch = -Math.PI / 4; // -45 degrees
+  let tilt = 45; // 45 degrees for nice 3D view
+
+  // Calculate final range based on style
+  let finalRange = adjustedDistance;
 
   switch (cameraStyle) {
     case 'drone-orbit':
       heading = 0; // Always start from front view (north-facing)
-      pitch = -Math.PI / 8; // -22.5 degrees for better architectural view (higher tilt)
+      tilt = 60; // 60 degrees for better architectural view
+      // For drone-orbit, close enough to see the building details
+      finalRange = Math.max(600, adjustedDistance);
       break;
     case 'overview':
-      pitch = -Math.PI / 2; // -90 degrees (straight down)
+      tilt = 0; // 0 degrees (straight down)
       // For country overview, use much higher altitude
-      if (adjustedDistance < 200000) { // If less than 200km, increase for country view
+      if (adjustedDistance < 200000) {
         return createCountryOverviewConfig(location, elevation);
       }
       break;
     case 'static':
     default:
       heading = 0;
-      pitch = -Math.PI / 4;
+      tilt = 45;
       break;
   }
 
-  // Create target position
-  const target = Cesium.Cartesian3.fromDegrees(
-    location.lng(), 
-    location.lat(), 
-    elevation
-  );
-
   return {
-    target,
-    distance: adjustedDistance,
+    lat: location.lat(),
+    lng: location.lng(),
+    altitude: elevation,
+    range: finalRange,
     heading,
-    pitch,
-    roll: 0,
-    cameraStyle,
-    headingPitchRange: new Cesium.HeadingPitchRange(heading, pitch, adjustedDistance)
+    tilt,
+    cameraStyle
   };
 }
 
 /**
- * Country overview camera configuration
+ * Country overview camera configuration for Google Maps 3D
  */
 function createCountryOverviewConfig(location, elevation) {
   const countryDistance = 2000000; // 2000km altitude for country view
-  
+
   return {
-    target: Cesium.Cartesian3.fromDegrees(location.lng(), location.lat(), elevation),
-    distance: countryDistance,
+    lat: location.lat(),
+    lng: location.lng(),
+    altitude: elevation,
+    range: countryDistance,
     heading: 0,
-    pitch: -Math.PI / 2, // -90 degrees (straight down)
-    roll: 0,
-    cameraStyle: 'overview',
-    headingPitchRange: new Cesium.HeadingPitchRange(0, -Math.PI / 2, countryDistance)
+    tilt: 0, // Looking straight down
+    cameraStyle: 'overview'
   };
 }
 
 /**
- * Fallback camera configuration
+ * Fallback camera configuration for Google Maps 3D
  */
 function createDefaultCameraConfig(location, elevation, cameraStyle) {
-  const defaultDistance = cameraStyle === 'overview' ? 2000000 : 1000; // Increased overview distance
-  
+  // Close default distance for building visibility
+  const defaultDistance = cameraStyle === 'overview' ? 2000000 : 500;
+
   return {
-    target: Cesium.Cartesian3.fromDegrees(location.lng(), location.lat(), elevation),
-    distance: defaultDistance,
+    lat: location.lat(),
+    lng: location.lng(),
+    altitude: elevation,
+    range: defaultDistance,
     heading: 0,
-    pitch: cameraStyle === 'overview' ? -Math.PI / 2 : -Math.PI / 4,
-    roll: 0,
-    cameraStyle,
-    headingPitchRange: new Cesium.HeadingPitchRange(
-      0, 
-      cameraStyle === 'overview' ? -Math.PI / 2 : -Math.PI / 4, 
-      defaultDistance
-    )
+    tilt: cameraStyle === 'overview' ? 0 : 60, // 60 degrees for nice 3D view
+    cameraStyle
   };
 }
 
 /**
- * Apply camera configuration to Cesium viewer
- * @param {Object} cameraConfig - Camera configuration
+ * Apply camera configuration to Google Maps 3D viewer
+ * @param {Object} cameraConfig - Camera configuration {lat, lng, altitude, range, heading, tilt}
  * @param {boolean} immediate - If true, sets camera immediately without animation
  */
 export function applyCameraConfigNew(cameraConfig, immediate = false) {
-  if (!cesiumViewer) {
-    throw new Error('Cesium viewer not initialized');
+  if (!map3d) {
+    throw new Error('Google Maps 3D not initialized');
   }
 
   if (immediate) {
-    // For initial overview, set camera immediately without any animation
-    cesiumViewer.camera.setView({
-      destination: cameraConfig.target,
-      orientation: {
-        heading: cameraConfig.heading,
-        pitch: cameraConfig.pitch,
-        roll: cameraConfig.roll
-      }
-    });
-  } else {
-    // Use Cesium's lookAt method for precise positioning
-    cesiumViewer.camera.lookAt(
-      cameraConfig.target,
-      cameraConfig.headingPitchRange
-    );
+    // Set camera immediately without animation
+    setCamera(cameraConfig);
   }
+  // If not immediate, the flyToLocation will handle the transition
 
-  // Add drone orbit effect if specified (but not for overview)
+  // Handle drone orbit effect - start immediately (no delay)
   if (cameraConfig.cameraStyle === 'drone-orbit') {
-    // Check if mobile and if orbit should be paused by default
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (!isMobile || (window.isOrbitPaused === false)) {
-      // Only start orbit on desktop or if explicitly unpaused on mobile
-      startDroneOrbit();
-    } else {
-      console.log('📱 Mobile: orbit paused by default for this location');
-      stopDroneOrbit();
+    window.isOrbitPaused = false;
+    if (window.startOrbitAnimation) {
+      window.startOrbitAnimation();
     }
+    // Update button state
+    const orbitBtn = document.getElementById('orbit-pause-btn');
+    if (orbitBtn) orbitBtn.classList.add('active');
   } else {
-    stopDroneOrbit();
+    stopAnimation();
   }
 }
 
 /**
- * Drone orbit animation (SLOWER)
+ * Drone orbit animation using Google Maps 3D native orbit
+ * Uses flyCameraAround for smooth continuous rotation
  */
-let orbitAnimation = null;
+function startDroneOrbitNew() {
+  // Stop any existing animation first
+  stopAnimation();
 
-function startDroneOrbit() {
-  stopDroneOrbit(); // Clear any existing orbit
-  stopSpainOrbitIfExists(); // Stop Spain orbit if active
-
-  // Don't check for mobile here - let the pause button control it
-  orbitAnimation = cesiumViewer.clock.onTick.addEventListener(() => {
-    // Reduced rotation speed for subtle animation (0.0010 - very gentle)
-    cesiumViewer.camera.rotate(Cesium.Cartesian3.UNIT_Z, 0.0010);
-  });
+  // Start orbit using Google Maps 3D native function
+  // 90 seconds for one smooth 360° rotation, only 1 round
+  startOrbit(90000, 1);
 }
 
-// Function to stop Spain orbit (we'll import this or check if it exists)
-function stopSpainOrbitIfExists() {
-  // Check if we can access the Spain orbit stop function
-  if (typeof window !== 'undefined' && window.stopSpainOrbitEffect) {
-    window.stopSpainOrbitEffect();
-  }
-}
-
-function stopDroneOrbit() {
-  if (orbitAnimation) {
-    orbitAnimation();
-    orbitAnimation = null;
-  }
+function stopDroneOrbitNew() {
+  stopAnimation();
 }
 
 // Make orbit control functions available globally with unified names
 if (typeof window !== 'undefined') {
-  window.stopOrbitAnimation = stopDroneOrbit;
-  window.startOrbitAnimation = startDroneOrbit;
-  // Also provide legacy compatibility
-  window.stopDroneOrbit = stopDroneOrbit;
-  window.startDroneOrbit = startDroneOrbit;
+  window.stopOrbitAnimation = stopDroneOrbitNew;
+  window.startOrbitAnimation = startDroneOrbitNew;
+  window.stopDroneOrbit = stopDroneOrbitNew;
+  window.startDroneOrbit = startDroneOrbitNew;
+  window.stopSpainOrbitEffect = stopDroneOrbitNew;
 }
 
 /**
- * Fly to a place with smooth animation using NEW API
+ * Fly to a place with smooth animation using Google Maps 3D native flyCameraTo
+ * Provides smooth parabolic arc animation (Google Earth style)
  */
 export async function flyToPlaceNew(placeName, cameraStyle = 'static') {
   try {
-    const cameraConfig = await resolvePlaceToCameraNew(placeName, cameraStyle);
+    let cameraConfig;
 
-    // Return a promise that resolves when the animation completes
-    return new Promise((resolve, reject) => {
-      // Animate to the new position
-      cesiumViewer.camera.flyTo({
-        destination: cameraConfig.target,
-        orientation: {
-          heading: cameraConfig.heading,
-          pitch: cameraConfig.pitch,
-          roll: cameraConfig.roll
-        },
-        duration: 5.0, // 5 second animation for smoother Google Earth-like travel
-        complete: () => {
-          // Apply final camera configuration after animation
-          applyCameraConfigNew(cameraConfig);
+    // PRIORITY: Check for marker click coordinates FIRST (bypasses all caching)
+    if (typeof window !== 'undefined' && window._markerClickCoordinates) {
+      const markerCoords = window._markerClickCoordinates;
+      window._markerClickCoordinates = null; // Clear immediately
 
-          // Resolve the promise with camera config after animation completes
-          resolve(cameraConfig);
+      console.log(`Flying to marker coordinates: ${markerCoords.lat}, ${markerCoords.lng}`);
+
+      // Build camera config directly from marker coordinates
+      cameraConfig = {
+        lat: markerCoords.lat,
+        lng: markerCoords.lng,
+        altitude: 0,
+        range: cameraStyle === 'drone-orbit' ? 600 : 400,
+        heading: 0,
+        tilt: cameraStyle === 'drone-orbit' ? 60 : 45,
+        cameraStyle,
+        placeName,
+        location: {
+          lat: () => markerCoords.lat,
+          lng: () => markerCoords.lng
         },
-        cancel: () => {
-          // If animation is cancelled, still resolve
-          resolve(cameraConfig);
+        placeDetails: {
+          displayName: { text: placeName }
         }
-      });
-    });
+      };
+    } else {
+      // Fallback to place resolution (uses Google Places API or cache)
+      cameraConfig = await resolvePlaceToCameraNew(placeName, cameraStyle);
+    }
+
+    // Use Google Maps 3D native fly animation
+    // Duration is auto-calculated based on distance (see flyToLocation)
+    await flyToLocation(cameraConfig, 10000);
+
+    // Apply final configuration (handles orbit state)
+    applyCameraConfigNew(cameraConfig);
+
+    return cameraConfig;
   } catch (error) {
     console.error(`Error flying to place ${placeName}:`, error);
     throw error;

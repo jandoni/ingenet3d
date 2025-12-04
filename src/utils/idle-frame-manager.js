@@ -52,8 +52,6 @@ export class IdleFrameManager {
 
     this.enabled = true;
     this.checkInterval = null;
-
-    console.log(`🎬 Idle Frame Manager initialized (target: ${targetFrameRate} FPS, network-aware: ${tileset ? 'YES' : 'NO'})`);
   }
 
   /**
@@ -74,8 +72,6 @@ export class IdleFrameManager {
     this.checkInterval = setInterval(() => {
       this.checkIdleState();
     }, 500);
-
-    console.log(`▶️ Idle detection started`);
   }
 
   /**
@@ -94,8 +90,6 @@ export class IdleFrameManager {
 
     // Restore target frame rate
     this.setFrameRate(this.targetFrameRate);
-
-    console.log(`⏸️ Idle detection stopped`);
   }
 
   /**
@@ -180,7 +174,6 @@ export class IdleFrameManager {
         // If tiles are loading, force active state
         if (this.isIdle) {
           this.setIdleLevel(0);
-          console.log(`📡 Network active: ${currentTilesLoading} tiles loading - restoring full FPS`);
         }
       }
 
@@ -222,9 +215,6 @@ export class IdleFrameManager {
 
     const newFrameRate = this.frameRateLevels[level];
     this.setFrameRate(newFrameRate);
-
-    const labels = ['Active', 'Idle', 'Very Idle', 'Deeply Idle'];
-    console.log(`🎬 Frame rate adjusted: ${newFrameRate} FPS (${labels[level]})`);
   }
 
   /**
@@ -285,14 +275,7 @@ export class IdleFrameManager {
    */
   setOrbitMode(active) {
     if (this.orbitModeActive === active) return;
-
     this.orbitModeActive = active;
-
-    if (active) {
-      console.log(`🔄 Orbit mode enabled - camera rotation will not break idle state`);
-    } else {
-      console.log(`⏹️ Orbit mode disabled - normal idle detection resumed`);
-    }
   }
 }
 
@@ -306,7 +289,6 @@ let globalIdleManager = null;
  */
 export function initIdleFrameManager(cesiumViewer, targetFrameRate = 30, tileset = null) {
   if (globalIdleManager) {
-    console.warn('⚠️ Idle frame manager already initialized');
     return globalIdleManager;
   }
 

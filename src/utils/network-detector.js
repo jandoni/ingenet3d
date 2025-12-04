@@ -122,9 +122,6 @@ async function performSpeedTest() {
     const speedBps = fileSizeBits / durationSeconds;
     const speedMbps = speedBps / (1024 * 1024);
 
-    // Speed test complete - log quietly
-    console.log(`📊 Network speed: ${speedMbps.toFixed(2)} Mbps`);
-
     return speedMbps;
   } catch (error) {
     console.warn('⚠️ Speed test failed, using Network API classification:', error.message);

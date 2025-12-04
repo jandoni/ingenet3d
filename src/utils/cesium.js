@@ -223,7 +223,6 @@ export async function initCesiumViewer(performanceSettings = null) {
 
   // Configure tile requests based on network speed (adaptive!)
   Cesium.RequestScheduler.requestsByServer["tile.googleapis.com:443"] = settings.tileRequests;
-  console.log(`📡 Configured ${settings.tileRequests} simultaneous tile requests`);
 
   // Set the default access token to null to prevent the CesiumJS viewer from requesting an access token
   Cesium.Ion.defaultAccessToken = null;
@@ -292,18 +291,8 @@ export async function initCesiumViewer(performanceSettings = null) {
   // Disable high dynamic range rendering (simpler rendering pipeline)
   cesiumViewer.scene.highDynamicRange = false;
 
-  console.log(`⚡ Scene optimizations applied:`);
-  console.log(`   - Globe rendering: DISABLED`);
-  console.log(`   - Sky mode: DYNAMIC (space view on root, blue sky on chapters)`);
-  console.log(`   - Initial mode: Space view with stars`);
-  console.log(`   - Background: Dynamic based on view mode`);
-  console.log(`   - Fog: DISABLED`);
-  console.log(`   - Shadows: DISABLED`);
-  console.log(`   - Ground primitives: DISABLED`);
-
   // Adaptive resolution scale based on device capabilities and network speed
   cesiumViewer.resolutionScale = settings.resolutionScale;
-  console.log(`🎨 Resolution scale: ${settings.resolutionScale}x`);
 
   // Enable camera controls for user interaction
   cesiumViewer.scene.screenSpaceCameraController.enableLook = true;
@@ -334,7 +323,6 @@ export async function initCesiumViewer(performanceSettings = null) {
         // Force disable dynamic LOD after camera stops moving
         tileset.dynamicScreenSpaceError = false;
         tileset.foveatedScreenSpaceError = false;
-        console.log(`📷 Camera idle - tile refinement disabled`);
       }
     }, 2000);
   });
@@ -437,8 +425,6 @@ async function createTileset() {
       maximumScreenSpaceError = 16; // Good quality for fast networks (increased from 8)
     }
 
-    console.log(`🎯 Tileset LOD: maximumScreenSpaceError = ${maximumScreenSpaceError} (${settings.networkSpeed} network)`);
-
     tileset = await Cesium.Cesium3DTileset.fromUrl(
       "https://tile.googleapis.com/v1/3dtiles/root.json?key=" +
         GOOGLE_MAPS_API_KEY,
@@ -468,9 +454,9 @@ async function createTileset() {
         // Memory Management - Prevent unlimited tile accumulation
         maximumMemoryUsage: 512, // 512 MB limit
 
-        // Preloading Disabled - Don't load tiles we might not need
+        // Preloading - Tiles start loading before camera arrives at destination
         preloadWhenHidden: false,
-        preloadFlightDestinations: false,
+        preloadFlightDestinations: true, // Enables progressive tile loading during flight
 
         // Progressive Rendering - Show something quickly (improved from 0.3)
         progressiveResolutionHeightFraction: 0.5, // Better initial quality
@@ -495,15 +481,6 @@ async function createTileset() {
     // OPTIMIZED: Increased from 300 to 500 to prevent disk cache thrashing
     tileset.maximumCacheSize = 500; // Keep 500 tiles in memory (prevents re-requesting from disk)
 
-    console.log(`✅ Tileset created with optimized performance settings`);
-    console.log(`   - Max tiles in cache: 500 (prevents disk cache re-requests)`);
-    console.log(`   - Max memory: 512 MB`);
-    console.log(`   - Skip LOD: DISABLED (smoother transitions)`);
-    console.log(`   - Dynamic LOD: enabled (factor 2.0)`);
-    console.log(`   - Cull while moving: enabled`);
-    console.log(`   - Immediate load desired LOD: enabled (faster settling)`);
-    console.log(`   - Loading descendant limit: 10 (prevents thrashing)`);
-
     // ============================================================
     // CRITICAL: Stop Tile Thrashing After Initial Load
     // ============================================================
@@ -524,7 +501,6 @@ async function createTileset() {
         if (!tilesSettled) {
           tilesSettled = true;
           initialLoadComplete = true;
-          console.log(`🎯 Tiles settled - disabling aggressive refinement to stop network requests`);
 
           // Disable dynamic LOD refinement (stops continuous tile updates)
           tileset.dynamicScreenSpaceError = false;
@@ -534,8 +510,6 @@ async function createTileset() {
 
           // Store settled state globally for orbit animation to check
           window.tileSettlingComplete = true;
-
-          console.log(`✅ Tile loading complete - network requests should stop now`);
         }
       }, 3000); // 3 seconds of no tile loading = settled
     });
@@ -600,8 +574,6 @@ export function enableSpaceView() {
 
   // Dark background
   cesiumViewer.scene.backgroundColor = new Cesium.Color(0.0, 0.0, 0.05, 1.0);
-
-  console.log('🌌 Space view enabled (stars visible)');
 }
 
 /**
@@ -621,8 +593,6 @@ export function enableBlueSkyView() {
 
   // Bright sky blue background
   cesiumViewer.scene.backgroundColor = new Cesium.Color(0.529, 0.808, 0.922, 1.0);
-
-  console.log('☀️ Blue sky view enabled');
 }
 
 /**

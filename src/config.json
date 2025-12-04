@@ -763,8 +763,12 @@
         "showLocationMarker": true
       },
       "title": "MUCAIN - Museo Virtual de la Carrera de Indias",
-      "placeName": "Pl. Catedral, s/n, 11005 Cádiz, Spain",
+      "placeName": "Calle Valsaín, 121, 40194 Palazuelos de Eresma, Segovia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 40.9136,
+        "lng": -4.0611
+      },
       "id": 19,
       "imageUrl": "assets/logos/mucain-museo-virtual-de-la-carrera-de-indias.png",
       "logoUrl": "assets/logos/mucain-museo-virtual-de-la-carrera-de-indias.png",
@@ -772,12 +776,16 @@
       "content": "MUCAIN es un innovador museo virtual inaugurado en 2021 que preserva la historia de la Carrera de Indias, la ruta comercial que conectó España con América desde 1503 hasta 1828. Describida como 'la operación naval más duradera, efectiva, decisiva y exitosa de la historia de la humanidad', esta ruta convirtió a Cádiz en uno de los centros comerciales más poderosos de Europa tras el traslado de la Casa de Contratación desde Sevilla en 1717.",
       "dateTime": "1503-1828 (Museo: 2021)",
       "imageCredit": "Asociación MUCAIN",
-      "address": "Plaza de la Catedral, 11005 Cádiz",
+      "address": "Calle Valsaín 121, 40194 Palazuelos de Eresma, Segovia",
       "website": "https://mucain.com",
+      "gallery": [
+        "https://mucain.com/wp-content/uploads/2021/03/01cartagena.jpg",
+        "https://mucain.com/wp-content/uploads/2021/03/030_bodega-barco-con-botas-det1.jpg"
+      ],
       "etiquetas": {
         "ubicacion": [
-          "Cádiz",
-          "Andalucía",
+          "Segovia",
+          "Castilla y León",
           "España"
         ],
         "sector": [
@@ -1171,7 +1179,7 @@
         "showLocationMarker": true
       },
       "title": "Soermar",
-      "placeName": "Vigo, Galicia, Spain",
+      "placeName": "Paseo de la Castellana 143, 28046 Madrid, Spain",
       "cameraStyle": "drone-orbit",
       "id": 29,
       "imageUrl": "assets/logos/soermar.png",
@@ -1180,12 +1188,12 @@
       "content": "Soermar (Sociedad para el Estudio de los Recursos Marítimos) es una asociación que agrupa a 18 de los principales astilleros pequeños y medianos de España. Soermar promueve la innovación tecnológica en el sector naval y organiza jornadas de innovación. Aunque no es un astillero en sí, es un actor clave en el ecosistema de I+D+i del sector naval español.",
       "dateTime": "Presente",
       "imageCredit": "Soermar",
-      "address": "Vigo (Galicia)",
+      "address": "Paseo de la Castellana 143, 2ºD, 28046 Madrid",
       "website": "https://www.soermar.com",
       "etiquetas": {
         "ubicacion": [
-          "Vigo",
-          "Galicia",
+          "Madrid",
+          "Comunidad de Madrid",
           "España"
         ],
         "sector": [
@@ -1254,6 +1262,11 @@
       "title": "Real Liga Naval Española",
       "placeName": "Calle Mayor, 16, 1ª planta, Madrid, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 40.4158,
+        "lng": -3.7073,
+        "elevation": 650
+      },
       "id": 31,
       "imageUrl": "assets/logos/real-liga-naval-espa-ola.png",
       "logoUrl": "assets/logos/real-liga-naval-espa-ola.png",
@@ -1533,8 +1546,12 @@
         "showLocationMarker": true
       },
       "title": "Fundación Excelem - Robótica y Automatización",
-      "placeName": "Poligono Industrial Oeste, Calle Perú, 5, planta 2 oficina 8, Oficinas Forum 2, 30820 Alcantarilla, Murcia, Spain",
+      "placeName": "Avenida Descubrimiento, 15, 30820 Alcantarilla, Murcia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.9694,
+        "lng": -1.2247
+      },
       "id": 38,
       "imageUrl": "assets/logos/fundacion_excelem_logo.png",
       "logoUrl": "assets/logos/fundacion_excelem_logo.png",
@@ -1542,8 +1559,17 @@
       "content": "Fundación Excelem conforma un ecosistema transversal de Robótica y Automatización que coordina acciones entre los ámbitos educativo, institucional y empresarial. Su misión es mejorar la formación tecnológica, fomentar la innovación, crear empresas punteras del sector y generar empleos de calidad en la Región de Murcia. Iniciativa conjunta de FREMM y Centro Tecnológico del Metal, la fundación promueve las materias STEAM desde edades tempranas.",
       "dateTime": "2023-Presente",
       "imageCredit": "Fundación Excelem",
-      "address": "Polígono Industrial Oeste, Calle Perú, 5, 30820 Alcantarilla (Murcia)",
+      "address": "Polígono Industrial Oeste, Avda. Descubrimiento 15, 30820 Alcantarilla, Murcia",
       "website": "https://excelem.org",
+      "phone": "+34 614 161 298",
+      "email": "fundacion@excelem.org",
+      "gallery": [
+        "https://excelem.org/wp-content/uploads/2025/10/VocacionesDualiza_Herrero.png",
+        "https://excelem.org/wp-content/uploads/2025/07/Mavitec_01-1024x768.jpeg",
+        "https://excelem.org/wp-content/uploads/2025/06/IMG_0475-1024x768.jpg",
+        "https://excelem.org/wp-content/uploads/2025/05/IMG20250203105133-1024x578.jpg",
+        "https://excelem.org/wp-content/uploads/2025/03/Skills-2025-1-1024x731.png"
+      ],
       "etiquetas": {
         "ubicacion": [
           "Murcia",

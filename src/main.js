@@ -1,7 +1,8 @@
-import { initCesiumViewer, cesiumViewer, getTileset } from "./utils/cesium.js";
+// Google Maps 3D API (replaces Cesium)
+import { initGoogleMaps3D, map3d, flyToLocation, startOrbit, stopAnimation, zoomIn, zoomOut, flyToSpainOverview } from "./utils/google-maps-3d.js";
+import createMarkers, { hideAllMarkers, showAllMarkers, showFilteredMarkers, setSelectedMarker } from "./utils/google-markers-3d.js";
+
 import { loadConfig } from "./utils/config.js";
-import createMarkers from "./utils/create-markers.js";
-import { initGoogleMaps } from "./utils/places.js";
 import { initChapterNavigation, updateChapter, resetToIntro, getCurrentChapterIndex, showSearchResultsOnMap } from "./chapters/chapter-navigation.js";
 import { initGoogleMapsServicesNew, resolvePlaceToCameraNew } from "./utils/places-new-api.js";
 import { simpleGeocodeToCamera } from "./utils/simple-geocoder.js";
@@ -9,8 +10,6 @@ import { initChatbot } from "./utils/chatbot.js";
 import { loadingManager } from "./utils/loading-manager.js";
 import { preloadChapterImages } from "./utils/image-preloader.js";
 import { detectAndConfigurePerformance } from "./utils/performance-settings.js";
-import { initIdleFrameManager } from "./utils/idle-frame-manager.js";
-// import { initFreezeModeManager, freezeAtLocation } from "./utils/freeze-mode-manager.js"; // DISABLED - causing tile thrashing
 
 /**
  * The story configuration object
@@ -18,6 +17,9 @@ import { initIdleFrameManager } from "./utils/idle-frame-manager.js";
  */
 export const story = await loadConfig("./config.json");
 const { chapters } = story;
+
+// Make story available globally for places-new-api.js to use cameraCoordinates
+window.story = story;
 
 /**
  * Load detailed data for a specific chapter when needed
@@ -35,15 +37,16 @@ async function loadChapterDetails(chapterId) {
   }
 
   try {
-    // Ensure Google Maps API is loaded
+    // Ensure Google Maps services are initialized
     // This should already be loaded during app startup, but check just in case
     if (typeof google === 'undefined' || !google.maps) {
-      console.warn('⚠️ Google Maps API not loaded yet, loading now...');
-      if (!window.googleMapsLoaded) {
-        await initGoogleMaps();
-        initGoogleMapsServicesNew();
-        window.googleMapsLoaded = true;
-      }
+      console.warn('⚠️ Google Maps API not loaded yet');
+      return chapter;
+    }
+
+    if (!window.googleMapsLoaded) {
+      initGoogleMapsServicesNew();
+      window.googleMapsLoaded = true;
     }
 
     let cameraConfig;
@@ -89,6 +92,40 @@ function truncateText(text, maxLength) {
 }
 
 /**
+ * Preload camera configs for all chapters (background task)
+ * This caches Google Places API responses so navigation is instant
+ */
+async function preloadCameraConfigs(chaptersToPreload) {
+  const preloadPromises = [];
+
+  for (const chapter of chaptersToPreload) {
+    // Skip chapters that already have cached coordinates
+    if (chapter.cameraCoordinates) {
+      continue;
+    }
+
+    // Add slight delay between requests to avoid rate limiting
+    const promise = new Promise(async (resolve) => {
+      try {
+        await resolvePlaceToCameraNew(chapter.placeName || chapter.title, chapter.cameraStyle || 'drone-orbit');
+        resolve({ success: true, title: chapter.title });
+      } catch (error) {
+        resolve({ success: false, title: chapter.title, error: error.message });
+      }
+    });
+
+    preloadPromises.push(promise);
+
+    // Small delay between starting requests to be nice to the API
+    await new Promise(r => setTimeout(r, 50));
+  }
+
+  // Wait for all preloads to complete
+  const results = await Promise.all(preloadPromises);
+  return results;
+}
+
+/**
  * The main function. This function is called when the page is loaded.
  * Fast initial load, then background enrichment.
  */
@@ -126,9 +163,15 @@ async function main() {
     // Show initial UI immediately with curated images
     initializeNewUI();
 
-    // Initialize Cesium with adaptive performance settings
+    // Initialize Google Maps 3D
     loadingManager.updateStage('INIT', 0.6, 'Inicializando visor 3D...');
-    await initCesiumViewer(performanceSettings);
+    await initGoogleMaps3D({
+      lat: 40.0,
+      lng: -3.7,
+      range: 2000000, // 2000km for Spain overview
+      tilt: 0,        // Looking straight down
+      heading: 0
+    });
 
     loadingManager.completeStage('INIT');
 
@@ -156,6 +199,9 @@ async function main() {
     // Initialize chapter navigation with basic data
     initChapterNavigation();
 
+    // Initialize category navigation menu
+    initCategoryMenu();
+
     // Initialize the chatbot with story data
     initChatbot(story);
 
@@ -167,67 +213,39 @@ async function main() {
     loadingManager.startStage('FINALIZE');
 
     // ============================================================
-    // CRITICAL: Load Google Maps API ONCE during app startup
+    // Initialize Google Maps services for Places API
     // ============================================================
-    // Google Maps API can ONLY be loaded once per page.
-    // If we try to load it again (e.g., when clicking markers),
-    // it will fail with ERR_CONNECTION_CLOSED and prevent navigation.
-    // Therefore, we MUST load it here during initial app startup.
+    // Google Maps API is already loaded via the script tag in index.html
+    // We just need to initialize the services for Places API
     // ============================================================
     try {
-      if (typeof google === 'undefined' || !google.maps) {
-        console.log('📍 Loading Google Maps API...');
-        await initGoogleMaps();
-        initGoogleMapsServicesNew();
-        window.googleMapsLoaded = true;
-        console.log('✅ Google Maps API loaded successfully');
-      } else {
-        console.log('✅ Google Maps API already available');
-        initGoogleMapsServicesNew();
-        window.googleMapsLoaded = true;
-      }
+      initGoogleMapsServicesNew();
+      window.googleMapsLoaded = true;
+
+      // Preload camera configs for all chapters (background, non-blocking)
+      preloadCameraConfigs(chapters).catch(() => {
+        // Silent failure - preloading is optional optimization
+      });
     } catch (error) {
-      console.error('⚠️ Failed to load Google Maps API (will retry on-demand):', error);
+      console.error('Failed to initialize Google Maps services:', error);
       window.googleMapsLoaded = false;
     }
 
-    // Give UI time to settle
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // Give Google Maps 3D time to fully load tiles and become interactive
+    // This ensures the map is usable immediately when the loading screen hides
+    loadingManager.updateStage('FINALIZE', 0.8, 'Cargando mapa 3D...');
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
     loadingManager.complete();
 
     // ==========================================
-    // PHASE 7A: INITIALIZE PERFORMANCE MANAGERS
+    // PHASE 7A: PERFORMANCE (Google Maps 3D handles this internally)
     // ==========================================
-    // Initialize idle frame manager (network-aware dynamic frame rate throttling)
-    if (performanceSettings.enableIdleThrottling !== false) {
-      console.log(`🎬 Initializing idle frame manager (network-aware)...`);
-      const tileset = getTileset();
-      initIdleFrameManager(cesiumViewer, performanceSettings.targetFrameRate, tileset);
-    }
-
-    // Freeze mode DISABLED - was causing tile loading thrashing
-    // Let Cesium naturally finish loading tiles without interference
-    // Idle frame manager will handle CPU/GPU optimization after network is quiet
-    // if (performanceSettings.enableFreezeMode !== false) {
-    //   console.log(`❄️ Initializing freeze mode manager...`);
-    //   const tileset = getTileset();
-    //   if (tileset) {
-    //     initFreezeModeManager(tileset, {
-    //       freezeDelay: 10000,
-    //       moveThresholdDistance: 500,
-    //       zoomThresholdPercent: 0.3
-    //     });
-    //   } else {
-    //     console.warn('⚠️ Tileset not available for freeze mode manager');
-    //   }
-    // }
-
-    console.log(`✅ Phase 7A: Aggressive Cesium optimization complete!`);
+    // Google Maps 3D API manages frame rate and tile loading automatically
+    // No manual performance managers needed
 
   } catch (error) {
-    console.error('💥 Critical error during initialization:', error);
-    console.trace('Error stack:');
+    console.error('Critical error during initialization:', error);
     // Hide loading screen even on error
     loadingManager.complete();
   }
@@ -363,14 +381,12 @@ function initializeNewUI() {
       };
       
       img.onload = () => {
-        console.log(`✅ Successfully loaded image for ${chapter.title}`);
         // Remove handlers to prevent memory leaks
         img.onload = null;
         img.onerror = null;
       };
     } else {
       // No image URL, use placeholder
-      console.warn(`⚠️ No imageUrl found for ${chapter.title}, using placeholder`);
       const placeholderColor = '#3b82f6';
       img.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="60" viewBox="0 0 140 60"><rect width="140" height="60" fill="${placeholderColor}"/><text x="70" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">${encodeURIComponent(chapter.title.substring(0, 20))}</text></svg>`;
     }
@@ -387,22 +403,30 @@ function initializeNewUI() {
     placesList.appendChild(placeCard);
   });
 
-  // Initialize bottom sheet to minimized state
+  // Initialize bottom sheet state based on page
+  // On root page (no chapterId), show it open; on chapter pages, minimize it
   const bottomSheet = document.getElementById('bottom-sheet');
   if (bottomSheet) {
-    bottomSheet.classList.add('minimized');
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRootPage = !urlParams.get('chapterId');
+
+    if (!isRootPage) {
+      // Only minimize on chapter pages, not on root
+      bottomSheet.classList.add('minimized');
+    }
   }
 
-  // Initialize orbit pause button state on mobile
-  if (isMobile && isOrbitPaused) {
+  // Initialize orbit pause button state (always paused by default)
+  // Note: Initial state is already set in HTML, this ensures consistency
+  if (isOrbitPaused) {
     const pauseBtn = document.getElementById('orbit-pause-btn');
     const pauseIcon = document.getElementById('pause-icon');
     const playIcon = document.getElementById('play-icon');
 
     if (pauseBtn) {
       pauseBtn.classList.add('paused');
-      pauseIcon.style.display = 'none';
-      playIcon.style.display = 'block';
+      if (pauseIcon) pauseIcon.style.display = 'none';
+      if (playIcon) playIcon.style.display = 'block';
     }
   }
   
@@ -488,10 +512,29 @@ window.toggleBottomSheet = function() {
 };
 
 /**
+ * Collapse (minimize) the bottom sheet
+ */
+window.collapseBottomSheet = function() {
+  const bottomSheet = document.getElementById('bottom-sheet');
+  if (bottomSheet && !bottomSheet.classList.contains('minimized')) {
+    bottomSheet.classList.add('minimized');
+  }
+};
+
+/**
+ * Expand (open) the bottom sheet
+ */
+window.expandBottomSheet = function() {
+  const bottomSheet = document.getElementById('bottom-sheet');
+  if (bottomSheet && bottomSheet.classList.contains('minimized')) {
+    bottomSheet.classList.remove('minimized');
+  }
+};
+
+/**
  * Orbit pause state
  */
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-let isOrbitPaused = isMobile; // Start paused on mobile, playing on desktop
+let isOrbitPaused = true; // Always start paused - user can enable via play button
 let currentChapterWithPausedOrbit = null;
 
 // Make it globally available
@@ -500,81 +543,28 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Toggle orbit pause for current chapter
+ * Toggle 360° rotation view
+ * Starts a smooth 360° rotation around the current view
  */
 window.toggleOrbitPause = function() {
-  const pauseBtn = document.getElementById('orbit-pause-btn');
-  const pauseIcon = document.getElementById('pause-icon');
-  const playIcon = document.getElementById('play-icon');
-  
+  const orbitBtn = document.getElementById('orbit-pause-btn');
+
   isOrbitPaused = !isOrbitPaused;
-  window.isOrbitPaused = isOrbitPaused; // Update global state
+  window.isOrbitPaused = isOrbitPaused;
 
   if (isOrbitPaused) {
-    // Pause orbit
-    pauseBtn.classList.add('paused');
-    pauseIcon.style.display = 'none';
-    playIcon.style.display = 'block';
+    // Stop rotation
+    orbitBtn.classList.remove('active');
 
-    // Store which chapter has paused orbit
-    try {
-      const currentChapterIndex = getCurrentChapterIndex();
-      if (currentChapterIndex >= 0 && story && story.chapters && story.chapters[currentChapterIndex]) {
-        currentChapterWithPausedOrbit = story.chapters[currentChapterIndex].id;
-      }
-    } catch (error) {
-      console.warn('⚠️ Could not store paused chapter state:', error);
-      currentChapterWithPausedOrbit = 'unknown';
-    }
-
-    // Stop the actual orbit animation - try all possible orbit types
-    let orbitStopped = false;
     if (window.stopOrbitAnimation) {
       window.stopOrbitAnimation();
-      orbitStopped = true;
     }
-    if (window.stopSpainOrbitEffect) {
-      window.stopSpainOrbitEffect();
-      orbitStopped = true;
-    }
-    if (!orbitStopped) {
-      console.warn('⚠️ No orbit animation found to stop');
-    }
-    
-    // Keep camera controls enabled so user can still manually control the camera
-    // The orbit pause only stops the automatic rotation, not manual control
   } else {
-    // Resume orbit
-    pauseBtn.classList.remove('paused');
-    pauseIcon.style.display = 'block';
-    playIcon.style.display = 'none';
-    
-    currentChapterWithPausedOrbit = null;
+    // Start 360° rotation
+    orbitBtn.classList.add('active');
 
-    // Resume orbit animation based on current location
-    try {
-      const currentChapterIndex = getCurrentChapterIndex();
-
-      if (currentChapterIndex >= 0 && story.chapters[currentChapterIndex]) {
-        const chapter = story.chapters[currentChapterIndex];
-
-        // Check if we should restart an orbit animation
-        if (chapter.cameraStyle === 'drone-orbit' && window.startOrbitAnimation) {
-          const coords = chapter.cameraConfig?.coordinates || { lat: 40.4168, lng: -3.7038 };
-          window.startOrbitAnimation(coords);
-        }
-      }
-    } catch (error) {
-      console.warn('⚠️ Could not restart orbit:', error);
-      console.error('Error details:', error);
-    }
-    
-    // Re-enable camera controls
-    if (cesiumViewer && cesiumViewer.scene && cesiumViewer.scene.screenSpaceCameraController) {
-      cesiumViewer.scene.screenSpaceCameraController.enableRotate = true;
-      cesiumViewer.scene.screenSpaceCameraController.enableTilt = true;
-      cesiumViewer.scene.screenSpaceCameraController.enableTranslate = true;
-      cesiumViewer.scene.screenSpaceCameraController.enableZoom = true;
+    if (window.startOrbitAnimation) {
+      window.startOrbitAnimation();
     }
   }
 };
@@ -678,15 +668,7 @@ window.updateOrbitPauseState = function updateOrbitPauseState() {
       playIcon.style.display = 'none';
     }
     
-    // Resume cesium camera controller
-    if (cesiumViewer && cesiumViewer.scene && cesiumViewer.scene.screenSpaceCameraController) {
-      cesiumViewer.scene.screenSpaceCameraController.enableRotate = true;
-      cesiumViewer.scene.screenSpaceCameraController.enableTilt = true;
-      cesiumViewer.scene.screenSpaceCameraController.enableTranslate = true;
-      cesiumViewer.scene.screenSpaceCameraController.enableZoom = true;
-    } else {
-      console.warn('CesiumViewer not available for resuming');
-    }
+    // Google Maps 3D handles camera controls automatically
   }
 }
 
@@ -765,21 +747,28 @@ function initializeGallery(chapter) {
 
   if (!galleryTrack || !galleryDots || !chapter) return;
 
-  // Prepare images array (for now, we'll use the main image multiple times with related images)
+  // Prepare images array
   currentGalleryImages = [];
 
-  // Add the main chapter image
-  if (chapter.imageUrl) {
-    currentGalleryImages.push({
-      url: chapter.imageUrl,
-      credit: chapter.imageCredit || ''
+  // Use chapter.images array if available, otherwise fall back to single imageUrl
+  if (chapter.images && chapter.images.length > 0) {
+    // Use the images array from chapter data
+    chapter.images.forEach(image => {
+      currentGalleryImages.push({
+        url: image.url,
+        credit: image.credit || chapter.imageCredit || ''
+      });
     });
-  }
-
-  // For now, add some placeholder related images (in a real implementation,
-  // these would come from an expanded data structure)
-  if (chapter.imageUrl) {
-    // Add the same image as placeholder for gallery demonstration
+  } else if (chapter.gallery && chapter.gallery.length > 0) {
+    // Use gallery array (URLs only)
+    chapter.gallery.forEach(url => {
+      currentGalleryImages.push({
+        url: url,
+        credit: chapter.imageCredit || ''
+      });
+    });
+  } else if (chapter.imageUrl) {
+    // Fallback: use the single imageUrl (logo)
     currentGalleryImages.push({
       url: chapter.imageUrl,
       credit: chapter.imageCredit || ''
@@ -917,6 +906,148 @@ window.switchTab = function(tabId) {
   if (activeTabPanel) activeTabPanel.classList.add('active');
 };
 
+// ============================================
+// CATEGORY NAVIGATION MENU
+// ============================================
+
+/**
+ * Build category index from all chapters
+ * Groups entities by their etiquetas (tags)
+ */
+function buildCategoryIndex() {
+  const index = {
+    ubicacion: {},
+    sector: {},
+    profesion: {},
+    tipo: {}
+  };
+
+  story.chapters.forEach(chapter => {
+    if (!chapter.etiquetas) return;
+
+    Object.keys(index).forEach(category => {
+      const tags = chapter.etiquetas[category] || [];
+      tags.forEach(tag => {
+        if (!index[category][tag]) {
+          index[category][tag] = [];
+        }
+        index[category][tag].push({
+          id: chapter.id,
+          title: chapter.title,
+          logoUrl: chapter.logoUrl
+        });
+      });
+    });
+  });
+
+  return index;
+}
+
+/**
+ * Render category content for a specific category tab
+ * @param {string} category - The category to render
+ * @param {string} filter - Optional search filter
+ */
+function renderCategoryContent(category, filter = '') {
+  const content = document.getElementById('category-content');
+  if (!content || !story || !story.chapters) return;
+
+  const index = buildCategoryIndex();
+  const groups = index[category] || {};
+
+  // Sort groups alphabetically
+  let sortedGroups = Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0], 'es'));
+
+  // Apply filter if provided
+  if (filter) {
+    sortedGroups = sortedGroups.map(([groupName, items]) => {
+      // Check if group name matches
+      const groupMatches = groupName.toLowerCase().includes(filter);
+
+      // Filter items that match
+      const filteredItems = items.filter(item =>
+        item.title.toLowerCase().includes(filter)
+      );
+
+      // Include group if name matches or has matching items
+      if (groupMatches || filteredItems.length > 0) {
+        return [groupName, groupMatches ? items : filteredItems];
+      }
+      return null;
+    }).filter(Boolean);
+  }
+
+  if (sortedGroups.length === 0) {
+    content.innerHTML = '<div style="padding: 20px; text-align: center; color: #94a3b8;">No se encontraron resultados</div>';
+    return;
+  }
+
+  content.innerHTML = sortedGroups.map(([groupName, items]) => {
+    // Auto-expand groups when filtering
+    const expanded = filter ? 'expanded' : '';
+    return `
+      <div class="category-group ${expanded}">
+        <div class="category-group-header" onclick="toggleCategoryGroup(this)">
+          <span class="category-expand-icon">▸</span>
+          <span class="category-group-name">${groupName}</span>
+          <span class="category-group-count">${items.length}</span>
+        </div>
+        <div class="category-group-items">
+          ${items.map(item => `
+            <div class="category-item" onclick="navigateToChapter(${item.id})" title="${item.title}">
+              ${item.title}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/**
+ * Switch category tab
+ */
+window.switchCategoryTab = function(category) {
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.category === category);
+  });
+  // Keep current search filter when switching tabs
+  renderCategoryContent(category, currentSearchQuery);
+};
+
+/**
+ * Toggle category group expand/collapse
+ */
+window.toggleCategoryGroup = function(header) {
+  const group = header.parentElement;
+  group.classList.toggle('expanded');
+};
+
+// Store current search query
+let currentSearchQuery = '';
+
+/**
+ * Search/filter within current category
+ */
+window.searchCategories = function(query) {
+  currentSearchQuery = query.trim().toLowerCase();
+
+  // Get current active category
+  const activeTab = document.querySelector('.category-tab.active');
+  const category = activeTab ? activeTab.dataset.category : 'ubicacion';
+
+  // Re-render with filter applied
+  renderCategoryContent(category, currentSearchQuery);
+};
+
+/**
+ * Initialize category menu
+ */
+function initCategoryMenu() {
+  // Render initial content (Ubicación tab is active by default)
+  renderCategoryContent('ubicacion');
+}
+
 /**
  * Extract URLs from content text
  */
@@ -928,100 +1059,7 @@ function extractUrls(content) {
   return matches || [];
 }
 
-/**
- * Enhanced location data with real information
- */
-const enhancedLocationData = {
-  1: { // Fundación Exponav
-    openingHours: "Consultar horarios en el sitio web oficial. Visitas concertadas disponibles",
-    ticketInfo: "Entrada gratuita. Visitas guiadas disponibles previa cita. Centro educativo especializado",
-    address: "Edificio Herrerías, Cantón de Molins s/n, 15490 Ferrol (A Coruña)",
-    officialLinks: [
-      { url: "https://exponav.org/", title: "Fundación Exponav", description: "Museo de Construcción Naval - Sitio oficial" }
-    ]
-  },
-  2: { // Fundación Excelem
-    openingHours: "Lunes a viernes horario comercial. Consultar para actividades específicas",
-    ticketInfo: "Centro de formación y robótica. Participación en concursos y actividades STEAM",
-    address: "Polígono Industrial Oeste, Calle Perú, 5, 30820 Alcantarilla, Murcia",
-    officialLinks: [
-      { url: "https://excelem.org/", title: "Fundación Excelem", description: "Ecosistema de Robótica y Automatización" }
-    ]
-  },
-  3: { // MUCAIN
-    openingHours: "Museo virtual disponible 24/7 online. Consultar eventos presenciales",
-    ticketInfo: "Acceso gratuito al museo virtual. Contenido audiovisual educativo de alta calidad",
-    address: "Plaza de la Catedral, 11005 Cádiz",
-    officialLinks: [
-      { url: "https://mucain.com/", title: "MUCAIN", description: "Museo Virtual de la Carrera de Indias" }
-    ]
-  },
-  4: { // Museo Histórico Minero UPM
-    openingHours: "Visitas concertadas. Consultar en la ETS de Ingenieros de Minas y Energía",
-    ticketInfo: "Entrada gratuita con visita guiada. Más de 10,000 minerales, fósiles e instrumentos históricos",
-    address: "C. de Ríos Rosas, 21, 28003 Madrid",
-    officialLinks: [
-      { url: "https://minasyenergia.upm.es/museo/", title: "Museo Histórico-Minero UPM", description: "Universidad Politécnica de Madrid" }
-    ]
-  },
-  5: { // Sagrada Familia
-    openingHours: "Nov-Feb: Lun-Sáb 9:00-18:00, Dom 10:30-18:00. Mar-Oct: Lun-Vie 9:00-19:00, Sáb 9:00-18:00, Dom 10:30-19:00. Abr-Sep: Lun-Vie 9:00-20:00, Sáb 9:00-18:00, Dom 10:30-20:00",
-    ticketInfo: "Niños menores de 10 años: gratis. Audioguía incluida en app oficial (19 idiomas). Cancelaciones hasta 48h antes.",
-    address: "C/ Mallorca, 401, 08013 Barcelona",
-    officialLinks: [
-      { url: "https://sagradafamilia.org/", title: "Sagrada Família - Sitio Oficial", description: "Web oficial para compra de entradas sin comisiones" }
-    ]
-  },
-  6: { // Prado Museum
-    openingHours: "Lun-Sáb: 10:00-20:00. Dom y festivos: 10:00-19:00. Entrada gratuita: Lun-Sáb 18:00-20:00, Dom 17:00-19:00",
-    ticketInfo: "Entrada general: 18-20€. Con audioguía: 22-26€. Pase Triángulo del Arte (Prado + Reina Sofía + Thyssen): 40-60€",
-    address: "C/ Ruiz de Alarcón, 23, 28014 Madrid",
-    officialLinks: [
-      { url: "https://www.museodelprado.es/", title: "Museo Nacional del Prado", description: "Sitio web oficial del museo" }
-    ]
-  },
-  7: { // Park Güell
-    openingHours: "9:30-19:30 (Jul-Ago: 9:00-19:30). BON DIA BARCELONA: 7:00-9:30 solo residentes",
-    ticketInfo: "Adultos: 10-18€. Niños 7-12 años: 7-13.50€. Menores de 7 años: gratis. Compra anticipada obligatoria",
-    address: "08024 Barcelona",
-    officialLinks: [
-      { url: "https://parkguell.barcelona/", title: "Park Güell - Sitio Oficial", description: "Web oficial del parque diseñado por Gaudí" }
-    ]
-  },
-  8: { // Alhambra
-    openingHours: "Temporada alta (Abr-Oct): 8:30-20:00. Temporada baja: 8:30-18:00. Cerrado 25 Dic y 1 Ene",
-    ticketInfo: "Entrada general diurna, jardines y visitas nocturnas. Reserva hasta 1 año antes. Entrada 1h antes del cierre",
-    address: "C/ Real de la Alhambra, s/n, 18009 Granada",
-    officialLinks: [
-      { url: "https://www.alhambra.org/", title: "Alhambra y Generalife", description: "Portal oficial de la Alhambra de Granada" }
-    ]
-  },
-  10: { // Guggenheim
-    openingHours: "Consultar horarios especiales y días cerrados en el sitio oficial. Cerrado 25 Dic y 1 Ene",
-    ticketInfo: "Descuentos especiales último día de cada exposición (50% desde las 16:00). Precios variables según visitante",
-    address: "Abandoibarra Etorb., 2, 48009 Bilbao, Bizkaia",
-    officialLinks: [
-      { url: "https://www.guggenheim-bilbao.eus/", title: "Museo Guggenheim Bilbao", description: "Sitio web oficial del museo" }
-    ]
-  },
-  11: { // Royal Palace
-    openingHours: "Consultar horarios en el sitio oficial. Cerrado días especiales. Entrada gratuita UE: últimas 2 horas",
-    ticketInfo: "Entrada gratuita ciudadanos UE: Lun-Jue últimas 2 horas. Skip-the-line disponible. Llegada recomendada 8:00",
-    address: "C. de Bailén, s/n, 28071 Madrid",
-    officialLinks: [
-      { url: "https://tickets.patrimonionacional.es/", title: "Patrimonio Nacional", description: "Venta oficial de entradas al Palacio Real" }
-    ]
-  },
-  12: { // Santiago Cathedral
-    openingHours: "Basílica: 7:00-21:00. Museo: 10:00-20:00. Oficina del Peregrino: 9:00-19:00",
-    ticketInfo: "Entrada libre a la basílica. Museo con entrada. Botafumeiro bajo petición. Compostela para peregrinos",
-    address: "Praza do Obradoiro, s/n, 15705 Santiago de Compostela, A Coruña",
-    officialLinks: [
-      { url: "https://catedraldesantiago.es/", title: "Catedral de Santiago", description: "Sitio web oficial de la Catedral" },
-      { url: "https://oficinadelperegrino.com/", title: "Oficina del Peregrino", description: "Información oficial para peregrinos" }
-    ]
-  }
-};
+// Note: enhancedLocationData removed - addresses now come directly from config.json
 
 /**
  * Populate the information tab
@@ -1033,18 +1071,10 @@ function populateInfoTab(chapter, isIntro = false) {
     titleElement.textContent = isIntro ? chapter.title : chapter.title;
   }
 
-  // Address/Location
+  // Address/Location - uses correct address from config.json
   const addressElement = document.querySelector('.place-address');
   if (addressElement) {
-    let address = chapter.address || chapter.placeName || 'Ubicación no disponible';
-
-    // Use enhanced data if available
-    const enhanced = enhancedLocationData[chapter.id];
-    if (enhanced && enhanced.address) {
-      address = enhanced.address;
-    }
-
-    addressElement.textContent = address;
+    addressElement.textContent = chapter.address || chapter.placeName || 'Ubicación no disponible';
   }
 
   // Date/Period
@@ -1054,17 +1084,10 @@ function populateInfoTab(chapter, isIntro = false) {
     dateElement.textContent = date;
   }
 
-  // Description - Enhanced with real information
+  // Description
   const descriptionElement = document.querySelector('.place-description');
   if (descriptionElement) {
-    let description = isIntro ? chapter.description : (chapter.content || 'Descripción no disponible');
-
-    // Add enhanced information for specific locations
-    const enhanced = enhancedLocationData[chapter.id];
-    if (enhanced) {
-      description += `\n\nDIRECCIÓN:\n${enhanced.address}\n\nHORARIOS DE APERTURA:\n${enhanced.openingHours}\n\nINFORMACIÓN DE ENTRADAS:\n${enhanced.ticketInfo}`;
-    }
-
+    const description = isIntro ? chapter.description : (chapter.content || 'Descripción no disponible');
     // Format the text properly with line breaks
     descriptionElement.innerHTML = description.replace(/\n/g, '<br>');
   }
@@ -1079,43 +1102,38 @@ function populateLinksTab(chapter) {
 
   // Clear existing content
   officialLinksContainer.innerHTML = '';
-
-  // Get enhanced links data
-  const enhanced = enhancedLocationData[chapter.id];
   let hasLinks = false;
 
-  // Add enhanced official links
-  if (enhanced && enhanced.officialLinks) {
-    enhanced.officialLinks.forEach(link => {
-      hasLinks = true;
-      const linkElement = document.createElement('a');
-      linkElement.href = link.url;
-      linkElement.target = '_blank';
-      linkElement.className = 'link-item';
-      linkElement.innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M18 13V6A2 2 0 0 0 16 4H4A2 2 0 0 0 2 6V18C2 19.1 2.9 20 4 20H20A2 2 0 0 0 22 18V8H18" stroke="currentColor" stroke-width="2"/>
-          <path d="M15 3H21V9M10 14L21 3" stroke="currentColor" stroke-width="2"/>
-        </svg>
-        <div>
-          <span class="link-title">${link.title}</span>
-          <span class="link-desc">${link.description}</span>
-        </div>
-      `;
-      officialLinksContainer.appendChild(linkElement);
-    });
+  // Add chapter website if available
+  if (chapter.website) {
+    hasLinks = true;
+    const domain = new URL(chapter.website).hostname.replace('www.', '');
+    const linkElement = document.createElement('a');
+    linkElement.href = chapter.website;
+    linkElement.target = '_blank';
+    linkElement.className = 'link-item';
+    linkElement.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M18 13V6A2 2 0 0 0 16 4H4A2 2 0 0 0 2 6V18C2 19.1 2.9 20 4 20H20A2 2 0 0 0 22 18V8H18" stroke="currentColor" stroke-width="2"/>
+        <path d="M15 3H21V9M10 14L21 3" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      <div>
+        <span class="link-title">${chapter.title} - Sitio Oficial</span>
+        <span class="link-desc">${domain}</span>
+      </div>
+    `;
+    officialLinksContainer.appendChild(linkElement);
   }
 
-  // Also extract URLs from chapter content as fallback
+  // Also extract URLs from chapter content
   const urls = extractUrls(chapter.content);
   if (urls.length > 0) {
     urls.forEach(url => {
-      // Skip if we already added this URL from enhanced data
-      const alreadyAdded = enhanced && enhanced.officialLinks &&
-        enhanced.officialLinks.some(link => link.url === url);
+      // Skip if same as chapter website
+      if (chapter.website && url === chapter.website) return;
 
-      if (!alreadyAdded) {
-        hasLinks = true;
+      hasLinks = true;
+      try {
         const domain = new URL(url).hostname.replace('www.', '');
 
         const linkElement = document.createElement('a');
@@ -1133,6 +1151,8 @@ function populateLinksTab(chapter) {
           </div>
         `;
         officialLinksContainer.appendChild(linkElement);
+      } catch (e) {
+        // Invalid URL, skip
       }
     });
   }

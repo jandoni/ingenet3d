@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { cesiumViewer } from "./cesium.js";
+import { map3d, flyToLocation } from "./google-maps-3d.js";
 
 /**
  * Simple geocoding fallback when Places API is not available
@@ -90,44 +90,42 @@ export async function simpleGeocodeToCamera(placeName, cameraStyle = 'static') {
     coords = knownPlaces['spain'];
   }
 
-  // Create camera configuration matching Places API format
-  const target = Cesium.Cartesian3.fromDegrees(coords.lng, coords.lat, 0); // Target at ground level
-  
-  // Camera settings based on style (matching Places API logic)
+  // Create camera configuration for Google Maps 3D format
+  // Google Maps 3D uses tilt (0 = down, 90 = horizon) instead of pitch
   let heading = 0;
-  let pitch = -Math.PI / 4; // -45 degrees
-  let distance = coords.altitude;
-  
+  let tilt = 45; // 45 degrees for nice 3D view
+  let range = coords.altitude;
+
   switch (cameraStyle) {
     case 'drone-orbit':
       heading = 0; // Start from north-facing
-      pitch = -Math.PI / 8; // -22.5 degrees for better architectural view
-      distance = 1000; // 1km distance for orbit effect
+      tilt = 60; // 60 degrees for better architectural view
+      range = 2000; // 2km distance for orbit effect (was 1km - too close)
       break;
     case 'overview':
-      pitch = -Math.PI / 2; // Straight down
-      distance = 200000; // 200km for overview
+      tilt = 0; // Straight down
+      range = 2000000; // 2000km for overview
       break;
     case 'static':
     default:
       heading = 0;
-      pitch = -Math.PI / 4; // -45 degrees
-      distance = coords.altitude;
+      tilt = 60; // 60 degrees for nice 3D view
+      range = Math.max(2000, coords.altitude); // Minimum 2km
       break;
   }
-  
+
   return {
-    target,
-    distance,
+    lat: coords.lat,
+    lng: coords.lng,
+    altitude: 0,
+    range,
     heading,
-    pitch,
-    roll: 0,
+    tilt,
     cameraStyle,
     location: {
       lat: () => coords.lat,
       lng: () => coords.lng
-    },
-    headingPitchRange: new Cesium.HeadingPitchRange(heading, pitch, distance)
+    }
   };
 }
 
@@ -141,36 +139,12 @@ export async function simpleFlyToPlace(placeName, cameraStyle = 'static') {
   try {
     const cameraConfig = await simpleGeocodeToCamera(placeName, cameraStyle);
 
-    // Simple camera positioning using flyTo with calculated position
-    const lat = cameraConfig.location.lat();
-    const lng = cameraConfig.location.lng();
+    console.log(`Simple geocoder flying to: ${cameraConfig.lat}, ${cameraConfig.lng} at range ${cameraConfig.range}`);
 
-    // Calculate camera position based on distance and angles
-    const position = Cesium.Cartesian3.fromDegrees(lng, lat, cameraConfig.distance);
+    // Use Google Maps 3D native flyToLocation
+    await flyToLocation(cameraConfig, 8000); // 8 second animation
 
-    console.log(`Simple geocoder flying to: ${lat}, ${lng} at distance ${cameraConfig.distance}`);
-
-    // Return a promise that resolves when the animation completes
-    return new Promise((resolve, reject) => {
-      // Use flyTo for all camera styles for consistency
-      cesiumViewer.camera.flyTo({
-        destination: position,
-        orientation: {
-          heading: cameraConfig.heading,
-          pitch: cameraConfig.pitch,
-          roll: cameraConfig.roll
-        },
-        duration: 3.0, // 3 second animation
-        complete: () => {
-          // Resolve the promise after animation completes
-          resolve(cameraConfig);
-        },
-        cancel: () => {
-          // If animation is cancelled, still resolve
-          resolve(cameraConfig);
-        }
-      });
-    });
+    return cameraConfig;
   } catch (error) {
     console.error(`Error flying to place ${placeName}:`, error);
     throw error;
