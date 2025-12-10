@@ -1,6 +1,6 @@
 // Google Maps 3D API (replaces Cesium)
 import { initGoogleMaps3D, map3d, flyToLocation, startOrbit, stopAnimation, zoomIn, zoomOut, flyToSpainOverview } from "./utils/google-maps-3d.js";
-import createMarkers, { hideAllMarkers, showAllMarkers, showFilteredMarkers, setSelectedMarker } from "./utils/google-markers-3d.js";
+import createMarkers, { hideAllMarkers, showAllMarkers, showFilteredMarkers, setSelectedMarker, hardcodedCoordinates } from "./utils/google-markers-3d.js";
 
 import { loadConfig } from "./utils/config.js";
 import { initChapterNavigation, updateChapter, resetToIntro, getCurrentChapterIndex, showSearchResultsOnMap } from "./chapters/chapter-navigation.js";
@@ -488,6 +488,18 @@ window.navigateToChapter = async function(chapterId, chapterIndex = null) {
 
   const chapter = story.chapters[chapterIndex];
 
+  // ALWAYS set marker coordinates for flyTo - ensures camera centers on marker
+  // This works for all navigation sources: horizontal bar, markers, category menu
+  const markerCoords = hardcodedCoordinates[chapterId];
+  if (markerCoords) {
+    window._markerClickCoordinates = {
+      lat: markerCoords.lat,
+      lng: markerCoords.lng,
+      chapterId: chapterId
+    };
+    console.log(`📍 Set marker coordinates for navigation: ${markerCoords.lat}, ${markerCoords.lng}`);
+  }
+
   // Update active place in horizontal navigation
   setActivePlace(chapterId);
 
@@ -549,18 +561,23 @@ if (typeof window !== 'undefined') {
 window.toggleOrbitPause = function() {
   const orbitBtn = document.getElementById('orbit-pause-btn');
 
-  isOrbitPaused = !isOrbitPaused;
-  window.isOrbitPaused = isOrbitPaused;
+  // Read current state from window (source of truth set by auto-start)
+  const currentlyPaused = window.isOrbitPaused;
 
-  if (isOrbitPaused) {
-    // Stop rotation
+  // Toggle the state
+  const newPausedState = !currentlyPaused;
+  window.isOrbitPaused = newPausedState;
+  isOrbitPaused = newPausedState; // Keep local in sync
+
+  if (newPausedState) {
+    // Now paused - stop rotation
     orbitBtn.classList.remove('active');
 
     if (window.stopOrbitAnimation) {
       window.stopOrbitAnimation();
     }
   } else {
-    // Start 360° rotation
+    // Now playing - start rotation
     orbitBtn.classList.add('active');
 
     if (window.startOrbitAnimation) {

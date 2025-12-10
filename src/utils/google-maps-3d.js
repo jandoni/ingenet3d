@@ -15,6 +15,33 @@ export let map3d = null;
 // Animation state
 let currentAnimation = null;
 
+// Target location for zoom operations (ensures zoom centers on the marker/place)
+let currentTargetLocation = null;
+
+/**
+ * Set the target location for zoom operations
+ * @param {number} lat - Latitude
+ * @param {number} lng - Longitude
+ */
+export function setTargetLocation(lat, lng) {
+  currentTargetLocation = { lat, lng };
+}
+
+/**
+ * Get the current target location
+ * @returns {Object|null} Current target location {lat, lng} or null
+ */
+export function getTargetLocation() {
+  return currentTargetLocation;
+}
+
+/**
+ * Clear the target location (e.g., when returning to overview)
+ */
+export function clearTargetLocation() {
+  currentTargetLocation = null;
+}
+
 /**
  * Initialize Google Maps 3D
  * @param {Object} options - Initial camera settings
@@ -58,6 +85,9 @@ export async function initGoogleMaps3D(options = {}) {
 
     // Remove the alpha channel warning banner
     removeAlphaWarning();
+
+    // Note: Native scroll zoom is kept (zooms towards mouse cursor)
+    // FlyTo animations will center on marker coordinates
 
     console.log('Google Maps 3D initialized successfully');
     return map3d;
@@ -186,6 +216,13 @@ export function flyToLocation(destination, duration = null) {
       return;
     }
 
+    // Store target location for zoom operations (ensures zoom centers on this location)
+    currentTargetLocation = {
+      lat: destination.lat,
+      lng: destination.lng
+    };
+    console.log('🎯 Target location set:', currentTargetLocation);
+
     // Cancel any existing animation
     stopAnimation();
 
@@ -296,10 +333,18 @@ export function startOrbit(duration = 90000, rounds = 1) {
   // Stop any existing animation
   stopAnimation();
 
+  // Use target location if available, otherwise current center
+  // This ensures orbit rotates around the marker, not the camera position
+  const orbitCenter = currentTargetLocation ? {
+    lat: currentTargetLocation.lat,
+    lng: currentTargetLocation.lng,
+    altitude: map3d.center?.altitude || 0
+  } : map3d.center;
+
   // Use native flyCameraAround for smooth rotation
   map3d.flyCameraAround({
     camera: {
-      center: map3d.center,
+      center: orbitCenter,
       range: map3d.range,
       tilt: map3d.tilt,
       heading: map3d.heading
@@ -335,6 +380,8 @@ export function isAnimating() {
 
 /**
  * Zoom in (decrease range)
+ * Note: Native Google Maps scroll zoom is used instead (zooms towards cursor)
+ * This function is kept for programmatic zoom if needed
  * @param {number} factor - Zoom factor (default 0.5 = halve the range)
  */
 export function zoomIn(factor = 0.5) {
@@ -347,6 +394,8 @@ export function zoomIn(factor = 0.5) {
 
 /**
  * Zoom out (increase range)
+ * Note: Native Google Maps scroll zoom is used instead (zooms towards cursor)
+ * This function is kept for programmatic zoom if needed
  * @param {number} factor - Zoom factor (default 2 = double the range)
  */
 export function zoomOut(factor = 2) {
@@ -359,9 +408,13 @@ export function zoomOut(factor = 2) {
 
 /**
  * Fly to Spain overview (home position)
+ * Clears target location since overview doesn't have a specific marker target
  * @returns {Promise<Object|null>}
  */
 export function flyToSpainOverview() {
+  // Clear target location for overview (no specific marker to zoom towards)
+  currentTargetLocation = null;
+
   return flyToLocation({
     lat: 40.0,
     lng: -3.7,

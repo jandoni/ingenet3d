@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { map3d, flyToLocation, setCamera, startOrbit, stopAnimation } from "./google-maps-3d.js";
+import { map3d, flyToLocation, setCamera } from "./google-maps-3d.js";
 
 /**
  * Service for handling NEW Places API integration with automatic camera positioning
@@ -219,41 +219,10 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
     throw new Error('Google Maps services not initialized. Call initGoogleMapsServicesNew() first.');
   }
 
-  // ✅ PRIORITY 1: Check for marker click coordinates (most accurate)
-  // When user clicks a marker, use its exact coordinates
-  if (typeof window !== 'undefined' && window._markerClickCoordinates) {
-    const markerCoords = window._markerClickCoordinates;
+  // NOTE: _markerClickCoordinates is ONLY checked in flyToPlaceNew (the navigation function)
+  // This function is used for background caching/preloading and should NOT touch _markerClickCoordinates
 
-    // Clear after use to avoid stale data
-    window._markerClickCoordinates = null;
-
-    // Create location object compatible with Google Maps
-    const location = {
-      lat: () => markerCoords.lat,
-      lng: () => markerCoords.lng
-    };
-
-    // Skip ALL Google API calls - use marker's exact position
-    const cameraConfig = calculateOptimalCamera(
-      { location, viewport: null },
-      10, // Default elevation
-      cameraStyle
-    );
-
-    return {
-      ...cameraConfig,
-      placeName,
-      location,
-      viewport: null,
-      elevation: 10,
-      placeDetails: {
-        displayName: { text: placeName },
-        formattedAddress: placeName
-      }
-    };
-  }
-
-  // ✅ PRIORITY 2: Check for pre-cached coordinates in chapter config
+  // ✅ PRIORITY 1: Check for pre-cached coordinates in chapter config
   // Look for chapter in story configuration
   if (typeof window !== 'undefined' && window.story && window.story.chapters) {
     // Try to find chapter by placeName or title
@@ -478,45 +447,20 @@ export function applyCameraConfigNew(cameraConfig, immediate = false) {
   }
   // If not immediate, the flyToLocation will handle the transition
 
-  // Handle drone orbit effect - start immediately (no delay)
+  // Handle drone orbit effect - auto-start after fly animation
   if (cameraConfig.cameraStyle === 'drone-orbit') {
     window.isOrbitPaused = false;
     if (window.startOrbitAnimation) {
       window.startOrbitAnimation();
     }
-    // Update button state
+    // Update button state to show orbit is active
     const orbitBtn = document.getElementById('orbit-pause-btn');
     if (orbitBtn) orbitBtn.classList.add('active');
-  } else {
-    stopAnimation();
   }
 }
 
-/**
- * Drone orbit animation using Google Maps 3D native orbit
- * Uses flyCameraAround for smooth continuous rotation
- */
-function startDroneOrbitNew() {
-  // Stop any existing animation first
-  stopAnimation();
-
-  // Start orbit using Google Maps 3D native function
-  // 90 seconds for one smooth 360° rotation, only 1 round
-  startOrbit(90000, 1);
-}
-
-function stopDroneOrbitNew() {
-  stopAnimation();
-}
-
-// Make orbit control functions available globally with unified names
-if (typeof window !== 'undefined') {
-  window.stopOrbitAnimation = stopDroneOrbitNew;
-  window.startOrbitAnimation = startDroneOrbitNew;
-  window.stopDroneOrbit = stopDroneOrbitNew;
-  window.startDroneOrbit = startDroneOrbitNew;
-  window.stopSpainOrbitEffect = stopDroneOrbitNew;
-}
+// Note: Orbit control functions are registered in google-maps-3d.js
+// Do NOT register them here to avoid duplicate/conflicting registrations
 
 /**
  * Fly to a place with smooth animation using Google Maps 3D native flyCameraTo

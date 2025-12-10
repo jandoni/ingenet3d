@@ -22,7 +22,8 @@ const markers = new Map();
 let selectedMarkerId = null;
 
 // Hardcoded coordinates for fast loading (verified December 2025)
-const hardcodedCoordinates = {
+// Exported so other modules can use the same coordinates for navigation
+export const hardcodedCoordinates = {
   1: { lat: 43.4824, lng: -8.2316 },   // Fundacion Exponav - Ferrol
   2: { lat: 43.5384, lng: -7.0233 },   // Gondan Shipbuilders - Castropol
   3: { lat: 43.6136, lng: -5.7931 },   // Museo Maritimo de Asturias - Luanco
@@ -41,7 +42,7 @@ const hardcodedCoordinates = {
   16: { lat: 37.5967, lng: -0.9839 },  // ARQVA - Museo Arqueologia Subacuatica - Cartagena
   17: { lat: 37.5983, lng: -0.9863 },  // Museo Naval de Cartagena
   18: { lat: 37.7180, lng: -1.1530 },  // CTN - Centro Tecnologico Naval - Fuente Alamo
-  19: { lat: 40.9136, lng: -4.0611 },  // MUCAIN - Museo Virtual - Palazuelos de Eresma, Segovia
+  19: { lat: 40.9481, lng: -4.1184 },  // MUCAIN - Museo Virtual - Segovia (Alcazar area, near Palazuelos)
   20: { lat: 37.9784, lng: -0.6826 },  // Museo del Mar y de la Sal - Torrevieja
   21: { lat: 36.6010, lng: -6.2290 },  // Ghenova Ingenieria - El Puerto de Santa Maria
   22: { lat: 36.5328, lng: -6.2053 },  // Navantia Seanergies - Puerto Real

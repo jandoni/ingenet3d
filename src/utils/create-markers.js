@@ -975,7 +975,7 @@ export async function createMarkers(chapters) {
     16: { lat: 37.5967, lng: -0.9839 },  // ARQVA - Museo Arqueología Subacuática - Cartagena
     17: { lat: 37.5983, lng: -0.9863 },  // Museo Naval de Cartagena
     18: { lat: 37.7180, lng: -1.1530 },  // CTN - Centro Tecnológico Naval - Fuente Álamo
-    19: { lat: 40.9136, lng: -4.0611 },  // MUCAIN - Museo Virtual - Palazuelos de Eresma, Segovia
+    19: { lat: 40.9481, lng: -4.1184 },  // MUCAIN - Museo Virtual - Segovia (Alcazar area, near Palazuelos)
     20: { lat: 37.9784, lng: -0.6826 },  // Museo del Mar y de la Sal - Torrevieja
     21: { lat: 36.6010, lng: -6.2290 },  // Ghenova Ingeniería - El Puerto de Santa María
     22: { lat: 36.5328, lng: -6.2053 },  // Navantia Seanergies - Puerto Real
