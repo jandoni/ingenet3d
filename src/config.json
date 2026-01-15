@@ -113,6 +113,11 @@
       "title": "Museo Marítimo de Asturias",
       "placeName": "Calle de Gijón, 6, 33440 Luanco, Asturias, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 43.6136,
+        "lng": -5.7931,
+        "elevation": 10
+      },
       "id": 3,
       "imageUrl": "assets/logos/museo-mar-timo-de-asturias.png",
       "logoUrl": "assets/logos/museo-mar-timo-de-asturias.png",
@@ -153,6 +158,11 @@
       "title": "Museo Marítimo del Cantábrico (MMC)",
       "placeName": "Av. de Severiano Ballesteros, s/n, 39004 Santander, Cantabria, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 43.4685,
+        "lng": -3.7873,
+        "elevation": 10
+      },
       "id": 4,
       "imageUrl": "assets/logos/museo-mar-timo-del-cant-brico-mmc.png",
       "logoUrl": "assets/logos/museo-mar-timo-del-cant-brico-mmc.png",
@@ -194,6 +204,11 @@
       "title": "Euskal Itsas Museoa - Museo Marítimo Vasco",
       "placeName": "P.º del Muelle, 24, 20003 Donostia-San Sebastián, Gipuzkoa, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 43.3230,
+        "lng": -1.9911,
+        "elevation": 10
+      },
       "id": 5,
       "imageUrl": "assets/logos/euskal-itsas-museoa-museo-mar-timo-vasco.png",
       "logoUrl": "assets/logos/euskal-itsas-museoa-museo-mar-timo-vasco.png",
@@ -236,6 +251,11 @@
       "title": "Navantia Ferrol",
       "placeName": "C. Taxonera, s/n, 15403 Ferrol, A Coruña, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 43.4833,
+        "lng": -8.2333,
+        "elevation": 10
+      },
       "id": 6,
       "imageUrl": "assets/logos/navantia-ferrol.png",
       "logoUrl": "assets/logos/navantia-ferrol.png",
@@ -279,6 +299,11 @@
       "title": "Campus Industrial de Ferrol - UDC",
       "placeName": "R/ Dr. Vázquez Cabrera, s/n, Campus de Esteiro, 15403 Ferrol, A Coruña, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 43.4820,
+        "lng": -8.2235,
+        "elevation": 10
+      },
       "id": 7,
       "imageUrl": "assets/logos/campus-industrial-de-ferrol-udc.png",
       "logoUrl": "assets/logos/campus-industrial-de-ferrol-udc.png",
@@ -322,6 +347,11 @@
       "title": "Windar Renovables",
       "placeName": "Puerto de Avilés, Avilés, Asturias, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 43.5595,
+        "lng": -5.9029,
+        "elevation": 10
+      },
       "id": 8,
       "imageUrl": "assets/logos/windar-renovables.png",
       "logoUrl": "assets/logos/windar-renovables.png",
@@ -363,6 +393,11 @@
       "title": "Murueta Astilleros - Shipyards",
       "placeName": "Barrio Malloape s/n, 48394 Murueta, Bizkaia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 43.3500,
+        "lng": -2.6700,
+        "elevation": 10
+      },
       "id": 9,
       "imageUrl": "assets/logos/murueta-astilleros-shipyards.png",
       "logoUrl": "assets/logos/murueta-astilleros-shipyards.png",
@@ -404,6 +439,11 @@
       "title": "Cintranaval-Defcar",
       "placeName": "Lauroeta Etorbidea, 4, 48180 Loiu, Bizkaia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 43.3060,
+        "lng": -2.9410,
+        "elevation": 10
+      },
       "id": 10,
       "imageUrl": "assets/logos/cintranaval-defcar.png",
       "logoUrl": "assets/logos/cintranaval-defcar.png",
@@ -447,6 +487,11 @@
       "title": "MB92 Barcelona",
       "placeName": "Passeig de Joan de Borbó 92, Barcelona, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 41.3750,
+        "lng": 2.1830,
+        "elevation": 10
+      },
       "id": 11,
       "imageUrl": "assets/logos/mb92-barcelona.png",
       "logoUrl": "assets/logos/mb92-barcelona.png",
@@ -487,6 +532,11 @@
       "title": "Museu Marítim de Barcelona",
       "placeName": "Avinguda de les Drassanes, s/n, 08001 Barcelona, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 41.3756,
+        "lng": 2.1758,
+        "elevation": 10
+      },
       "id": 12,
       "imageUrl": "assets/logos/museu-mar-tim-de-barcelona.png",
       "logoUrl": "assets/logos/museu-mar-tim-de-barcelona.png",
@@ -528,6 +578,11 @@
       "title": "Compass Ingeniería y Sistemas",
       "placeName": "Gran Capitán s/n, Campus Nord UPC - Edificio B0, 08034 Barcelona, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 41.3890,
+        "lng": 2.1126,
+        "elevation": 10
+      },
       "id": 13,
       "imageUrl": "assets/logos/compass-ingenier-a-y-sistemas.png",
       "logoUrl": "assets/logos/compass-ingenier-a-y-sistemas.png",
@@ -569,6 +624,11 @@
       "title": "Universidad Politécnica de Cartagena (UPCT)",
       "placeName": "Paseo Alfonso XIII, 52, 30203 Cartagena, Murcia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.6025,
+        "lng": -0.9865,
+        "elevation": 10
+      },
       "id": 14,
       "imageUrl": "assets/logos/universidad-polit-cnica-de-cartagena-upct.png",
       "logoUrl": "assets/logos/universidad-polit-cnica-de-cartagena-upct.png",
@@ -608,6 +668,11 @@
       "title": "SAES - Electrónica Submarina",
       "placeName": "Carretera Algameca, s/n, 30205 Cartagena, Murcia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.5800,
+        "lng": -0.9750,
+        "elevation": 10
+      },
       "id": 15,
       "imageUrl": "assets/logos/saes-electr-nica-submarina.png",
       "logoUrl": "assets/logos/saes-electr-nica-submarina.png",
@@ -650,6 +715,11 @@
       "title": "ARQVA - Museo Nacional de Arqueología Subacuática",
       "placeName": "Paseo Alfonso XII, 22, 30202 Cartagena, Murcia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.5967,
+        "lng": -0.9839,
+        "elevation": 10
+      },
       "id": 16,
       "imageUrl": "assets/logos/arqva-museo-nacional-de-arqueolog-a-subacu-tica.png",
       "logoUrl": "assets/logos/arqva-museo-nacional-de-arqueolog-a-subacu-tica.png",
@@ -691,6 +761,11 @@
       "title": "Museo Naval de Cartagena",
       "placeName": "Paseo de Alfonso XII, s/n, Dársena de Botes, 30201 Cartagena, Murcia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.5983,
+        "lng": -0.9863,
+        "elevation": 10
+      },
       "id": 17,
       "imageUrl": "assets/logos/museo-naval-de-cartagena.png",
       "logoUrl": "assets/logos/museo-naval-de-cartagena.png",
@@ -730,6 +805,11 @@
       "title": "CTN - Centro Tecnológico Naval y del Mar",
       "placeName": "Parque Tecnológico de Fuente Álamo, Ctra El Estrecho-Lobosillo Km2, 30320 Fuente Alamo, Murcia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.7180,
+        "lng": -1.1530,
+        "elevation": 10
+      },
       "id": 18,
       "imageUrl": "assets/logos/ctn-centro-tecnol-gico-naval-y-del-mar.png",
       "logoUrl": "assets/logos/ctn-centro-tecnol-gico-naval-y-del-mar.png",
@@ -821,6 +901,11 @@
       "title": "Museo del Mar y de la Sal",
       "placeName": "Calle Patricio Pérez, 10 bajo, Torrevieja, Alicante, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.9784,
+        "lng": -0.6826,
+        "elevation": 10
+      },
       "id": 20,
       "imageUrl": "assets/logos/museo-del-mar-y-de-la-sal.png",
       "logoUrl": "assets/logos/museo-del-mar-y-de-la-sal.png",
@@ -861,6 +946,11 @@
       "title": "Ghenova Ingeniería",
       "placeName": "El Puerto de Santa María, Cádiz, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 36.6010,
+        "lng": -6.2290,
+        "elevation": 10
+      },
       "id": 21,
       "imageUrl": "assets/logos/ghenova-ingenier-a.png",
       "logoUrl": "assets/logos/ghenova-ingenier-a.png",
@@ -903,6 +993,11 @@
       "title": "Navantia Seanergies - Puerto Real",
       "placeName": "C/ polígono Astillero s/n, 11519 Puerto Real, Cádiz, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 36.5328,
+        "lng": -6.2053,
+        "elevation": 10
+      },
       "id": 22,
       "imageUrl": "assets/logos/navantia-seanergies-puerto-real.png",
       "logoUrl": "assets/logos/navantia-seanergies-puerto-real.png",
@@ -945,6 +1040,11 @@
       "title": "Museo El Dique",
       "placeName": "Polígono Astilleros, Puerto Real, Cádiz, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 36.5328,
+        "lng": -6.2053,
+        "elevation": 10
+      },
       "id": 23,
       "imageUrl": "assets/logos/museo-el-dique.png",
       "logoUrl": "assets/logos/museo-el-dique.png",
@@ -984,6 +1084,11 @@
       "title": "Universidad de Las Palmas de Gran Canaria (ULPGC)",
       "placeName": "Campus Universitario de Tafira s/n, 35017 Las Palmas de Gran Canaria, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 28.0706,
+        "lng": -15.4532,
+        "elevation": 10
+      },
       "id": 24,
       "imageUrl": "assets/logos/universidad-de-las-palmas-de-gran-canaria-ulpgc.png",
       "logoUrl": "assets/logos/universidad-de-las-palmas-de-gran-canaria-ulpgc.png",
@@ -1023,6 +1128,11 @@
       "title": "PLOCAN - Plataforma Oceánica de Canarias",
       "placeName": "Carretera de Taliarte, s/n, 35200 Telde, Gran Canaria, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 27.9922,
+        "lng": -15.3683,
+        "elevation": 10
+      },
       "id": 25,
       "imageUrl": "assets/logos/plocan-plataforma-oce-nica-de-canarias.png",
       "logoUrl": "assets/logos/plocan-plataforma-oce-nica-de-canarias.png",
@@ -1065,6 +1175,11 @@
       "title": "Museo Naval de Las Palmas de Gran Canaria",
       "placeName": "Calle León y Castillo, 310, Arsenal de Las Palmas, 35007 Las Palmas de Gran Canaria, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 28.1400,
+        "lng": -15.4270,
+        "elevation": 10
+      },
       "id": 26,
       "imageUrl": "assets/logos/museo-naval-de-las-palmas-de-gran-canaria.png",
       "logoUrl": "assets/logos/museo-naval-de-las-palmas-de-gran-canaria.png",
@@ -1105,6 +1220,11 @@
       "title": "Astican - Astilleros Canarios",
       "placeName": "Avenida Petrolíferas, S/N, Las Palmas de Gran Canaria, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 28.1558,
+        "lng": -15.4089,
+        "elevation": 10
+      },
       "id": 27,
       "imageUrl": "assets/logos/astican-astilleros-canarios.png",
       "logoUrl": "assets/logos/astican-astilleros-canarios.png",
@@ -1146,6 +1266,11 @@
       "title": "Sener - Sevilla",
       "placeName": "Edificio Galia Puerto Módulo 2, 1 c/ José Delgado Brackenbury, 11, 41011 Sevilla, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.3660,
+        "lng": -5.9987,
+        "elevation": 10
+      },
       "id": 28,
       "imageUrl": "assets/logos/sener-sevilla.png",
       "logoUrl": "assets/logos/sener-sevilla.png",
@@ -1187,6 +1312,11 @@
       "title": "Soermar",
       "placeName": "Paseo de la Castellana 143, 28046 Madrid, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 40.4570,
+        "lng": -3.6910,
+        "elevation": 10
+      },
       "id": 29,
       "imageUrl": "assets/logos/soermar.png",
       "logoUrl": "assets/logos/soermar.png",
@@ -1227,6 +1357,11 @@
       "title": "Seaplace",
       "placeName": "Marqués de Valladares, 3 1ºDrcha, 36201 Vigo, Galicia, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 42.2350,
+        "lng": -8.7250,
+        "elevation": 10
+      },
       "id": 30,
       "imageUrl": "assets/logos/seaplace.png",
       "logoUrl": "assets/logos/seaplace.png",
@@ -1310,6 +1445,11 @@
       "title": "AIMEN Centro Tecnológico",
       "placeName": "Calle Relva 27A, Torneiros, 36410 O Porriño, Pontevedra, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 42.1541,
+        "lng": -8.6315,
+        "elevation": 10
+      },
       "id": 32,
       "imageUrl": "assets/logos/aimen-centro-tecnol-gico.png",
       "logoUrl": "assets/logos/aimen-centro-tecnol-gico.png",
@@ -1351,6 +1491,11 @@
       "title": "Freire Shipyard",
       "placeName": "Av. da Beiramar 18, 36208 Vigo, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 42.2256,
+        "lng": -8.7450,
+        "elevation": 10
+      },
       "id": 33,
       "imageUrl": "assets/logos/freire-shipyard.png",
       "logoUrl": "assets/logos/freire-shipyard.png",
@@ -1392,6 +1537,11 @@
       "title": "Museo do Mar de Galicia",
       "placeName": "Avenida Atlántica, 160, 36208 Vigo, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 42.2180,
+        "lng": -8.7770,
+        "elevation": 10
+      },
       "id": 34,
       "imageUrl": "assets/logos/museo-do-mar-de-galicia.jpg",
       "logoUrl": "assets/logos/museo-do-mar-de-galicia.jpg",
@@ -1433,6 +1583,11 @@
       "title": "CEHIPAR - Canal de Experiencias Hidrodinámicas de El Pardo",
       "placeName": "Carretera de la Sierra, 28048 Madrid, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 40.5264,
+        "lng": -3.7781,
+        "elevation": 10
+      },
       "id": 35,
       "imageUrl": "assets/logos/CEHIPAR.png",
       "logoUrl": "assets/logos/CEHIPAR.png",
@@ -1474,6 +1629,11 @@
       "title": "Museo Naval de Madrid",
       "placeName": "Paseo del Prado, 3, 28014 Madrid, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 40.4178,
+        "lng": -3.6927,
+        "elevation": 10
+      },
       "id": 36,
       "imageUrl": "assets/logos/Emblem_of_the_Spanish_Naval_Muse.png",
       "logoUrl": "assets/logos/Emblem_of_the_Spanish_Naval_Muse.png",
@@ -1513,6 +1673,11 @@
       "title": "Reales Atarazanas de Sevilla",
       "placeName": "Calle Temprado, s/n, 41001 Sevilla, Spain",
       "cameraStyle": "drone-orbit",
+      "cameraCoordinates": {
+        "lat": 37.3847,
+        "lng": -5.9954,
+        "elevation": 10
+      },
       "id": 37,
       "imageUrl": "assets/logos/Reales Atarazanas de Sevilla.png",
       "logoUrl": "assets/logos/Reales Atarazanas de Sevilla.png",

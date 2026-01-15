@@ -86,102 +86,9 @@ export function initGoogleMapsServicesNew() {
   }
 }
 
-/**
- * Search for a place using the NEW Place API
- * @param {string} query - The place name to search for
- * @returns {Promise<Object>} Place details
- */
-async function searchPlace(query) {
-  try {
-    // Import places library first (required for Place.searchByText)
-    await google.maps.importLibrary('places');
-
-    // First try NEW API without type restriction for addresses
-    let request = {
-      textQuery: query,
-      fields: ['id', 'displayName', 'location', 'viewport', 'photos', 'editorialSummary', 
-               'formattedAddress', 'rating', 'regularOpeningHours', 'internationalPhoneNumber',
-               'adrFormatAddress', 'businessStatus', 'priceLevel', 'userRatingCount'],
-      language: 'es',
-      maxResultCount: 1
-    };
-
-    let { places } = await google.maps.places.Place.searchByText(request);
-    
-    if (places && places.length > 0) {
-      return places[0];
-    }
-    
-    // If no results, try Legacy Find Place API (better for addresses)
-    return await searchPlaceLegacy(query);
-
-  } catch (error) {
-    throw error;
-  }
-}
-
-/**
- * Search for a place using the Legacy Find Place API (better for addresses)
- * @param {string} query - The place name/address to search for
- * @returns {Promise<Object>} Place object from Google Places API
- */
-async function searchPlaceLegacy(query) {
-  try {
-    const service = new google.maps.places.PlacesService(document.createElement('div'));
-
-    return new Promise((resolve, reject) => {
-      const request = {
-        query: query,
-        fields: ['place_id', 'name', 'formatted_address', 'geometry', 'photos', 'rating', 'types']
-      };
-
-      service.findPlaceFromQuery(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
-          const place = results[0];
-
-          // Convert legacy format to NEW API format
-          const convertedPlace = {
-            id: place.place_id,
-            displayName: { text: place.name },
-            location: place.geometry.location,
-            viewport: place.geometry.viewport,
-            formattedAddress: place.formatted_address,
-            photos: place.photos || [],
-            rating: place.rating
-          };
-
-          resolve(convertedPlace);
-        } else {
-          reject(new Error(`Legacy Find Place API failed: ${status}`));
-        }
-      });
-    });
-  } catch (error) {
-    throw error;
-  }
-}
-
-/**
- * Get photos for a place using NEW API
- * @param {Object} place - The place object
- * @returns {Array} Array of photo URLs
- */
-async function getPlacePhotos(place) {
-  if (!place.photos || place.photos.length === 0) {
-    return [];
-  }
-
-  // Get up to 5 photos
-  const photoUrls = [];
-  for (let i = 0; i < Math.min(5, place.photos.length); i++) {
-    const photo = place.photos[i];
-    // Get photo URL with specific max width/height
-    const photoUrl = photo.getURI({ maxWidth: 800, maxHeight: 600 });
-    photoUrls.push(photoUrl);
-  }
-
-  return photoUrls;
-}
+// NOTE: Google Places API functions removed to eliminate API costs
+// All navigation now uses pre-stored coordinates from config.json
+// Removed: searchPlace(), searchPlaceLegacy(), getPlacePhotos()
 
 /**
  * Get elevation for a location (with caching)
@@ -250,7 +157,7 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
         lng: () => coords.lng
       };
 
-      // Skip ALL Google API calls
+      // Skip ALL Google API calls - use stored coordinates only
       const cameraConfig = calculateOptimalCamera(
         { location, viewport: null },
         coords.elevation || 10,
@@ -264,69 +171,20 @@ export async function resolvePlaceToCameraNew(placeName, cameraStyle = 'static')
         viewport: null,
         elevation: coords.elevation || 10,
         placeDetails: {
-          displayName: { text: placeName },
+          displayName: { text: chapter.title || placeName },
           formattedAddress: chapter.address || placeName
         }
       };
     } else if (chapter) {
-      console.log(`⚠️ Chapter "${chapter.title}" found but no cameraCoordinates`);
-    } else {
-      console.log(`⚠️ No chapter found for placeName: "${placeName}"`);
+      // Chapter found but missing coordinates - this should not happen after config update
+      console.error(`❌ Chapter "${chapter.title}" missing cameraCoordinates - add them to config.json`);
+      throw new Error(`Missing cameraCoordinates for chapter: ${chapter.title}`);
     }
   }
 
-  console.log(`🔍 Using Google Places API for: "${placeName}"`);
-  // Use caching for place resolution
-  const cacheKey = `place_${placeName}_${cameraStyle}`;
-  
-  return await rateLimitedApiCall(cacheKey, async () => {
-    try {
-      // Search for the place using NEW API
-      const place = await searchPlace(placeName);
-    
-    if (!place) {
-      throw new Error(`Could not find place: ${placeName}`);
-    }
-
-    // Get place details
-    const location = place.location;
-    const viewport = place.viewport;
-    
-    // Photos are stored locally in config.json imageUrl
-    // Skip Google Photo API to save costs
-    const photos = [];
-    
-    // Get elevation for the location
-    const elevation = await getElevation(location);
-
-    // Calculate optimal camera position
-    const cameraConfig = calculateOptimalCamera({ location, viewport }, elevation, cameraStyle);
-
-    // Return comprehensive place data
-    return {
-      ...cameraConfig,
-      placeName,
-      location,
-      viewport,
-      elevation,
-      placeDetails: {
-        displayName: place.displayName,
-        formattedAddress: place.formattedAddress,
-        editorialSummary: place.editorialSummary,
-        rating: place.rating,
-        userRatingCount: place.userRatingCount,
-        // photos removed - use local imageUrl from config.json
-        phoneNumber: place.internationalPhoneNumber,
-        openingHours: place.regularOpeningHours,
-        priceLevel: place.priceLevel
-      }
-    };
-    
-    } catch (error) {
-      console.error(`Error resolving place ${placeName}:`, error);
-      throw error;
-    }
-  });
+  // No chapter found - this is an error since we require coordinates in config
+  console.error(`❌ No chapter found for placeName: "${placeName}" - add to config.json with cameraCoordinates`);
+  throw new Error(`No coordinates found for: ${placeName}. Add cameraCoordinates to config.json.`);
 }
 
 /**

@@ -91,39 +91,8 @@ function truncateText(text, maxLength) {
   return text.substring(0, maxLength - 3) + '...';
 }
 
-/**
- * Preload camera configs for all chapters (background task)
- * This caches Google Places API responses so navigation is instant
- */
-async function preloadCameraConfigs(chaptersToPreload) {
-  const preloadPromises = [];
-
-  for (const chapter of chaptersToPreload) {
-    // Skip chapters that already have cached coordinates
-    if (chapter.cameraCoordinates) {
-      continue;
-    }
-
-    // Add slight delay between requests to avoid rate limiting
-    const promise = new Promise(async (resolve) => {
-      try {
-        await resolvePlaceToCameraNew(chapter.placeName || chapter.title, chapter.cameraStyle || 'drone-orbit');
-        resolve({ success: true, title: chapter.title });
-      } catch (error) {
-        resolve({ success: false, title: chapter.title, error: error.message });
-      }
-    });
-
-    preloadPromises.push(promise);
-
-    // Small delay between starting requests to be nice to the API
-    await new Promise(r => setTimeout(r, 50));
-  }
-
-  // Wait for all preloads to complete
-  const results = await Promise.all(preloadPromises);
-  return results;
-}
+// NOTE: preloadCameraConfigs() removed to eliminate Google Places API costs
+// All chapters now have cameraCoordinates in config.json - no API calls needed
 
 /**
  * The main function. This function is called when the page is loaded.
@@ -221,11 +190,7 @@ async function main() {
     try {
       initGoogleMapsServicesNew();
       window.googleMapsLoaded = true;
-
-      // Preload camera configs for all chapters (background, non-blocking)
-      preloadCameraConfigs(chapters).catch(() => {
-        // Silent failure - preloading is optional optimization
-      });
+      // NOTE: preloadCameraConfigs() removed - all coordinates now in config.json
     } catch (error) {
       console.error('Failed to initialize Google Maps services:', error);
       window.googleMapsLoaded = false;
