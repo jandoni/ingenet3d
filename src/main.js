@@ -10,6 +10,7 @@ import { initChatbot } from "./utils/chatbot.js";
 import { loadingManager } from "./utils/loading-manager.js";
 import { preloadChapterImages } from "./utils/image-preloader.js";
 import { detectAndConfigurePerformance } from "./utils/performance-settings.js";
+import { fetchNewsForChapter, clearNewsCache } from "./utils/news-service.js";
 
 /**
  * The story configuration object
@@ -869,6 +870,190 @@ function updateGalleryNavigation() {
   }
 }
 
+// ============================================
+// NEWS TAB FUNCTIONALITY
+// ============================================
+
+// Track current news fetch to prevent race conditions
+let currentNewsFetchId = null;
+// Track which chapter's news is currently displayed (to avoid refetching on duplicate calls)
+let displayedNewsChapterId = null;
+
+/**
+ * Populate the news tab for a chapter
+ * @param {Object} chapter - Chapter object
+ */
+async function populateNewsTab(chapter) {
+  const newsContent = document.getElementById('news-content');
+
+  if (!newsContent) return;
+
+  // Generate unique ID for this fetch request
+  const fetchId = chapter.id || Date.now();
+
+  // Skip if we've already displayed news for this exact chapter
+  // (prevents duplicate calls from updateChapterContent being called multiple times)
+  if (displayedNewsChapterId === fetchId && !newsContent.querySelector('.news-loading')) {
+    return;
+  }
+
+  currentNewsFetchId = fetchId;
+
+  // Check if news is disabled for this entity
+  if (chapter.newsConfig?.disabled) {
+    if (currentNewsFetchId === fetchId) {
+      renderNewsEmpty(newsContent, chapter, true);
+      displayedNewsChapterId = fetchId;
+    }
+    return;
+  }
+
+  // Show loading state
+  newsContent.innerHTML = `
+    <div class="news-loading" id="news-loading">
+      <div class="news-loading-spinner"></div>
+      <span class="news-loading-text">Cargando novedades...</span>
+    </div>
+  `;
+
+  try {
+    const news = await fetchNewsForChapter(chapter);
+
+    // Only update UI if this is still the current request (user hasn't switched places)
+    if (currentNewsFetchId !== fetchId) {
+      return; // Stale request, ignore
+    }
+
+    if (news.length > 0) {
+      renderNewsCards(newsContent, news, chapter);
+    } else {
+      renderNewsEmpty(newsContent, chapter, false);
+    }
+
+    // Mark this chapter's news as displayed
+    displayedNewsChapterId = fetchId;
+  } catch (error) {
+    // Only update UI if this is still the current request
+    if (currentNewsFetchId !== fetchId) {
+      return; // Stale request, ignore
+    }
+    console.error('Failed to fetch news:', error);
+    renderNewsEmpty(newsContent, chapter, false);
+
+    // Mark this chapter's news as displayed (even if empty/error)
+    displayedNewsChapterId = fetchId;
+  }
+}
+
+/**
+ * Render news cards
+ * @param {HTMLElement} container - Container element
+ * @param {Array} news - News items
+ * @param {Object} chapter - Chapter object
+ */
+function renderNewsCards(container, news, chapter) {
+  container.innerHTML = news.map(item => `
+    <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-card">
+      <div class="news-card-image ${!item.image ? 'logo-fallback' : ''}">
+        <img src="${item.image || chapter.logoUrl}"
+             alt="${escapeHtml(item.title)}"
+             onerror="this.src='${chapter.logoUrl}'; this.parentElement.classList.add('logo-fallback')">
+      </div>
+      <div class="news-card-content">
+        <span class="news-card-title">${escapeHtml(item.title)}</span>
+        <span class="news-card-date">${item.date}</span>
+        ${item.excerpt ? `<span class="news-card-excerpt">${escapeHtml(item.excerpt)}</span>` : ''}
+      </div>
+    </a>
+  `).join('');
+}
+
+/**
+ * Render empty state with optional highlights
+ * @param {HTMLElement} container - Container element
+ * @param {Object} chapter - Chapter object
+ * @param {boolean} disabled - Whether news is disabled for this entity
+ */
+function renderNewsEmpty(container, chapter, disabled) {
+  let html = `
+    <div class="news-empty-state">
+      <svg class="news-empty-illustration" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Newspaper/document icon -->
+        <rect x="20" y="15" width="60" height="70" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>
+        <line x1="30" y1="30" x2="70" y2="30" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="30" y1="42" x2="55" y2="42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="30" y1="54" x2="60" y2="54" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="30" y1="66" x2="50" y2="66" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <!-- Decorative sparkle -->
+        <circle cx="75" cy="25" r="3" fill="currentColor" opacity="0.5"/>
+        <path d="M82 18 L84 22 L88 24 L84 26 L82 30 L80 26 L76 24 L80 22 Z" fill="currentColor" opacity="0.3"/>
+      </svg>
+      <h3 class="news-empty-title">Sin novedades recientes</h3>
+      <p class="news-empty-description">
+        ${disabled
+          ? 'Las novedades no estan disponibles para esta organizacion.'
+          : 'No se encontraron noticias recientes.'}
+      </p>
+      ${chapter.website ? `
+        <a href="${chapter.website}" target="_blank" rel="noopener noreferrer" class="news-website-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Ver novedades en su web
+        </a>
+      ` : ''}
+    </div>
+  `;
+
+  // Add highlights if available
+  if (chapter.highlights && chapter.highlights.length > 0) {
+    html += `
+      <div class="highlights-section">
+        <h4 class="highlights-title">Datos destacados</h4>
+        ${chapter.highlights.map(h => `
+          <div class="highlight-item">
+            <svg class="highlight-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="highlight-text">${escapeHtml(h)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+/**
+ * Get human-readable source label
+ * @param {string} source - Source identifier
+ * @returns {string}
+ */
+function getSourceLabel(source) {
+  const labels = {
+    'rss': 'Fuente oficial',
+    'newsapi': 'Via NewsAPI',
+    'google': 'Via Google News'
+  };
+  return labels[source] || '';
+}
+
+/**
+ * Escape HTML to prevent XSS
+ * @param {string} str - String to escape
+ * @returns {string}
+ */
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 /**
  * Switch between tabs
  */
@@ -891,6 +1076,168 @@ window.switchTab = function(tabId) {
 // ============================================
 // CATEGORY NAVIGATION MENU
 // ============================================
+
+// ============================================
+// CATEGORY MAP FILTERING
+// ============================================
+
+// Track active category filters (array for multiple filters)
+let activeCategoryFilters = [];
+
+/**
+ * Filter map markers by category (toggle behavior - click again to remove)
+ * @param {string} category - Category type (ubicacion, sector, etc.)
+ * @param {string} tagName - Tag name (e.g., "Astillero", "Galicia")
+ * @param {number[]} chapterIds - Array of chapter IDs for this filter
+ */
+window.filterMapByCategory = async function(category, tagName, chapterIds) {
+  // Check if this filter already exists (toggle off)
+  const existingIndex = activeCategoryFilters.findIndex(
+    f => f.category === category && f.tagName === tagName
+  );
+
+  if (existingIndex >= 0) {
+    // Remove the filter (toggle off)
+    activeCategoryFilters.splice(existingIndex, 1);
+  } else {
+    // Add new filter
+    activeCategoryFilters.push({ category, tagName, chapterIds });
+  }
+
+  // Apply combined filters
+  await applyFilters();
+};
+
+/**
+ * Apply all active filters to show combined markers
+ */
+async function applyFilters() {
+  // Update UI immediately (no delay)
+  updateAllCategoryFilterStates();
+  updatePlacesPanel();
+
+  if (activeCategoryFilters.length === 0) {
+    // No filters - show all markers
+    showAllMarkers();
+    hideClearFilterButton();
+  } else {
+    // Combine all chapter IDs from all active filters (union)
+    const allChapterIds = new Set();
+    activeCategoryFilters.forEach(filter => {
+      filter.chapterIds.forEach(id => allChapterIds.add(id));
+    });
+
+    showFilteredMarkers([...allChapterIds]);
+    showClearFilterButton();
+
+    // Fly to Spain overview (async, doesn't block UI)
+    flyToSpainOverview();
+  }
+}
+
+/**
+ * Show the clear filter button with all active filter names
+ */
+function showClearFilterButton() {
+  const clearBtn = document.getElementById('clear-filter-btn');
+  if (clearBtn) {
+    clearBtn.style.display = 'flex';
+    const filterNames = activeCategoryFilters.map(f => f.tagName).join(', ');
+    clearBtn.querySelector('.filter-name').textContent = filterNames;
+  }
+}
+
+/**
+ * Hide the clear filter button
+ */
+function hideClearFilterButton() {
+  const clearBtn = document.getElementById('clear-filter-btn');
+  if (clearBtn) {
+    clearBtn.style.display = 'none';
+  }
+}
+
+/**
+ * Clear all category filters and show all markers
+ */
+window.clearCategoryFilter = function() {
+  activeCategoryFilters = [];
+
+  // Show all markers
+  showAllMarkers();
+
+  // Hide the clear filter button
+  hideClearFilterButton();
+
+  // Clear visual state from category groups
+  updateAllCategoryFilterStates();
+
+  // Update places panel to show all places
+  updatePlacesPanel();
+};
+
+/**
+ * Update visual state of all category groups to show which are filtering
+ */
+function updateAllCategoryFilterStates() {
+  // Clear all active states first
+  document.querySelectorAll('.category-group.filter-active').forEach(group => {
+    group.classList.remove('filter-active');
+  });
+
+  // Add active state to all groups that are currently filtered
+  activeCategoryFilters.forEach(filter => {
+    document.querySelectorAll('.category-group').forEach(group => {
+      const groupName = group.querySelector('.category-group-name')?.textContent;
+      if (groupName === filter.tagName) {
+        group.classList.add('filter-active');
+      }
+    });
+  });
+}
+
+// ============================================
+// PLACES PANEL (Right Side)
+// ============================================
+
+/**
+ * Update the places panel to show visible places (filtered or all)
+ */
+function updatePlacesPanel() {
+  const panel = document.getElementById('places-panel-content');
+  const countEl = document.getElementById('places-count');
+  if (!panel) return;
+
+  // Get places to show (filtered or all)
+  let places;
+  if (activeCategoryFilters.length > 0) {
+    // Get union of all filtered IDs
+    const filteredIds = new Set();
+    activeCategoryFilters.forEach(f => f.chapterIds.forEach(id => filteredIds.add(id)));
+    places = story.chapters.filter(ch => filteredIds.has(ch.id));
+  } else {
+    places = story.chapters;
+  }
+
+  // Update count
+  if (countEl) {
+    countEl.textContent = `${places.length} ${places.length === 1 ? 'lugar' : 'lugares'}`;
+  }
+
+  // Render place cards (no animation delay for instant updates)
+  panel.innerHTML = places.map(place => `
+    <div class="place-panel-card" onclick="navigateToChapter(${place.id}); expandBottomSheet();">
+      <img class="place-panel-image"
+           src="${place.imageUrl || place.logoUrl}"
+           alt="${escapeHtml(place.title)}"
+           onerror="this.src='${place.logoUrl}'">
+      <div class="place-panel-info">
+        <div class="place-panel-title">${escapeHtml(place.title)}</div>
+        <div class="place-panel-description">${escapeHtml(truncateText(place.content || 'Sin descripción disponible', 80))}</div>
+      </div>
+    </div>
+  `).join('');
+}
 
 /**
  * Build category index from all chapters
@@ -967,12 +1314,23 @@ function renderCategoryContent(category, filter = '') {
   content.innerHTML = sortedGroups.map(([groupName, items]) => {
     // Auto-expand groups when filtering
     const expanded = filter ? 'expanded' : '';
+    // Get chapter IDs for filter function
+    const chapterIds = items.map(item => item.id);
+    // Check if this group is currently active filter (supports multiple filters)
+    const isActiveFilter = activeCategoryFilters.some(
+      f => f.category === category && f.tagName === groupName
+    );
     return `
-      <div class="category-group ${expanded}">
+      <div class="category-group ${expanded} ${isActiveFilter ? 'filter-active' : ''}">
         <div class="category-group-header" onclick="toggleCategoryGroup(this)">
           <span class="category-expand-icon">▸</span>
           <span class="category-group-name">${groupName}</span>
           <span class="category-group-count">${items.length}</span>
+          <button class="category-filter-btn" onclick="event.stopPropagation(); filterMapByCategory('${category}', '${groupName.replace(/'/g, "\\'")}', [${chapterIds.join(',')}])" title="Filtrar mapa por ${groupName}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+          </button>
         </div>
         <div class="category-group-items">
           ${items.map(item => `
@@ -1028,6 +1386,9 @@ window.searchCategories = function(query) {
 function initCategoryMenu() {
   // Render initial content (Ubicación tab is active by default)
   renderCategoryContent('ubicacion');
+
+  // Initialize places panel with all places
+  updatePlacesPanel();
 }
 
 /**
@@ -1090,15 +1451,15 @@ function populateLinksTab(chapter) {
   if (chapter.website) {
     hasLinks = true;
     const domain = new URL(chapter.website).hostname.replace('www.', '');
+    const logoUrl = chapter.logoUrl || chapter.imageUrl || 'assets/IIE-logo.webp';
     const linkElement = document.createElement('a');
     linkElement.href = chapter.website;
     linkElement.target = '_blank';
     linkElement.className = 'link-item';
     linkElement.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path d="M18 13V6A2 2 0 0 0 16 4H4A2 2 0 0 0 2 6V18C2 19.1 2.9 20 4 20H20A2 2 0 0 0 22 18V8H18" stroke="currentColor" stroke-width="2"/>
-        <path d="M15 3H21V9M10 14L21 3" stroke="currentColor" stroke-width="2"/>
-      </svg>
+      <div class="link-logo">
+        <img src="${logoUrl}" alt="${chapter.title}" onerror="this.style.display='none'">
+      </div>
       <div>
         <span class="link-title">${chapter.title} - Sitio Oficial</span>
         <span class="link-desc">${domain}</span>
@@ -1110,6 +1471,7 @@ function populateLinksTab(chapter) {
   // Also extract URLs from chapter content
   const urls = extractUrls(chapter.content);
   if (urls.length > 0) {
+    const logoUrl = chapter.logoUrl || chapter.imageUrl || 'assets/IIE-logo.webp';
     urls.forEach(url => {
       // Skip if same as chapter website
       if (chapter.website && url === chapter.website) return;
@@ -1123,13 +1485,12 @@ function populateLinksTab(chapter) {
         linkElement.target = '_blank';
         linkElement.className = 'link-item';
         linkElement.innerHTML = `
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M18 13V6A2 2 0 0 0 16 4H4A2 2 0 0 0 2 6V18C2 19.1 2.9 20 4 20H20A2 2 0 0 0 22 18V8H18" stroke="currentColor" stroke-width="2"/>
-            <path d="M15 3H21V9M10 14L21 3" stroke="currentColor" stroke-width="2"/>
-          </svg>
+          <div class="link-logo link-logo-small">
+            <img src="${logoUrl}" alt="${domain}" onerror="this.style.display='none'">
+          </div>
           <div>
             <span class="link-title">${domain}</span>
-            <span class="link-desc">Información adicional</span>
+            <span class="link-desc">Informacion adicional</span>
           </div>
         `;
         officialLinksContainer.appendChild(linkElement);
@@ -1200,6 +1561,9 @@ function updateTabContent(chapter, isIntro = false) {
 
   // Initialize gallery
   initializeGallery(chapter);
+
+  // Pre-fetch news in background (async, doesn't block UI)
+  populateNewsTab(chapter);
 
   // Reset to info tab
   switchTab('info');

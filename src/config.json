@@ -7,7 +7,19 @@
     "createdBy": "Instituto de la Ingeniería de España",
     "imageCredit": "Instituto de la Ingeniería de España",
     "placeName": "Spain",
-    "cameraStyle": "overview"
+    "cameraStyle": "overview",
+    "website": "https://www.iies.es/",
+    "logoUrl": "assets/IIE-logo.webp",
+    "newsConfig": {
+      "rssUrl": "https://www.iies.es/blog-feed.xml",
+      "keywords": ["ingenieria", "IIE", "tecnologia", "innovacion"]
+    },
+    "highlights": [
+      "Fundado en 1905, mas de un siglo de historia",
+      "Agrupa a todas las asociaciones de ingenieros de Espana",
+      "Sede en el Palacio de la Mineria, Madrid",
+      "Promueve la excelencia en ingenieria espanola"
+    ]
   },
   "chapters": [
     {
@@ -56,7 +68,16 @@
           "Fundación",
           "Museo"
         ]
-      }
+      },
+      "newsConfig": {
+        "rssUrl": "https://exponav.org/feed",
+        "keywords": ["exponav", "naval", "ferrol", "museo"]
+      },
+      "highlights": [
+        "Mayor museo de construccion naval de Europa",
+        "Ubicado en edificio historico del siglo XVIII",
+        "Mas de 5.000 piezas en exposicion permanente"
+      ]
     },
     {
       "focusOptions": {
@@ -102,7 +123,16 @@
           "Astillero",
           "Empresa"
         ]
-      }
+      },
+      "newsConfig": {
+        "rssUrl": "https://gondan.com/feed",
+        "keywords": ["gondan", "shipbuilding", "naval", "offshore"]
+      },
+      "highlights": [
+        "Mas de 90 anos de experiencia en construccion naval",
+        "Especializado en buques offshore y oceanograficos",
+        "Tres instalaciones en Asturias"
+      ]
     },
     {
       "focusOptions": {
@@ -147,7 +177,12 @@
         "tipo": [
           "Museo"
         ]
-      }
+      },
+      "highlights": [
+        "Dedicado a la cultura maritima asturiana",
+        "Coleccion de objetos de pesca tradicional",
+        "Ubicado en el pintoresco pueblo de Luanco"
+      ]
     },
     {
       "focusOptions": {

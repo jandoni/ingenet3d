@@ -326,7 +326,8 @@ async function createMarker(options) {
     content: img,
     lat,
     lng,
-    title
+    title,
+    hidden: false  // Track visibility state for filtering
   });
 
   return markerElement;
@@ -454,45 +455,52 @@ export function removeMarker(markerId) {
 }
 
 /**
- * Hide a marker
+ * Hide a marker by removing it from the map
  * @param {number} markerId - The marker ID to hide
  */
 export function hideMarker(markerId) {
   const marker = markers.get(markerId);
-  if (marker && marker.element) {
-    marker.element.style.display = 'none';
+  if (marker && marker.element && marker.element.parentNode) {
+    marker.element.remove();
+    marker.hidden = true;
   }
 }
 
 /**
- * Show a marker
+ * Show a marker by adding it back to the map
  * @param {number} markerId - The marker ID to show
  */
 export function showMarker(markerId) {
   const marker = markers.get(markerId);
-  if (marker && marker.element) {
-    marker.element.style.display = '';
+  if (marker && marker.element && marker.hidden && map3d) {
+    map3d.append(marker.element);
+    marker.hidden = false;
   }
 }
 
 /**
- * Hide all markers
+ * Hide all markers by removing them from the map
  */
 export function hideAllMarkers() {
   markers.forEach((marker) => {
-    if (marker.element) {
-      marker.element.style.display = 'none';
+    if (marker.element && marker.element.parentNode) {
+      marker.element.remove();
+      marker.hidden = true;
     }
   });
 }
 
 /**
- * Show all markers
+ * Show all markers by adding them back to the map
  */
 export function showAllMarkers() {
+  console.log('Showing all markers');
   markers.forEach((marker) => {
-    if (marker.element) {
-      marker.element.style.display = '';
+    if (marker.element && marker.hidden) {
+      if (map3d) {
+        map3d.append(marker.element);
+        marker.hidden = false;
+      }
     }
   });
 }
@@ -502,9 +510,23 @@ export function showAllMarkers() {
  * @param {Array<number>} chapterIds - Array of chapter IDs to show
  */
 export function showFilteredMarkers(chapterIds) {
+  console.log('Filtering markers for chapter IDs:', chapterIds);
   markers.forEach((marker, id) => {
     if (marker.element) {
-      marker.element.style.display = chapterIds.includes(id) ? '' : 'none';
+      const shouldShow = chapterIds.includes(id);
+      if (shouldShow && marker.hidden) {
+        // Show marker
+        if (map3d) {
+          map3d.append(marker.element);
+          marker.hidden = false;
+        }
+      } else if (!shouldShow && !marker.hidden) {
+        // Hide marker
+        if (marker.element.parentNode) {
+          marker.element.remove();
+          marker.hidden = true;
+        }
+      }
     }
   });
 }

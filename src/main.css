@@ -1,6 +1,7 @@
 /* ---- import other css files here ---- */
 @import "./styles/bottom-sheet.css";
 @import "./styles/chatbot.css";
+@import "./styles/news-tab.css";
 
 @font-face {
   font-display: swap;

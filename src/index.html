@@ -203,6 +203,16 @@
         <button class="category-tab" data-category="tipo" onclick="switchCategoryTab('tipo')">Tipo</button>
       </div>
 
+      <!-- Clear Filter Button (hidden by default) -->
+      <button id="clear-filter-btn" class="clear-filter-btn" style="display: none;" onclick="clearCategoryFilter()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        <span>Filtro: </span>
+        <span class="filter-name"></span>
+      </button>
+
       <!-- Category Content -->
       <div class="category-content" id="category-content">
         <!-- Populated dynamically by JavaScript -->
@@ -251,6 +261,9 @@
         <button class="tab-btn active" data-tab="info" onclick="switchTab('info')">
           <span>Información</span>
         </button>
+        <button class="tab-btn" data-tab="news" onclick="switchTab('news')">
+          <span>Novedades</span>
+        </button>
         <button class="tab-btn" data-tab="links" onclick="switchTab('links')">
           <span>Enlaces</span>
         </button>
@@ -280,6 +293,17 @@
           </div>
         </div>
 
+        <!-- News Tab (Novedades) -->
+        <div class="tab-panel" id="news-panel">
+          <div class="news-content" id="news-content">
+            <!-- Loading state (shown initially) -->
+            <div class="news-loading" id="news-loading">
+              <div class="news-loading-spinner"></div>
+              <span class="news-loading-text">Cargando novedades...</span>
+            </div>
+            <!-- News cards will be populated dynamically -->
+          </div>
+        </div>
 
         <!-- Links Tab -->
         <div class="tab-panel" id="links-panel">
@@ -322,6 +346,17 @@
     
     <div class="map-container">
       <gmp-map-3d id="map3d" mode="SATELLITE" style="width: 100%; height: 100%;"></gmp-map-3d>
+    </div>
+
+    <!-- Places Panel (Right Side) -->
+    <div id="places-panel" class="places-panel">
+      <div class="places-panel-header">
+        <span class="places-panel-title">Lugares</span>
+        <span class="places-panel-count" id="places-count">0 lugares</span>
+      </div>
+      <div class="places-panel-content" id="places-panel-content">
+        <!-- Place cards populated dynamically -->
+      </div>
     </div>
 
     <!-- Chatbot Container -->
