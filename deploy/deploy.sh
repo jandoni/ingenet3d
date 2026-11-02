@@ -8,6 +8,7 @@
 # ================================================================================================
 
 set -e  # Exit on error
+cd "$(dirname "$0")/.."  # always run from the repository root
 
 echo "🚀 Starting Production Build and Deployment..."
 echo "=============================================="
@@ -19,7 +20,7 @@ if [ -f "./production-config.sh" ]; then
     echo "✅ Loaded production configuration"
 else
     echo "❌ ERROR: production-config.sh not found!"
-    echo "   Please run ./setup-production-infrastructure.sh first"
+    echo "   Please run ./deploy/setup-infrastructure.sh first"
     exit 1
 fi
 

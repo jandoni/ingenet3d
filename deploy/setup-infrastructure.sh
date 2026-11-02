@@ -8,12 +8,13 @@
 # ================================================================================================
 
 set -e  # Exit on error
+cd "$(dirname "$0")/.."  # always run from the repository root
 
 # Configuration
-BUCKET_NAME="ingenet-production-s3"
-REGION="eu-south-2"  # Spain - Aragón
-CLOUDFRONT_NAME="Ingenet-Production-Cloudfront"
-AWS_PROFILE="ingenet3d"
+BUCKET_NAME="${BUCKET_NAME:-ingenet-production-s3}"
+REGION="${REGION:-eu-south-2}"  # Spain - Aragón
+CLOUDFRONT_NAME="${CLOUDFRONT_NAME:-Ingenet-Production-Cloudfront}"
+AWS_PROFILE="${AWS_PROFILE:-ingenet3d}"
 
 echo "🚀 Setting up Production Infrastructure in Spain (Simplified)..."
 echo "================================================================="
@@ -222,7 +223,7 @@ echo ""
 echo "📋 Next steps:"
 echo "1. Wait for CloudFront status to be 'Deployed'"
 echo "2. Run: npm install"
-echo "3. Run: ./build-and-deploy-production.sh"
+echo "3. Run: ./deploy/deploy.sh"
 echo ""
 
 # Save configuration for deployment script

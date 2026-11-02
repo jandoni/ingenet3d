@@ -1,13 +1,14 @@
 {
   "name": "ingenet3d",
   "version": "1.0.0",
-  "description": "Ingenet3D 3D Storytelling App - Interactive map showcasing Spanish maritime and naval centers",
+  "license": "Apache-2.0",
+  "description": "Explorar España: an interactive 3D map of the IIE INGENET network of Spanish engineering centres",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && ./build-and-deploy-production.sh"
+    "deploy": "./deploy/deploy.sh"
   },
   "devDependencies": {
     "vite": "^5.0.0",
