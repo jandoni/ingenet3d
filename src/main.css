@@ -6,7 +6,7 @@
 @font-face {
   font-display: swap;
   font-family: "New York Medium";
-  src: url("../assets/fonts/New-York.ttf") format("truetype");
+  src: url("./assets/fonts/New-York.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
 }
@@ -14,7 +14,7 @@
 @font-face {
   font-display: swap;
   font-family: "Inter";
-  src: url("../assets/fonts/Inter-Regular.ttf") format("truetype");
+  src: url("./assets/fonts/Inter-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
 }
