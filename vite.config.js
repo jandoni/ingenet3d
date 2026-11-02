@@ -5,6 +5,9 @@ export default defineConfig({
   // Root directory where index.html is located
   root: 'src',
 
+  // .env lives in the repository root, not in src/
+  envDir: '..',
+
   // Base URL for deployment
   base: '/',
 
@@ -86,10 +89,6 @@ export default defineConfig({
       targets: [
         {
           src: 'config.json',
-          dest: '.'
-        },
-        {
-          src: 'env.js',
           dest: '.'
         },
         {

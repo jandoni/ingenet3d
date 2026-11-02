@@ -1,4 +1,7 @@
-env.js
+# Local secrets
+.env
+.env.local
+src/env.js
 .DS_Store
 .vscode
 
@@ -23,3 +26,5 @@ production-config.sh
 *.tmp
 *.temp
 /tmp/
+# Office lock files
+~$*

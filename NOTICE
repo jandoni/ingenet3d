@@ -1,0 +1,24 @@
+Explorar España (Ingenet 3D)
+Copyright 2025-2026 Jon Andoni Baranda
+
+This project began as a fork of the Google Maps Platform "3D Storytelling"
+solution:
+
+  https://github.com/googlemaps-samples/js-3d-storytelling
+  Copyright 2024 Google LLC, licensed under the Apache License, Version 2.0.
+  Original authors include Google and Ubilabs contributors; their commit
+  history is preserved in this repository.
+
+Files that still carry the original Apache-2.0 header are derived from that
+project. In December 2025 the CesiumJS renderer was replaced with the Google
+Maps JavaScript API 3D maps, and the application was largely rewritten.
+
+Third-party content, not covered by the Apache License:
+
+  - Map imagery and Photorealistic 3D Tiles are provided by Google Maps
+    Platform under its own terms of service and require visible attribution.
+  - Institution names, logos and photographs in src/assets/logos/ and
+    src/assets/photos/ belong to their respective owners and are used to
+    identify each institution. The Instituto de la Ingeniería de España (IIE)
+    name and logo belong to the IIE.
+  - Fonts in src/assets/fonts/ are distributed under their own licences.
